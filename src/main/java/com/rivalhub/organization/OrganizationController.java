@@ -15,7 +15,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/organization")
+@RequestMapping("/organizations")
 @AllArgsConstructor
 public class OrganizationController {
 
