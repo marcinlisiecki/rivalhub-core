@@ -1,20 +1,18 @@
 package com.rivalhub.user;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.rivalhub.organization.Organization;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -25,6 +23,7 @@ import java.util.List;
 public class UserData implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @NotNull
@@ -32,14 +31,14 @@ public class UserData implements UserDetails {
     private String name;
     @Email
     private String email;
+    private byte[] salt;
+    private byte[] passwordHash;
     private String profilePictureUrl;
-
     private String password;
 
-    /*
-    @ManyToMany
-    private Organization organization;
-    */
+    @ManyToMany(mappedBy = "userList")
+    private List<Organization> organizationList = new ArrayList<>();
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -71,4 +70,7 @@ public class UserData implements UserDetails {
         return true;
     }
 
+    public UserData(String name) {
+        this.name = name;
+    }
 }

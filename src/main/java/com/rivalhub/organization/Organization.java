@@ -1,14 +1,16 @@
 package com.rivalhub.organization;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.rivalhub.user.UserData;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.apache.catalina.User;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -20,6 +22,7 @@ public class Organization {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "organization_id")
     private Long id;
 
     @NotNull
@@ -36,9 +39,21 @@ public class Organization {
 
     private LocalDateTime addedDate;
 
+    @ManyToMany
+    @JoinTable(name = "organization_users",
+            joinColumns = @JoinColumn(name = "organization_id", referencedColumnName = "organization_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    )
+    private List<UserData> userList;
+
     public Organization(String name, String invitationLink, String imageUrl) {
         this.name = name;
         this.invitationLink = invitationLink;
         this.imageUrl = imageUrl;
+    }
+
+    public void addUser(UserData userData){
+        userData.getOrganizationList().add(this);
+        userList.add(userData);
     }
 }

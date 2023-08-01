@@ -5,8 +5,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
+import com.rivalhub.user.UserData;
+import com.rivalhub.user.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -22,6 +26,8 @@ public class OrganizationController {
     private OrganizationService organizationService;
     private final ObjectMapper objectMapper;
 
+    private final UserRepository userRepository;
+
     @GetMapping("{id}")
     public ResponseEntity<Optional<OrganizationDTO>> viewOrganization(@PathVariable Long id){
         if (organizationService.findOrganization(id).isEmpty()) {
@@ -31,8 +37,8 @@ public class OrganizationController {
     }
 
     @PostMapping
-    public ResponseEntity<OrganizationDTO> addOrganization(@RequestBody OrganizationDTO organizationDTO){
-        OrganizationDTO savedOrganization = organizationService.saveOrganization(organizationDTO);
+    public ResponseEntity<OrganizationDTO> addOrganization(@RequestBody OrganizationCreateDTO organizationCreateDTO){
+        OrganizationDTO savedOrganization = organizationService.saveOrganization(organizationCreateDTO);
         URI savedOrganizationUri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(savedOrganization.getId())
@@ -64,6 +70,26 @@ public class OrganizationController {
     ResponseEntity<?> deleteJobOffer(@PathVariable Long id) {
         organizationService.deleteOrganization(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/invitation")
+    public ResponseEntity<?> createInvitation(@PathVariable Long id){
+        String invitationLink = organizationService.createInvitationLink(id);
+        if(invitationLink == null) return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(invitationLink);
+    }
+
+    @GetMapping("/{id}/invitation/{hash}")
+    public ResponseEntity<?> addUser(@PathVariable Long id, @PathVariable String hash, @AuthenticationPrincipal UserDetails userDetails){
+        if (userDetails == null) return ResponseEntity.notFound().build();
+
+        UserData userData = new UserData(userDetails.getUsername());
+        UserData save = userRepository.save(userData);
+        Optional<Organization> organization = organizationService.addUser(id, hash, save);
+        if (organization.isEmpty()) return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(organization.toString());
     }
 
 }
