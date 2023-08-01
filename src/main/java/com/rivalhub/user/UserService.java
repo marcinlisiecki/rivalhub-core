@@ -12,10 +12,8 @@ public class UserService {
     private final UserDtoMapper userDtoMapper;
     private final UserDtoDetailsMapper userDtoDetailsMapper;
 
-
-    public UserDto register(UserDto userDto)  {
-        if(userRepository.findByEmail(userDto.getEmail()).isEmpty()) {
-
+    public UserDto register(UserDto userDto) {
+        if (userRepository.findByEmail(userDto.getEmail()).isEmpty()) {
             UserData userData = userDtoMapper.map(userDto);
             userData.setPassword(passwordEncoder.encode(userDto.getPassword()));
             userData = userRepository.save(userData);
@@ -23,11 +21,10 @@ public class UserService {
         } else {
             // TODO: Throw UserAlreadyExistsException
             return null;
-        };
-    };
+        }
+    }
 
-
-    public UserDtoDetails findUserById(Long id){
+    public UserDtoDetails findUserById(Long id) {
         return userDtoDetailsMapper.map(userRepository.findById(id).get());
     }
 }
