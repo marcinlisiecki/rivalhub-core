@@ -21,9 +21,28 @@ public class OrganizationDTOMapper {
         organization.setName(dto.getName());
         organization.setId(dto.getId());
         organization.setImageUrl(dto.getImageUrl());
-        organization.setInvitationLink(dto.getInvitationLink());
 
         return organization;
     }
+
+    Organization map(OrganizationCreateDTO organizationCreateDTO){
+        Organization organization = new Organization();
+
+        organization.setName(organizationCreateDTO.getName());
+        organization.setId(organizationCreateDTO.getId());
+        organization.setImageUrl(organizationCreateDTO.getImageUrl());
+
+        return organization;
+    }
+
+//    OrganizationDTO map(OrganizationCreateDTO organizationCreateDTO){
+//        OrganizationDTO organizationDTO = new OrganizationDTO();
+//
+//        organizationDTO.setName(organizationCreateDTO.getName());
+//        organizationDTO.setId(organizationCreateDTO.getId());
+//        organizationDTO.setImageUrl(organizationDTO.getImageUrl());
+//
+//        return organizationDTO;
+//    }
 
 }

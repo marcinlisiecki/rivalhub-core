@@ -1,42 +1,30 @@
 package com.rivalhub.user;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Random;
-
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    private UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
-    private UserDtoMapper userDtoMapper;
-    private UserDtoDetailsMapper userDtoDetailsMapper;
-    public UserService(UserRepository userRepository,PasswordEncoder passwordEncoder,
-                       UserDtoMapper userDtoMapper,UserDtoDetailsMapper userDtoDetailsMapper){
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.userDtoMapper = userDtoMapper;
-        this.userDtoDetailsMapper = userDtoDetailsMapper;
-    }
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserDtoMapper userDtoMapper;
+    private final UserDtoDetailsMapper userDtoDetailsMapper;
 
-    public UserDto register(UserDto userDto)  {
-        if(userRepository.findByEmail(userDto.getEmail()) == null) {
-
+    public UserDto register(UserDto userDto) {
+        if (userRepository.findByEmail(userDto.getEmail()).isEmpty()) {
             UserData userData = userDtoMapper.map(userDto);
-            userData.setPasswordHash(passwordEncoder.encode(userDto.getPassword()));
+            userData.setPassword(passwordEncoder.encode(userDto.getPassword()));
             userData = userRepository.save(userData);
             return userDtoMapper.map(userData);
-        } else return null;
+        } else {
+            // TODO: Throw UserAlreadyExistsException
+            return null;
+        }
+    }
 
-    };
-
-
-
-    public UserDtoDetails findUserById(Long id){
+    public UserDtoDetails findUserById(Long id) {
         return userDtoDetailsMapper.map(userRepository.findById(id).get());
     }
 }

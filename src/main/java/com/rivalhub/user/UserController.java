@@ -1,6 +1,7 @@
 package com.rivalhub.user;
 
 import com.rivalhub.common.dto.ErrorMessageDto;
+import jakarta.validation.Valid;
 import com.rivalhub.email.EmailService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
