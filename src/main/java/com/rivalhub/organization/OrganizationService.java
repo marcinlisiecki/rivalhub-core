@@ -20,7 +20,7 @@ public class OrganizationService {
         return organizationDTOMapper.map(savedOrganization);
     }
 
-    public Optional<OrganizationDTO> findOrganization(Integer id){
+    public Optional<OrganizationDTO> findOrganization(Long id){
         return organizationRepository.findById(id).map(organizationDTOMapper::map);
     }
 
@@ -29,7 +29,7 @@ public class OrganizationService {
         organizationRepository.save(organization);
     }
 
-    public void deleteOrganization(Integer id) {
+    public void deleteOrganization(Long id) {
         organizationRepository.deleteById(id);
     }
 

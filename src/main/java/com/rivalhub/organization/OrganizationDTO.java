@@ -11,7 +11,7 @@ import lombok.ToString;
 @NoArgsConstructor
 public class OrganizationDTO {
 
-    private Integer id;
+    private Long id;
 
     private String name;
 
