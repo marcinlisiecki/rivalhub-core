@@ -23,7 +23,7 @@ public class OrganizationController {
     private final ObjectMapper objectMapper;
 
     @GetMapping("{id}")
-    public ResponseEntity<Optional<OrganizationDTO>> viewOrganization(@PathVariable Integer id){
+    public ResponseEntity<Optional<OrganizationDTO>> viewOrganization(@PathVariable Long id){
         if (organizationService.findOrganization(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -41,7 +41,7 @@ public class OrganizationController {
     }
 
     @PatchMapping("/{id}")
-    ResponseEntity<?> updateJobOffer(@PathVariable Integer id, @RequestBody JsonMergePatch patch) {
+    ResponseEntity<?> updateJobOffer(@PathVariable Long id, @RequestBody JsonMergePatch patch) {
         try {
             OrganizationDTO jobOffer = organizationService.findOrganization(id).orElseThrow();
             OrganizationDTO offerPatched = applyPatch(jobOffer, patch);
@@ -61,7 +61,7 @@ public class OrganizationController {
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<?> deleteJobOffer(@PathVariable Integer id) {
+    ResponseEntity<?> deleteJobOffer(@PathVariable Long id) {
         organizationService.deleteOrganization(id);
         return ResponseEntity.noContent().build();
     }

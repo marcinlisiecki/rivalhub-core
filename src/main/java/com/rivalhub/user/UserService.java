@@ -9,30 +9,25 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserDtoMapper userDtoMapper;
+    private final UserDtoDetailsMapper userDtoDetailsMapper;
+
 
     public UserDto register(UserDto userDto)  {
-        UserData userData = userDtoToUserMapper(userDto);
+        if(userRepository.findByEmail(userDto.getEmail()).isEmpty()) {
 
-        userData.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        userRepository.save(userData);
+            UserData userData = userDtoMapper.map(userDto);
+            userData.setPassword(passwordEncoder.encode(userDto.getPassword()));
+            userData = userRepository.save(userData);
+            return userDtoMapper.map(userData);
+        } else {
+            // TODO: Throw UserAlreadyExistsException
+            return null;
+        };
+    };
 
-        return userDto;
-    }
-
-    public UserData userDtoToUserMapper(UserDto userDto){
-        UserData userData = new UserData();
-        userData.setName(userDto.getName());
-        userData.setEmail(userDto.getEmail());
-        userData.setId(userData.getId());
-        return userData;
-    }
-
-    public UserDtoDetails userToUserDtoDetailsMapper(UserData userData){
-        UserDtoDetails userDtoDetails = new UserDtoDetails(userData.getName(), userData.getEmail());
-        return userDtoDetails;
-    }
 
     public UserDtoDetails findUserById(Long id){
-        return userToUserDtoDetailsMapper(userRepository.findById(id).get());
+        return userDtoDetailsMapper.map(userRepository.findById(id).get());
     }
 }

@@ -1,5 +1,6 @@
 package com.rivalhub.user;
 
+import com.rivalhub.common.dto.ErrorMessageDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -22,13 +23,16 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    ResponseEntity<UserDto> register(@RequestBody UserDto userDto){
+    ResponseEntity<?> register(@RequestBody UserDto userDto){
         UserDto savedUser = userService.register(userDto);
-        URI savedUserUri = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/users/{id}")
-                .buildAndExpand(userDto.getId())
-                .toUri();
-        return ResponseEntity.created(savedUserUri).body(userDto);
+        if(savedUser != null) {
+            URI savedUserUri = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/users/{id}")
+                    .buildAndExpand(savedUser.getId())
+                    .toUri();
+            return ResponseEntity.created(savedUserUri).body(savedUser);
+        }
+        return ResponseEntity.badRequest().body(new ErrorMessageDto("Adres email jest już w użyciu"));
     }
 
 
