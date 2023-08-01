@@ -17,7 +17,7 @@ public class UserService {
         userRepository.save(userData);
 
         return userDto;
-    };
+    }
 
     public UserData userDtoToUserMapper(UserDto userDto){
         UserData userData = new UserData();
