@@ -20,13 +20,12 @@ class SecurityConfig {
         http.authorizeHttpRequests(requests -> requests
                 .requestMatchers(new AntPathRequestMatcher("/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/organizations/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/organizations")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/register")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/users/**")).permitAll()
                 .anyRequest().authenticated());
 
-//        http.csrf(csrf -> csrf.ignoringRequestMatchers(PathRequest.toH2Console()));
-        http.headers().frameOptions().sameOrigin();
-
         return http.build();
-    }
+   }
 }

@@ -29,7 +29,10 @@ public class Organization {
     @Size(min = 2, max = 256)
     private String name;
 
+
+    @Size(min = 9, max = 10)
     private String invitationLink;
+
 
     @Size(min = 2, max = 512)
     private String imageUrl;
