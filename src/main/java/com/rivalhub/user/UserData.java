@@ -32,8 +32,6 @@ public class UserData implements UserDetails {
     private String name;
     @Email
     private String email;
-    private byte[] salt;
-    private byte[] passwordHash;
     private String profilePictureUrl;
     private String password;
 
