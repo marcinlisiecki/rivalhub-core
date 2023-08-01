@@ -1,5 +1,12 @@
 package com.rivalhub.user;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
 public class UserDtoDetails {
 
     private String name;
@@ -9,21 +16,6 @@ public class UserDtoDetails {
         this.name = name;
         this.email = email;
 
-    }
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
 
