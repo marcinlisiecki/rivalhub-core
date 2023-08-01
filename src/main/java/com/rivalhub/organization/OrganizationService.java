@@ -2,6 +2,7 @@ package com.rivalhub.organization;
 
 import com.rivalhub.user.UserData;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -53,16 +54,16 @@ public class OrganizationService {
         return hash;
     }
 
-    public void addUser(Long id, String hash, UserData userData) {
+    public Optional<Organization> addUser(Long id, String hash, UserData userData) {
         Optional<Organization> organizationRepositoryById = organizationRepository.findById(id);
 
-        if (organizationRepositoryById.isEmpty()) return;
+        if (organizationRepositoryById.isEmpty()) return Optional.empty();
 
         Organization organization = organizationRepositoryById.get();
-        if (!organization.getInvitationLink().equals(hash)) return;
+        if (!organization.getInvitationLink().equals(hash)) return Optional.empty();
 
         organization.addUser(userData);
 
-        organizationRepository.save(organization);
+        return Optional.of(organizationRepository.save(organization));
     }
 }

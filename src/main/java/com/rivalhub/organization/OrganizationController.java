@@ -7,9 +7,7 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
-import com.rivalhub.user.UserService;
 import lombok.AllArgsConstructor;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -75,23 +73,23 @@ public class OrganizationController {
     }
 
     @GetMapping("/{id}/invitation")
-    public String createInvitation(@PathVariable Long id){
+    public ResponseEntity<?> createInvitation(@PathVariable Long id){
         String invitationLink = organizationService.createInvitationLink(id);
-        System.out.println(invitationLink);
-        return invitationLink;
+        if(invitationLink == null) return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(invitationLink);
     }
 
     @GetMapping("/{id}/invitation/{hash}")
-    public String addUser(@PathVariable Long id, @PathVariable String hash, @AuthenticationPrincipal UserDetails userDetails){
-        if (userDetails == null) return null;
-
-        System.out.println(userDetails.toString());
+    public ResponseEntity<?> addUser(@PathVariable Long id, @PathVariable String hash, @AuthenticationPrincipal UserDetails userDetails){
+        if (userDetails == null) return ResponseEntity.notFound().build();
 
         UserData userData = new UserData(userDetails.getUsername());
         UserData save = userRepository.save(userData);
-        organizationService.addUser(id, hash, save);
+        Optional<Organization> organization = organizationService.addUser(id, hash, save);
+        if (organization.isEmpty()) return ResponseEntity.notFound().build();
 
-        return "";
+        return ResponseEntity.ok(organization.toString());
     }
 
 }
