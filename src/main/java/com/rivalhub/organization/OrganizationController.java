@@ -10,6 +10,7 @@ import com.rivalhub.user.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -84,9 +85,7 @@ public class OrganizationController {
     public ResponseEntity<?> addUser(@PathVariable Long id, @PathVariable String hash, @AuthenticationPrincipal UserDetails userDetails){
         if (userDetails == null) return ResponseEntity.notFound().build();
 
-        UserData userData = new UserData(userDetails.getUsername());
-        UserData save = userRepository.save(userData);
-        Optional<Organization> organization = organizationService.addUser(id, hash, save);
+        Optional<Organization> organization = organizationService.addUser(id, hash, userDetails.getUsername());
         if (organization.isEmpty()) return ResponseEntity.notFound().build();
 
         return ResponseEntity.ok(organization.toString());

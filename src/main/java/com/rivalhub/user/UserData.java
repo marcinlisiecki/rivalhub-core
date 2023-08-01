@@ -18,7 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -74,5 +75,14 @@ public class UserData implements UserDetails {
 
     public UserData(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "UserData{" +
+                "name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", profilePictureUrl='" + profilePictureUrl + '\'' +
+                '}';
     }
 }

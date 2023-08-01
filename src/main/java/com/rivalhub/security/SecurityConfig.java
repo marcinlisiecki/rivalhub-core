@@ -23,7 +23,6 @@ class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable());
-        http.cors(cors -> cors.disable());
 
         http.authorizeHttpRequests(requests -> requests
                 .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
@@ -34,6 +33,8 @@ class SecurityConfig {
 
         http.sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        http.headers().frameOptions().sameOrigin();
 
         http.authenticationProvider(authenticationProvider);
         http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
