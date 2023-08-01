@@ -1,6 +1,7 @@
 package com.rivalhub.organization;
 
 import com.rivalhub.user.UserData;
+import com.rivalhub.user.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,7 +14,9 @@ import java.util.Optional;
 public class OrganizationService {
 
     private final OrganizationRepository organizationRepository;
-    private OrganizationDTOMapper organizationDTOMapper;
+    private final OrganizationDTOMapper organizationDTOMapper;
+
+    private final UserRepository userRepository;
 
     public OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO){
         Organization organizationToSave = organizationDTOMapper.map(organizationCreateDTO);
@@ -54,15 +57,17 @@ public class OrganizationService {
         return hash;
     }
 
-    public Optional<Organization> addUser(Long id, String hash, UserData userData) {
+    public Optional<Organization> addUser(Long id, String hash, String email) {
         Optional<Organization> organizationRepositoryById = organizationRepository.findById(id);
+        Optional<UserData> user = userRepository.findByEmail(email);
 
+        if(user.isEmpty()) return Optional.empty();
         if (organizationRepositoryById.isEmpty()) return Optional.empty();
 
         Organization organization = organizationRepositoryById.get();
         if (!organization.getInvitationLink().equals(hash)) return Optional.empty();
 
-        organization.addUser(userData);
+        organization.addUser(user.get());
 
         return Optional.of(organizationRepository.save(organization));
     }

@@ -15,7 +15,6 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @Getter
 @Setter
 public class Organization {
@@ -55,5 +54,14 @@ public class Organization {
     public void addUser(UserData userData){
         userData.getOrganizationList().add(this);
         userList.add(userData);
+    }
+
+    @Override
+    public String toString() {
+        return "Organization{" +
+                "name='" + name + '\'' +
+                ", invitationLink='" + invitationLink + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                '}';
     }
 }
