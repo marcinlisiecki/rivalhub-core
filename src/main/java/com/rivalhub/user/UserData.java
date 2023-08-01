@@ -1,11 +1,13 @@
 package com.rivalhub.user;
 
+import com.rivalhub.common.ErrorMessages;
 import com.rivalhub.organization.Organization;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -27,13 +29,13 @@ public class UserData implements UserDetails {
     private Long id;
 
     @NotNull
-    @Size(min = 3, max = 256)
+    @Size(min = 3, max = 256,message = ErrorMessages.NAME_DONT_FIT_SIZE)
     private String name;
     @Email
+    @Email(message = ErrorMessages.EMAIL_IS_NOT_VALID)
     private String email;
-    private byte[] salt;
-    private byte[] passwordHash;
     private String profilePictureUrl;
+    //@Length(min=8,message = ErrorMessages.PASSWORD_IS_TOO_SHORT)
     private String password;
 
     @ManyToMany(mappedBy = "userList")
