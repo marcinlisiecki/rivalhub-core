@@ -16,7 +16,7 @@ class SecurityConfig {
 
         http.authorizeHttpRequests(requests -> requests
                 .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/organization")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/organizations")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/register")).permitAll()
                 .anyRequest().authenticated());
