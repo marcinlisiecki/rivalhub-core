@@ -9,4 +9,4 @@ spring:
 
 app:
   jwt:
-    secret: GaeuRaXZsiTHMXFTvA0INIVh7oaFxQBi
+    secret: GaeuRaXZsiTHMXFTvA0INIVh7oaFxQBifdBg4rAs0fG
