@@ -30,6 +30,8 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String sender;
 
+
+
     public void sendSimpleMessage(String receiver,String subject,String message){
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setText(message);
@@ -38,4 +40,34 @@ public class EmailService {
         mailMessage.setSubject(subject);
         javaMailSender.send(mailMessage);
     }
+
+    public void sendAttachmentMessage(String receiver,String subject,String messageBody, String pathToFile){
+
+        MimeMessage message = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message, true);
+            mimeMessageHelper.setFrom(sender);
+            mimeMessageHelper.setTo(receiver);
+            mimeMessageHelper.setSubject(subject);
+
+            MimeBodyPart attachmentPart = new MimeBodyPart();
+            attachmentPart.attachFile(new File(pathToFile));
+
+            BodyPart messageBodyPart = new MimeBodyPart();
+            messageBodyPart.setText(messageBody);
+
+            Multipart multipart = new MimeMultipart();
+
+            multipart.addBodyPart(messageBodyPart);
+            multipart.addBodyPart(attachmentPart);
+            message.setContent(multipart);
+            javaMailSender.send(message);
+        }catch(IOException e){
+
+        }catch (MessagingException e){
+
+        }
+    }
+
+
 }
