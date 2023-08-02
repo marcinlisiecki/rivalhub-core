@@ -1,13 +1,19 @@
 package com.rivalhub.user;
 
 import com.rivalhub.common.dto.ErrorMessageDto;
+import com.rivalhub.organization.Organization;
+import com.rivalhub.organization.OrganizationCreateDTO;
 import jakarta.validation.Valid;
 import com.rivalhub.email.EmailService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class UserController {
@@ -38,6 +44,16 @@ public class UserController {
             return ResponseEntity.created(savedUserUri).body(savedUser);
         }
         return ResponseEntity.badRequest().body(new ErrorMessageDto("Adres email jest już w użyciu"));
+    }
+
+    @GetMapping("/users/organizations")
+    public ResponseEntity<List<OrganizationCreateDTO>> listAllOrganizationsByUser(@AuthenticationPrincipal UserDetails userDetails){
+        Optional<List<OrganizationCreateDTO>> userOrganizations = userService.findOrganizationsByUser(userDetails.getUsername());
+
+
+        if (userOrganizations.isEmpty()) return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(userOrganizations.get());
     }
 
 

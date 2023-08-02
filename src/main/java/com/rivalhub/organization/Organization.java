@@ -1,6 +1,7 @@
 package com.rivalhub.organization;
 
 import com.rivalhub.station.Station;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -11,6 +12,7 @@ import org.apache.catalina.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -40,11 +42,12 @@ public class Organization {
     private LocalDateTime addedDate;
 
     @ManyToMany
+    @JsonManagedReference
     @JoinTable(name = "organization_users",
             joinColumns = @JoinColumn(name = "organization_id", referencedColumnName = "organization_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     )
-    private List<UserData> userList;
+    private List<UserData> userList = new ArrayList<>();
 
     @OneToMany
     private List<Station> stationList;

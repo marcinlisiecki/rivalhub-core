@@ -1,5 +1,6 @@
 package com.rivalhub.user;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.rivalhub.common.ErrorMessages;
 import com.rivalhub.organization.Organization;
 import jakarta.persistence.*;
@@ -7,7 +8,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.List;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -40,6 +39,7 @@ public class UserData implements UserDetails {
     private String password;
 
     @ManyToMany(mappedBy = "userList")
+    @JsonBackReference
     private List<Organization> organizationList = new ArrayList<>();
 
 

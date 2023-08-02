@@ -38,8 +38,9 @@ public class OrganizationController {
     }
 
     @PostMapping
-    public ResponseEntity<OrganizationDTO> addOrganization(@RequestBody OrganizationCreateDTO organizationCreateDTO){
-        OrganizationDTO savedOrganization = organizationService.saveOrganization(organizationCreateDTO);
+    public ResponseEntity<OrganizationDTO> addOrganization(@RequestBody OrganizationCreateDTO organizationCreateDTO,
+                                                           @AuthenticationPrincipal UserDetails userDetails){
+        OrganizationDTO savedOrganization = organizationService.saveOrganization(organizationCreateDTO, userDetails.getUsername());
         URI savedOrganizationUri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(savedOrganization.getId())
