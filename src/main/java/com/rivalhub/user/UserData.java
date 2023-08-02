@@ -1,5 +1,6 @@
 package com.rivalhub.user;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.rivalhub.organization.Organization;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -36,6 +37,7 @@ public class UserData implements UserDetails {
     private String password;
 
     @ManyToMany(mappedBy = "userList")
+    @JsonBackReference
     private List<Organization> organizationList = new ArrayList<>();
 
 
