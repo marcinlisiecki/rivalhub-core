@@ -8,6 +8,7 @@ import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.email.EmailService;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,6 +30,7 @@ public class OrganizationController {
     private final ObjectMapper objectMapper;
     private final EmailService emailService;
     private final UserRepository userRepository;
+
 
     @GetMapping("{id}")
     public ResponseEntity<Optional<OrganizationDTO>> viewOrganization(@PathVariable Long id){
@@ -76,10 +78,11 @@ public class OrganizationController {
 
     @GetMapping("/{id}/invitation")
     public ResponseEntity<?> createInvitation(@PathVariable Long id){
-        String invitationLink = organizationService.createInvitationLink(id);
-        if(invitationLink == null) return ResponseEntity.notFound().build();
+        String invitationHash = organizationService.createInvitationHash(id);
+        if(invitationHash == null) return ResponseEntity.notFound().build();
 
-        return ResponseEntity.ok(invitationLink);
+        return ResponseEntity.ok(invitationHash);
+
     }
 
     @GetMapping("/{id}/invitation/{hash}")
@@ -96,8 +99,18 @@ public class OrganizationController {
         if(userDetails == null) return ResponseEntity.notFound().build();
         Optional<OrganizationDTO> organizationDTO = organizationService.findOrganization(id);
         if(organizationDTO.isEmpty()) return ResponseEntity.notFound().build();
-        emailService.sendSimpleMessage(email,"Invitation to " + organizationDTO.get().getName(),
-                "Enter the link to join: \n" + organizationDTO.get().getInvitationLink());
+        StringBuilder builder = new StringBuilder("Invitation to ") .append(organizationDTO.get().getName());
+        String subject = builder.toString();
+        builder.setLength(0);
+        ServletUriComponentsBuilder uri = ServletUriComponentsBuilder.fromCurrentRequest();
+        uri.replacePath("");
+        builder.append("Enter the link to join: \n")
+                .append(uri.toUriString()).append("/")
+                .append(organizationDTO.get().getId())
+                .append("/invitation/")
+                .append(organizationDTO.get().getInvitationHash());
+        String body = builder.toString();
+        emailService.sendSimpleMessage(email, subject, body);
         return ResponseEntity.ok(organizationDTO.toString());
     }
 

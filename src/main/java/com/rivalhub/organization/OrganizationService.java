@@ -3,8 +3,6 @@ package com.rivalhub.organization;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -24,7 +22,7 @@ public class OrganizationService {
 
         Organization savedOrganization = organizationRepository.save(organizationToSave);
 
-        createInvitationLink(savedOrganization.getId());
+        createInvitationHash(savedOrganization.getId());
         Organization save = organizationRepository.save(savedOrganization);
 
         return organizationDTOMapper.map(save);
@@ -43,7 +41,7 @@ public class OrganizationService {
         organizationRepository.deleteById(id);
     }
 
-    public String createInvitationLink(Long id) {
+    public String createInvitationHash(Long id) {
         Optional<Organization> organizationById = organizationRepository.findById(id);
 
         if (organizationById.isEmpty()) return null;
@@ -52,7 +50,7 @@ public class OrganizationService {
         String valueToHash = organization.getName() + organization.getId() + LocalDateTime.now();
         String hash = String.valueOf(valueToHash.hashCode()  & 0x7fffffff);
 
-        organization.setInvitationLink(hash);
+        organization.setInvitationHash(hash);
         organizationRepository.save(organization);
         return hash;
     }
@@ -65,7 +63,7 @@ public class OrganizationService {
         if (organizationRepositoryById.isEmpty()) return Optional.empty();
 
         Organization organization = organizationRepositoryById.get();
-        if (!organization.getInvitationLink().equals(hash)) return Optional.empty();
+        if (!organization.getInvitationHash().equals(hash)) return Optional.empty();
 
         organization.addUser(user.get());
 

@@ -3,11 +3,8 @@ package com.rivalhub.organization;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.apache.catalina.User;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,7 +27,7 @@ public class Organization {
 
 
     @Size(min = 9, max = 10)
-    private String invitationLink;
+    private String invitationHash;
 
 
     @Size(min = 2, max = 512)
@@ -45,9 +42,9 @@ public class Organization {
     )
     private List<UserData> userList;
 
-    public Organization(String name, String invitationLink, String imageUrl) {
+    public Organization(String name, String invitationHash, String imageUrl) {
         this.name = name;
-        this.invitationLink = invitationLink;
+        this.invitationHash = invitationHash;
         this.imageUrl = imageUrl;
     }
 
@@ -60,7 +57,7 @@ public class Organization {
     public String toString() {
         return "Organization{" +
                 "name='" + name + '\'' +
-                ", invitationLink='" + invitationLink + '\'' +
+                ", invitationLink='" + invitationHash + '\'' +
                 ", imageUrl='" + imageUrl + '\'' +
                 '}';
     }
