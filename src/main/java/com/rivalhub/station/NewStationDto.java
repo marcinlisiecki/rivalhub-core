@@ -11,5 +11,4 @@ public class NewStationDto {
     private Long id;
     private String type;
     private String name;
-    private Long organizationId;
 }

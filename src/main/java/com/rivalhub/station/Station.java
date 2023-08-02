@@ -16,12 +16,9 @@ public class Station {
     private Long id;
     private String type;
     private String name;
-    @ManyToOne
-    private Organization organization;
 
-    public Station(Long id, String type, Organization organization) {
+    public Station(Long id, String type) {
         this.id = id;
         this.type = type;
-        this.organization = organization;
     }
 }

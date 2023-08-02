@@ -1,5 +1,6 @@
 package com.rivalhub.organization;
 
+import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -45,6 +46,9 @@ public class Organization {
     )
     private List<UserData> userList;
 
+    @OneToMany
+    private List<Station> stationList;
+
     public Organization(String name, String invitationLink, String imageUrl) {
         this.name = name;
         this.invitationLink = invitationLink;
@@ -54,6 +58,10 @@ public class Organization {
     public void addUser(UserData userData){
         userData.getOrganizationList().add(this);
         userList.add(userData);
+    }
+
+    public void addStation(Station station){
+        this.stationList.add(station);
     }
 
     @Override
