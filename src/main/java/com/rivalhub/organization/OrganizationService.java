@@ -3,8 +3,6 @@ package com.rivalhub.organization;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -18,14 +16,17 @@ public class OrganizationService {
 
     private final UserRepository userRepository;
 
-    public OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO){
+    public OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email){
         Organization organizationToSave = organizationDTOMapper.map(organizationCreateDTO);
         organizationToSave.setAddedDate(LocalDateTime.now());
 
         Organization savedOrganization = organizationRepository.save(organizationToSave);
 
         createInvitationLink(savedOrganization.getId());
+        UserData user = userRepository.findByEmail(email).get();
+        savedOrganization.addUser(user);
         Organization save = organizationRepository.save(savedOrganization);
+
 
         return organizationDTOMapper.map(save);
     }
