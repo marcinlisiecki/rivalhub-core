@@ -4,6 +4,8 @@ import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -70,5 +72,19 @@ public class OrganizationService {
         organization.addUser(user.get());
 
         return Optional.of(organizationRepository.save(organization));
+    }
+
+    public String createInvitationLink(Optional<OrganizationDTO> organizationDTO){
+        StringBuilder builder = new StringBuilder();
+        builder.setLength(0);
+        ServletUriComponentsBuilder uri = ServletUriComponentsBuilder.fromCurrentRequest();
+        uri.replacePath("");
+        builder.append("Enter the link to join: \n")
+                .append(uri.toUriString()).append("/")
+                .append(organizationDTO.get().getId())
+                .append("/invitation/")
+                .append(organizationDTO.get().getInvitationHash());
+        String body = builder.toString();
+        return body;
     }
 }

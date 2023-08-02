@@ -100,17 +100,8 @@ public class OrganizationController {
         if(userDetails == null) return ResponseEntity.notFound().build();
         Optional<OrganizationDTO> organizationDTO = organizationService.findOrganization(id);
         if(organizationDTO.isEmpty()) return ResponseEntity.notFound().build();
-        StringBuilder builder = new StringBuilder("Invitation to ") .append(organizationDTO.get().getName());
-        String subject = builder.toString();
-        builder.setLength(0);
-        ServletUriComponentsBuilder uri = ServletUriComponentsBuilder.fromCurrentRequest();
-        uri.replacePath("");
-        builder.append("Enter the link to join: \n")
-                .append(uri.toUriString()).append("/")
-                .append(organizationDTO.get().getId())
-                .append("/invitation/")
-                .append(organizationDTO.get().getInvitationHash());
-        String body = builder.toString();
+        String subject = "Invitation to " + organizationDTO.get().getName();
+        String body = organizationService.createInvitationLink(organizationDTO);
         emailService.sendSimpleMessage(email, subject, body);
         return ResponseEntity.ok(organizationDTO.toString());
     }
