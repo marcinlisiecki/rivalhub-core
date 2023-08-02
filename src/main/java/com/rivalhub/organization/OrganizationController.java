@@ -5,12 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
-import com.rivalhub.user.UserData;
+import com.rivalhub.station.NewStationDto;
 import com.rivalhub.user.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -28,6 +27,7 @@ public class OrganizationController {
     private final ObjectMapper objectMapper;
 
     private final UserRepository userRepository;
+
 
     @GetMapping("{id}")
     public ResponseEntity<Optional<OrganizationDTO>> viewOrganization(@PathVariable Long id){
@@ -91,5 +91,23 @@ public class OrganizationController {
 
         return ResponseEntity.ok(organization.toString());
     }
+
+    @PostMapping("/{id}/stations")
+    ResponseEntity<NewStationDto> saveStation(@PathVariable Long id, @RequestBody NewStationDto newStation,
+                                              @AuthenticationPrincipal UserDetails userDetails) {
+        NewStationDto savedStation = organizationService.addStation(newStation, id, userDetails.getUsername());
+
+        if (savedStation == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        URI savedStationUri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(savedStation.getId())
+                .toUri();
+        return ResponseEntity.created(savedStationUri).body(savedStation);
+    }
+
+
 
 }

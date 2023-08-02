@@ -17,6 +17,8 @@ public class Station {
     private String type;
     private String name;
 
+
+
     public Station(Long id, String type) {
         this.id = id;
         this.type = type;

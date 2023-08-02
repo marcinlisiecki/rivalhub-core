@@ -1,10 +1,15 @@
 package com.rivalhub.organization;
 
+import com.rivalhub.station.NewStationDto;
+import com.rivalhub.station.NewStationDtoMapper;
+import com.rivalhub.station.Station;
+import com.rivalhub.station.StationRepository;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -16,7 +21,12 @@ public class OrganizationService {
 
     private final UserRepository userRepository;
 
-    public OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email){
+    private final NewStationDtoMapper newStationDtoMapper;
+
+    private final StationRepository stationRepository;
+
+
+        public OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email){
         Organization organizationToSave = organizationDTOMapper.map(organizationCreateDTO);
         organizationToSave.setAddedDate(LocalDateTime.now());
 
@@ -72,4 +82,28 @@ public class OrganizationService {
 
         return Optional.of(organizationRepository.save(organization));
     }
+
+    NewStationDto addStation(NewStationDto newStationDto, Long id, String email) {
+        Optional<Organization> organizationOptional = organizationRepository.findById(id);
+        if (organizationOptional.isEmpty()) return null;
+        Organization organization = organizationOptional.get();
+
+        UserData user = userRepository.findByEmail(email).get();
+        List<Organization> organizationList = user.getOrganizationList();
+
+        Organization currentOrganization = organizationList.stream().filter(org -> org.getId().equals(id)).findFirst().orElse(null);
+
+        if (currentOrganization == null) return null;
+
+        Station station = newStationDtoMapper.map(newStationDto);
+        Station savedStation = stationRepository.save(station);
+        organization.addStation(savedStation);
+
+        organizationRepository.save(organization);
+
+        return newStationDtoMapper.map(savedStation);
+    }
+
+
+
 }

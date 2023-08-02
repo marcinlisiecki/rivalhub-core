@@ -13,13 +13,13 @@ public class NewStationDtoMapper {
         this.organizationRepository = organizationRepository;
     }
 
-    NewStationDto map(Station station) {
+    public NewStationDto map(Station station) {
         NewStationDto newStationDto = new NewStationDto();
         newStationDto.setType(station.getType());
         newStationDto.setName(station.getName());
         return newStationDto;
     }
-    Station map(NewStationDto newStationDto) {
+    public Station map(NewStationDto newStationDto) {
         Station station = new Station();
         station.setType(newStationDto.getType());
         station.setName(newStationDto.getName());
