@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
+import com.rivalhub.email.EmailService;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
 import lombok.AllArgsConstructor;
@@ -26,7 +27,7 @@ public class OrganizationController {
 
     private OrganizationService organizationService;
     private final ObjectMapper objectMapper;
-
+    private final EmailService emailService;
     private final UserRepository userRepository;
 
     @GetMapping("{id}")
@@ -90,5 +91,15 @@ public class OrganizationController {
 
         return ResponseEntity.ok(organization.toString());
     }
+    @GetMapping("/{id}/invite/{email}")
+    public ResponseEntity<?> addUserThroughEmail(@PathVariable Long id, @PathVariable String email, @AuthenticationPrincipal UserDetails userDetails){
+        if(userDetails == null) return ResponseEntity.notFound().build();
+        Optional<OrganizationDTO> organizationDTO = organizationService.findOrganization(id);
+        if(organizationDTO.isEmpty()) return ResponseEntity.notFound().build();
+        emailService.sendSimpleMessage(email,"Invitation to " + organizationDTO.get().getName(),
+                "Enter the link to join: \n" + organizationDTO.get().getInvitationLink());
+        return ResponseEntity.ok(organizationDTO.toString());
+    }
+
 
 }
