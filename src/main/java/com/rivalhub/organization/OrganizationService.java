@@ -16,13 +16,15 @@ public class OrganizationService {
 
     private final UserRepository userRepository;
 
-    public OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO){
+    public OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email){
         Organization organizationToSave = organizationDTOMapper.map(organizationCreateDTO);
         organizationToSave.setAddedDate(LocalDateTime.now());
 
         Organization savedOrganization = organizationRepository.save(organizationToSave);
 
         createInvitationHash(savedOrganization.getId());
+        UserData user = userRepository.findByEmail(email).get();
+        savedOrganization.addUser(user);
         Organization save = organizationRepository.save(savedOrganization);
 
         return organizationDTOMapper.map(save);

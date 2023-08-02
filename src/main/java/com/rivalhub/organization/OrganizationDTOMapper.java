@@ -35,14 +35,14 @@ public class OrganizationDTOMapper {
         return organization;
     }
 
-//    OrganizationDTO map(OrganizationCreateDTO organizationCreateDTO){
-//        OrganizationDTO organizationDTO = new OrganizationDTO();
-//
-//        organizationDTO.setName(organizationCreateDTO.getName());
-//        organizationDTO.setId(organizationCreateDTO.getId());
-//        organizationDTO.setImageUrl(organizationDTO.getImageUrl());
-//
-//        return organizationDTO;
-//    }
+    OrganizationCreateDTO mapToOrganizationCreateDTO(Organization organization){
+        OrganizationCreateDTO organizationCreateDTO = new OrganizationCreateDTO();
+
+        organizationCreateDTO.setId(organization.getId());
+        organizationCreateDTO.setName(organization.getName());
+        organizationCreateDTO.setImageUrl(organization.getImageUrl());
+
+        return organizationCreateDTO;
+    }
 
 }
