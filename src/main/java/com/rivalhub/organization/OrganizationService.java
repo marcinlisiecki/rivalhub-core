@@ -3,6 +3,7 @@ package com.rivalhub.organization;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -10,12 +11,11 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class OrganizationService {
 
     private final OrganizationRepository organizationRepository;
     private final OrganizationDTOMapper organizationDTOMapper;
-
     private final UserRepository userRepository;
 
     public OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email){
@@ -32,8 +32,11 @@ public class OrganizationService {
         return organizationDTOMapper.map(save);
     }
 
-    public Optional<OrganizationDTO> findOrganization(Long id){
-        return organizationRepository.findById(id).map(organizationDTOMapper::map);
+    public OrganizationDTO findOrganization(Long id){
+        return organizationRepository
+                .findById(id)
+                .map(organizationDTOMapper::map)
+                .orElseThrow(OrganizationNotFoundException::new);
     }
 
     void updateOrganization(OrganizationDTO organizationDTO){
@@ -74,16 +77,16 @@ public class OrganizationService {
         return Optional.of(organizationRepository.save(organization));
     }
 
-    public String createInvitationLink(Optional<OrganizationDTO> organizationDTO){
+    public String createInvitationLink(OrganizationDTO organizationDTO){
         StringBuilder builder = new StringBuilder();
         builder.setLength(0);
         ServletUriComponentsBuilder uri = ServletUriComponentsBuilder.fromCurrentRequest();
         uri.replacePath("");
         builder.append("Enter the link to join: \n")
                 .append(uri.toUriString()).append("/")
-                .append(organizationDTO.get().getId())
+                .append(organizationDTO.getId())
                 .append("/invitation/")
-                .append(organizationDTO.get().getInvitationHash());
+                .append(organizationDTO.getInvitationHash());
         String body = builder.toString();
         return body;
     }

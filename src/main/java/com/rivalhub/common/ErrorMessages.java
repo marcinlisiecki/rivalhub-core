@@ -20,4 +20,8 @@ public class ErrorMessages {
     public static final String ORGANIZATION_ID_IS_REQUIRED = "ID organizacji jest wymagane";
 
     public static final String EVENT_TYPE_IS_REQUIRED = "Typ jest wymagany";
+
+    public static final String STATION_NOT_FOUND = "Nie znaleziono stanowiska";
+    public static final String USER_NOT_FOUND = "Nie znaleziono użytkownika";
+    public static final String ORGANIZATION_NOT_FOUND = "Nie znaleziono organizacji";
 }
