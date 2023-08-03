@@ -41,7 +41,7 @@ public class Organization {
 
     private LocalDateTime addedDate;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JsonManagedReference
     @JoinTable(name = "organization_users",
             joinColumns = @JoinColumn(name = "organization_id", referencedColumnName = "organization_id"),
@@ -49,7 +49,7 @@ public class Organization {
     )
     private List<UserData> userList = new ArrayList<>();
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Station> stationList;
 
     public Organization(String name, String invitationLink, String imageUrl) {
@@ -65,6 +65,10 @@ public class Organization {
 
     public void addStation(Station station){
         this.stationList.add(station);
+    }
+
+    public void removeStation(Station station){
+        this.stationList.remove(station);
     }
 
     @Override

@@ -8,8 +8,10 @@ import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.reservation.AddReservationDTO;
 import com.rivalhub.reservation.Reservation;
 import com.rivalhub.station.NewStationDto;
+import com.rivalhub.station.Station;
 import com.rivalhub.user.UserRepository;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -53,10 +55,10 @@ public class OrganizationController {
     }
 
     @PatchMapping("/{id}")
-    ResponseEntity<?> updateJobOffer(@PathVariable Long id, @RequestBody JsonMergePatch patch) {
+    ResponseEntity<?> updateOrganization(@PathVariable Long id, @RequestBody JsonMergePatch patch) {
         try {
-            OrganizationDTO jobOffer = organizationService.findOrganization(id).orElseThrow();
-            OrganizationDTO offerPatched = applyPatch(jobOffer, patch);
+            OrganizationDTO organizationDTO = organizationService.findOrganization(id).orElseThrow();
+            OrganizationDTO offerPatched = applyPatch(organizationDTO, patch);
             organizationService.updateOrganization(offerPatched);
         } catch (JsonPatchException | JsonProcessingException e) {
             return ResponseEntity.internalServerError().build();
@@ -66,14 +68,14 @@ public class OrganizationController {
         return ResponseEntity.noContent().build();
     }
 
-    private OrganizationDTO applyPatch(OrganizationDTO jobOffer, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
-        JsonNode jobOfferNode = objectMapper.valueToTree(jobOffer);
-        JsonNode jobOfferPatchedNode = patch.apply(jobOfferNode);
-        return objectMapper.treeToValue(jobOfferPatchedNode, OrganizationDTO.class);
+    private OrganizationDTO applyPatch(OrganizationDTO organizationDTO, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
+        JsonNode organizationNode = objectMapper.valueToTree(organizationDTO);
+        JsonNode organizationPatchedNode = patch.apply(organizationNode);
+        return objectMapper.treeToValue(organizationPatchedNode, OrganizationDTO.class);
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<?> deleteJobOffer(@PathVariable Long id) {
+    ResponseEntity<?> deleteOrganization(@PathVariable Long id) {
         organizationService.deleteOrganization(id);
         return ResponseEntity.noContent().build();
     }
@@ -112,6 +114,45 @@ public class OrganizationController {
         return ResponseEntity.created(savedStationUri).body(savedStation);
     }
 
+    @GetMapping("/{id}/stations")
+    ResponseEntity<?> viewStations(@PathVariable Long id){
+        Optional<List<Station>> stations = organizationService.findStations(id);
+
+        if (stations.isEmpty()) return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(stations.get());
+    }
+
+    @PatchMapping("/stations/{stationId}")
+    ResponseEntity<?> updateOrganization(@RequestBody JsonMergePatch patch,
+                                         @PathVariable Long stationId) {
+        try {
+            NewStationDto station = organizationService.findStation(stationId).orElseThrow();
+            NewStationDto stationPatched = applyPatch(station, patch);
+            organizationService.updateStation(stationPatched);
+        } catch (JsonPatchException | JsonProcessingException e) {
+            return ResponseEntity.internalServerError().build();
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.noContent().build();
+    }
+
+    private NewStationDto applyPatch(NewStationDto station, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
+        JsonNode stationNode = objectMapper.valueToTree(station);
+        JsonNode stationPatchedNode = patch.apply(stationNode);
+        return objectMapper.treeToValue(stationPatchedNode, NewStationDto.class);
+    }
+
+    @DeleteMapping("{organizationId}/stations/{stationId}")
+    ResponseEntity<?> deleteStation(@PathVariable Long stationId,
+                                    @PathVariable Long organizationId) {
+        organizationService.deleteStation(stationId, organizationId);
+        return ResponseEntity.noContent().build();
+    }
+
+
+
     @PostMapping("{id}/reservations")
     ResponseEntity<?> addReservations(@RequestBody AddReservationDTO reservationDTO,
             @AuthenticationPrincipal UserDetails userDetails,@PathVariable Long id){
@@ -123,6 +164,7 @@ public class OrganizationController {
 
         return ResponseEntity.ok(reservation);
     }
+
 
 
 

@@ -6,8 +6,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -25,10 +28,12 @@ public class Station {
     @JsonBackReference
     private List<Reservation> reservationList = new ArrayList<>();
 
-
-
     public Station(Long id, String type) {
         this.id = id;
         this.type = type;
+    }
+
+    public void addReservation(Reservation reservation) {
+        this.reservationList.add(reservation);
     }
 }

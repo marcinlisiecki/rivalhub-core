@@ -39,7 +39,7 @@ public class UserData implements UserDetails {
     //@Length(min=8,message = ErrorMessages.PASSWORD_IS_TOO_SHORT)
     private String password;
 
-    @ManyToMany(mappedBy = "userList")
+    @ManyToMany(mappedBy = "userList", cascade = CascadeType.ALL)
     @JsonBackReference
     private List<Organization> organizationList = new ArrayList<>();
 

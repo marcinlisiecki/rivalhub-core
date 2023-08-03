@@ -1,6 +1,5 @@
 package com.rivalhub.organization;
 
-import com.fasterxml.jackson.databind.util.BeanUtil;
 import com.rivalhub.reservation.*;
 import com.rivalhub.station.NewStationDto;
 import com.rivalhub.station.NewStationDtoMapper;
@@ -9,21 +8,17 @@ import com.rivalhub.station.StationRepository;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.beans.Transient;
+import javax.swing.text.html.Option;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -130,12 +125,11 @@ public class OrganizationService {
     // oranizajca istnieje +
 
 
-    @Transactional
     public Optional<?> addReservation(AddReservationDTO reservationDTO,
                                       Long id, String email) {
-        boolean b = checkIfReservationIsPossible(reservationDTO, id, email);
+        boolean checkIfReservationIsPossible = checkIfReservationIsPossible(reservationDTO, id, email);
 
-        if (!b) return Optional.empty();
+        if (!checkIfReservationIsPossible) return Optional.empty();
 
         UserData user = userRepository.findByEmail(email).get();
 
@@ -150,11 +144,52 @@ public class OrganizationService {
                 LocalDateTime.parse(reservationDTO.getEndTime(), formatter));
         ReservationDTO viewReservationDTO = reservationMapper.map(reservation);
 
+        stationList.stream().forEach(station -> station.addReservation(reservation));
+
+
+        List<List<LocalDateTime>> listsOfStartTime = stationList.stream().map(station
+                -> station.getReservationList().stream().map(reservations -> reservations.getStartTime()).toList()).toList();
+        List<List<LocalDateTime>> listsOfEndTime = stationList.stream().map(station
+                -> station.getReservationList().stream().map(reservations -> reservations.getEndTime()).toList()).toList();
+
+        List<LocalDateTime> listOfStartTime =
+                listsOfStartTime.stream()
+                        .flatMap(List::stream).toList();
+
+        List<LocalDateTime> listOfEndTime =
+                listsOfEndTime.stream()
+                        .flatMap(List::stream).toList();
+
+
+        List<Instant> instantsStartTime = listOfStartTime.stream().map(localDateTime -> localDateTime.atZone(ZoneId.systemDefault()).toInstant()).toList();
+        List<Instant> instantsEndTime = listOfEndTime.stream().map(localDateTime -> localDateTime.atZone(ZoneId.systemDefault()).toInstant()).toList();
+
+        instantsStartTime.forEach(t -> System.out.println(t.toEpochMilli()));
+        instantsEndTime.forEach(t -> System.out.println(t.toEpochMilli()));
+
+
+        long reservationStartTime =  reservation.getStartTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        long reservationEndTime =  reservation.getEndTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        for(int i = 0; i < instantsStartTime.size(); i++){
+            long timeStart = instantsStartTime.get(i).toEpochMilli();
+            long timeEnd = instantsEndTime.get(i).toEpochMilli();
+
+            long timeStartReservationStartControl = timeStart - reservationStartTime;
+            long timeStartReservationEndControl = timeStart - reservationEndTime;
+
+            long timeEndReservationStartControl = timeEnd - reservationStartTime;
+            long timeEndReservationEndControl = timeEnd - reservationEndTime;
+
+            if (timeStartReservationEndControl * timeStartReservationStartControl < 0) return Optional.empty();
+            if (timeEndReservationStartControl * timeEndReservationEndControl < 0) return Optional.empty();
+        }
+
+        reservationRepository.save(reservation);
         return Optional.of(viewReservationDTO);
     }
 
     private boolean checkIfReservationIsPossible(AddReservationDTO reservationDTO, Long id, String email) {
-        //organizacja instnieje
+        // organizacja instnieje
         Optional<Organization> organization = organizationRepository.findById(id);
         if (organization.isEmpty()) return false;
 
@@ -163,7 +198,7 @@ public class OrganizationService {
         Organization userOrganization = user.getOrganizationList().stream().filter(org -> org.getId().equals(id)).findFirst().orElse(null);
         if (userOrganization == null) return false;
 
-        //stanowiska istnieja
+        // stanowiska istnieja
         List<Station> stationList;
         try{
             stationList = reservationDTO.getStationsIdList().stream()
@@ -181,7 +216,7 @@ public class OrganizationService {
         if (!checkIfStationsAreInOrganization(stationList, organization.get())) return false;
 
         // stanowiska nie sa zarezerwowane w danym czasie
-        // reservationRepository.findAllByStartTimeBetweenEndAAndEndTime();
+        // reservationRepository;
 
         return true;
     }
@@ -190,4 +225,26 @@ public class OrganizationService {
         return stationList.stream().allMatch(organization.getStationList()::contains);
     }
 
+    public Optional<List<Station>> findStations(Long organizationId) {
+        Optional<Organization> organization = organizationRepository.findById(organizationId);
+        if (organization.isEmpty()) return Optional.empty();
+
+        List<Station> stationList = organization.get().getStationList();
+        return Optional.of(stationList);
+    }
+
+    public Optional<NewStationDto> findStation(Long stationId){
+        return stationRepository.findById(stationId).map(newStationDtoMapper::map);
+    }
+
+    void updateStation(NewStationDto newStationDto){
+        Station station = newStationDtoMapper.map(newStationDto);
+        stationRepository.save(station);
+    }
+
+    @Transactional
+    public void deleteStation(Long stationId, Long organizationId) {
+        Organization organization = organizationRepository.findById(organizationId).get();
+        organization.removeStation(stationRepository.findById(stationId).get());
+    }
 }

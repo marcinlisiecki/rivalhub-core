@@ -7,7 +7,6 @@ import lombok.Setter;
 @Setter
 @Getter
 public class NewStationDto {
-    @JsonIgnore
     private Long id;
     private String type;
     private String name;

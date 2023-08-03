@@ -17,12 +17,14 @@ public class NewStationDtoMapper {
         NewStationDto newStationDto = new NewStationDto();
         newStationDto.setType(station.getType());
         newStationDto.setName(station.getName());
+        newStationDto.setId(station.getId());
         return newStationDto;
     }
     public Station map(NewStationDto newStationDto) {
         Station station = new Station();
         station.setType(newStationDto.getType());
         station.setName(newStationDto.getName());
+        station.setId(newStationDto.getId());
 
         return station;
     }
