@@ -33,10 +33,7 @@ public class OrganizationController {
 
 
     @GetMapping("{id}")
-    public ResponseEntity<Optional<OrganizationDTO>> viewOrganization(@PathVariable Long id){
-        if (organizationService.findOrganization(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<OrganizationDTO> viewOrganization(@PathVariable Long id){
         return ResponseEntity.ok(organizationService.findOrganization(id));
     }
 
@@ -54,7 +51,7 @@ public class OrganizationController {
     @PatchMapping("/{id}")
     ResponseEntity<?> updateJobOffer(@PathVariable Long id, @RequestBody JsonMergePatch patch) {
         try {
-            OrganizationDTO jobOffer = organizationService.findOrganization(id).orElseThrow();
+            OrganizationDTO jobOffer = organizationService.findOrganization(id);
             OrganizationDTO offerPatched = applyPatch(jobOffer, patch);
             organizationService.updateOrganization(offerPatched);
         } catch (JsonPatchException | JsonProcessingException e) {
@@ -95,16 +92,14 @@ public class OrganizationController {
 
         return ResponseEntity.ok(organization.toString());
     }
+
     @GetMapping("/{id}/invite/{email}")
-    public ResponseEntity<?> addUserThroughEmail(@PathVariable Long id, @PathVariable String email, @AuthenticationPrincipal UserDetails userDetails){
+    public ResponseEntity<OrganizationDTO> addUserThroughEmail(@PathVariable Long id, @PathVariable String email, @AuthenticationPrincipal UserDetails userDetails){
         if(userDetails == null) return ResponseEntity.notFound().build();
-        Optional<OrganizationDTO> organizationDTO = organizationService.findOrganization(id);
-        if(organizationDTO.isEmpty()) return ResponseEntity.notFound().build();
-        String subject = "Invitation to " + organizationDTO.get().getName();
+        OrganizationDTO organizationDTO = organizationService.findOrganization(id);
+        String subject = "Invitation to " + organizationDTO.getName();
         String body = organizationService.createInvitationLink(organizationDTO);
         emailService.sendSimpleMessage(email, subject, body);
-        return ResponseEntity.ok(organizationDTO.toString());
+        return ResponseEntity.ok(organizationDTO);
     }
-
-
 }

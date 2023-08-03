@@ -1,5 +1,6 @@
 package com.rivalhub.station;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -16,7 +17,7 @@ public class StationController {
     }
 
     @PostMapping
-    ResponseEntity<NewStationDto> saveStation(@RequestBody NewStationDto newStation) {
+    ResponseEntity<NewStationDto> saveStation(@Valid @RequestBody NewStationDto newStation) {
         NewStationDto savedStation = stationService.addStation(newStation);
         URI savedStationUri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
