@@ -3,6 +3,7 @@ package com.rivalhub.user;
 import com.rivalhub.common.dto.ErrorMessageDto;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationCreateDTO;
+import com.rivalhub.organization.OrganizationDTO;
 import jakarta.validation.Valid;
 import com.rivalhub.email.EmailService;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,9 @@ public class UserController {
                     .path("/users/{id}")
                     .buildAndExpand(savedUser.getId())
                     .toUri();
-            emailService.sendSimpleMessage(savedUser.getEmail(), "Welcome on RivalHub","Your account was successfully created");
+            emailService.sendSimpleMessage(savedUser.getEmail(),
+                    "Welcome on RivalHub",
+                    "Your account was successfully created\n Activate your account: " + userService.createActivationLink(savedUser));
             return ResponseEntity.created(savedUserUri).body(savedUser);
         }
         return ResponseEntity.badRequest().body(new ErrorMessageDto("Adres email jest już w użyciu"));
@@ -56,5 +59,11 @@ public class UserController {
         return ResponseEntity.ok(userOrganizations.get());
     }
 
+    @GetMapping("/confirm/{hash}")
+    public ResponseEntity<?> confirmUserEmail(@PathVariable String hash){
+        if(userService.confirmUserEmail(hash))
+        return ResponseEntity.ok("Confirmed");
+        return ResponseEntity.noContent().build();
+    }
 
 }

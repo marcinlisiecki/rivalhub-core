@@ -22,6 +22,8 @@ public class UserDto {
     //@Length(min=8,message = ErrorMessages.PASSWORD_IS_TOO_SHORT)
     private String password;
 
+    private String activationHash;
+
     public UserDto(Long id, String name,String email, String password){
         this.id = id;
         this.name = name;

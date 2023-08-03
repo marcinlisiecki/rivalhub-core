@@ -31,7 +31,8 @@ class SecurityConfig implements WebMvcConfigurer {
                 .requestMatchers(new AntPathRequestMatcher("/register")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/users/**")).permitAll()
-                .anyRequest().authenticated());
+                .requestMatchers(new AntPathRequestMatcher("/confirm/**")).permitAll()
+                .anyRequest().permitAll());
 
         http.sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
