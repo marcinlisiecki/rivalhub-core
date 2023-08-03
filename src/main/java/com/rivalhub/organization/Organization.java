@@ -1,6 +1,7 @@
 package com.rivalhub.organization;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.rivalhub.common.ErrorMessages;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -23,14 +24,12 @@ public class Organization {
     @Column(name = "organization_id")
     private Long id;
 
-    @NotNull
-    @Size(min = 2, max = 256)
+    @NotNull(message = ErrorMessages.NAME_IS_REQUIRED)
+    @Size(min = 2, max = 256, message = ErrorMessages.NAME_SIZE)
     private String name;
-
 
     @Size(min = 9, max = 10)
     private String invitationHash;
-
 
     @Size(min = 2, max = 512)
     private String imageUrl;
