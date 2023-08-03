@@ -1,6 +1,7 @@
 package com.rivalhub.organization;
 
 import com.rivalhub.user.UserData;
+import com.rivalhub.user.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +26,13 @@ public class OrganizationService {
         Organization savedOrganization = organizationRepository.save(organizationToSave);
 
         createInvitationHash(savedOrganization.getId());
-        UserData user = userRepository.findByEmail(email).get();
-        savedOrganization.addUser(user);
+
+        Optional<UserData> user = userRepository.findByEmail(email);
+        if (user.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+
+        savedOrganization.addUser(user.get());
         Organization save = organizationRepository.save(savedOrganization);
 
         return organizationDTOMapper.map(save);
