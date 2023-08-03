@@ -3,6 +3,7 @@ package com.rivalhub.user;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.rivalhub.common.ErrorMessages;
 import com.rivalhub.organization.Organization;
+import com.rivalhub.reservation.Reservation;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -41,6 +42,10 @@ public class UserData implements UserDetails {
     @ManyToMany(mappedBy = "userList")
     @JsonBackReference
     private List<Organization> organizationList = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userData")
+    @JsonBackReference
+    private List<Reservation> reservationList = new ArrayList<>();
 
 
     @Override

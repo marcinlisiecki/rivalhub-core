@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
+import com.rivalhub.reservation.AddReservationDTO;
+import com.rivalhub.reservation.Reservation;
 import com.rivalhub.station.NewStationDto;
 import com.rivalhub.user.UserRepository;
 import lombok.AllArgsConstructor;
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -106,6 +110,18 @@ public class OrganizationController {
                 .buildAndExpand(savedStation.getId())
                 .toUri();
         return ResponseEntity.created(savedStationUri).body(savedStation);
+    }
+
+    @PostMapping("{id}/reservations")
+    ResponseEntity<?> addReservations(@RequestBody AddReservationDTO reservationDTO,
+            @AuthenticationPrincipal UserDetails userDetails,@PathVariable Long id){
+
+        Optional<?> reservation = organizationService.addReservation(reservationDTO, id, userDetails.getUsername());
+
+        if (reservation.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(reservation);
     }
 
 

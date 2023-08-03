@@ -1,10 +1,14 @@
 package com.rivalhub.station;
 
-import com.rivalhub.organization.Organization;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.rivalhub.reservation.Reservation;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -16,6 +20,10 @@ public class Station {
     private Long id;
     private String type;
     private String name;
+
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "stationList")
+    @JsonBackReference
+    private List<Reservation> reservationList = new ArrayList<>();
 
 
 
