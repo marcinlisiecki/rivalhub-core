@@ -4,6 +4,7 @@ import com.rivalhub.auth.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -27,6 +28,7 @@ class SecurityConfig implements WebMvcConfigurer {
         http.csrf(csrf -> csrf.disable());
 
         http.authorizeHttpRequests(requests -> requests
+                .requestMatchers(new AntPathRequestMatcher("/**", HttpMethod.OPTIONS.name())).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/register")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()

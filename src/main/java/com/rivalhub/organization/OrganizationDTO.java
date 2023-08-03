@@ -11,17 +11,18 @@ import lombok.ToString;
 @NoArgsConstructor
 public class OrganizationDTO {
 
+
     private Long id;
 
     private String name;
 
-    private String invitationLink;
+    private String invitationHash;
 
     private String imageUrl;
 
     public OrganizationDTO(String name, String invitationLink, String imageUrl) {
         this.name = name;
-        this.invitationLink = invitationLink;
+        this.invitationHash = invitationLink;
         this.imageUrl = imageUrl;
     }
 }

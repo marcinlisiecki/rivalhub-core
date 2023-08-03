@@ -10,7 +10,7 @@ public class OrganizationDTOMapper {
         dto.setName(organization.getName());
         dto.setId(organization.getId());
         dto.setImageUrl(organization.getImageUrl());
-        dto.setInvitationLink(organization.getInvitationLink());
+        dto.setInvitationHash(organization.getInvitationHash());
 
         return dto;
     }

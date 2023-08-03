@@ -1,27 +1,33 @@
 package com.rivalhub.station;
 
+import com.rivalhub.common.ErrorMessages;
+import com.rivalhub.event.EventType;
 import com.rivalhub.organization.Organization;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 
 @Entity
 @NoArgsConstructor
-@Getter
-@Setter
+@AllArgsConstructor
+@Data
+@Builder
 public class Station {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String type;
-    private String name;
-    @ManyToOne
-    private Organization organization;
 
-    public Station(Long id, String type, Organization organization) {
-        this.id = id;
-        this.type = type;
-        this.organization = organization;
-    }
+    @NotNull(message = ErrorMessages.EVENT_TYPE_IS_REQUIRED)
+    @Enumerated(EnumType.STRING)
+    private EventType type;
+
+    @NotNull(message = ErrorMessages.NAME_IS_REQUIRED)
+    @Size(min = 2, max = 256, message = ErrorMessages.NAME_SIZE)
+    private String name;
+
+    @ManyToOne
+    @NotNull(message = ErrorMessages.ORGANIZATION_ID_IS_REQUIRED)
+    private Organization organization;
 }
