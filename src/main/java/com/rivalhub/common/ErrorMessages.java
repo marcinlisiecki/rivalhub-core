@@ -17,4 +17,7 @@ public class ErrorMessages {
 
     public static final String NAME_DONT_FIT_SIZE = "Nazwa użytkownika musi mieć od 3 do 256 znaków";
 
+    public static final String ORGANIZATION_ID_IS_REQUIRED = "ID organizacji jest wymagane";
+
+    public static final String EVENT_TYPE_IS_REQUIRED = "Typ jest wymagany";
 }

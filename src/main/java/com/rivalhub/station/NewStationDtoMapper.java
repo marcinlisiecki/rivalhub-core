@@ -20,6 +20,7 @@ public class NewStationDtoMapper {
         newStationDto.setOrganizationId(station.getOrganization().getId());
         return newStationDto;
     }
+
     Station map(NewStationDto newStationDto) {
         Station station = new Station();
         station.setType(newStationDto.getType());

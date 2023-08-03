@@ -11,6 +11,7 @@ import lombok.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 @Builder
 public class Station {
 
@@ -18,6 +19,7 @@ public class Station {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull(message = ErrorMessages.EVENT_TYPE_IS_REQUIRED)
     @Enumerated(EnumType.STRING)
     private EventType type;
 
@@ -26,5 +28,6 @@ public class Station {
     private String name;
 
     @ManyToOne
+    @NotNull(message = ErrorMessages.ORGANIZATION_ID_IS_REQUIRED)
     private Organization organization;
 }

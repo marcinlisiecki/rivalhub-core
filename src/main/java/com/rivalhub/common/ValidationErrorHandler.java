@@ -2,9 +2,11 @@ package com.rivalhub.common;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
@@ -20,6 +22,7 @@ public class ValidationErrorHandler {
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleValidationErrors(MethodArgumentNotValidException e) {
         return e.getBindingResult()
                 .getFieldErrors()
@@ -28,6 +31,7 @@ public class ValidationErrorHandler {
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleValidationErrors(ConstraintViolationException e) {
         return e.getConstraintViolations()
                 .stream()
