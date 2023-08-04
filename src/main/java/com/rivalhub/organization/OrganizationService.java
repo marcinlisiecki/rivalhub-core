@@ -131,7 +131,6 @@ public class OrganizationService {
         Station savedStation = stationRepository.save(station);
 
         organization.addStation(savedStation);
-
         organizationRepository.save(organization);
 
         return newStationDtoMapper.map(savedStation);

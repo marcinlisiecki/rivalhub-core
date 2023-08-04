@@ -48,4 +48,7 @@ public class Station {
     public void addReservation(Reservation reservation) {
         this.reservationList.add(reservation);
     }
+
+    @ManyToOne
+    private Organization organization;
 }
