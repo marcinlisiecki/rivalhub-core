@@ -9,6 +9,7 @@ public class UserDtoMapper {
         userData.setName(userDto.getName());
         userData.setEmail(userDto.getEmail());
         userData.setId(userData.getId());
+        userData.setActivationHash(userDto.getActivationHash());
         return userData;
     }
 
@@ -18,6 +19,7 @@ public class UserDtoMapper {
         userDto.setId(userData.getId());
         userDto.setPassword(userData.getPassword());
         userDto.setName(userData.getName());
+        userDto.setActivationHash(userData.getActivationHash());
         return userDto;
     }
 
