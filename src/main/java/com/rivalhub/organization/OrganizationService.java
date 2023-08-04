@@ -10,25 +10,15 @@ import com.rivalhub.user.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
-import java.awt.print.Pageable;
-import java.time.Instant;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -140,7 +130,6 @@ public class OrganizationService {
         Station station = newStationDtoMapper.map(newStationDto);
         Station savedStation = stationRepository.save(station);
         organization.addStation(savedStation);
-
         organizationRepository.save(organization);
 
         return newStationDtoMapper.map(savedStation);

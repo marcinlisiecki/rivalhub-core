@@ -1,6 +1,5 @@
 package com.rivalhub.station;
 
-import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 
 import org.springframework.stereotype.Service;

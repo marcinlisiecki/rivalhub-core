@@ -2,7 +2,6 @@ package com.rivalhub.reservation;
 
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

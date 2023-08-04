@@ -2,7 +2,6 @@ package com.rivalhub.reservation;
 
 import com.rivalhub.organization.Organization;
 import com.rivalhub.station.Station;
-import com.rivalhub.station.StationRepository;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Component

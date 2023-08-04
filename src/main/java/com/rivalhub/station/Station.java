@@ -6,14 +6,9 @@ import com.rivalhub.common.ErrorMessages;
 import com.rivalhub.event.EventType;
 import com.rivalhub.organization.Organization;
 import jakarta.persistence.*;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -42,7 +37,7 @@ public class Station {
     @JsonBackReference
     private List<Reservation> reservationList = new ArrayList<>();
 
-    public Station(Long id, String type) {
+    public Station(Long id, EventType type) {
         this.id = id;
         this.type = type;
     }
@@ -52,6 +47,5 @@ public class Station {
     }
 
     @ManyToOne
-    @NotNull(message = ErrorMessages.ORGANIZATION_ID_IS_REQUIRED)
     private Organization organization;
 }

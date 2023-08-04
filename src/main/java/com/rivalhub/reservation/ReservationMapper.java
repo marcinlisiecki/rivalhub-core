@@ -1,7 +1,5 @@
 package com.rivalhub.reservation;
 
-import com.rivalhub.user.UserData;
-import com.rivalhub.user.UserDtoDetails;
 import com.rivalhub.user.UserDtoDetailsMapper;
 import com.rivalhub.user.UserReservationDTO;
 import org.springframework.stereotype.Component;
