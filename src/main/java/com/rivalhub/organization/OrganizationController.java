@@ -34,9 +34,6 @@ public class OrganizationController {
     private OrganizationService organizationService;
     private final ObjectMapper objectMapper;
 
-    private final UserRepository userRepository;
-
-
     @GetMapping("{id}")
     public ResponseEntity<Optional<OrganizationDTO>> viewOrganization(@PathVariable Long id){
         if (organizationService.findOrganization(id).isEmpty()) {
