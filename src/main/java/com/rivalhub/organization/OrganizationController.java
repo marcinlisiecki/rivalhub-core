@@ -9,9 +9,11 @@ import com.rivalhub.reservation.AddReservationDTO;
 import com.rivalhub.reservation.Reservation;
 import com.rivalhub.station.NewStationDto;
 import com.rivalhub.station.Station;
-import com.rivalhub.user.UserRepository;
+import com.rivalhub.user.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -166,6 +168,15 @@ public class OrganizationController {
     }
 
 
+    @GetMapping("{id}/users")
+    ResponseEntity<Page<?>> viewUsers(@PathVariable Long id,
+                                                   @RequestParam(defaultValue = "0") int page,
+                                                   @RequestParam(defaultValue = "10") int size){
+        if (organizationService.findOrganization(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(organizationService.findUsersByOrganization(id, page, size));
+    }
 
 
 }

@@ -1,17 +1,21 @@
 package com.rivalhub.organization;
 
+import com.rivalhub.common.PaginationHelper;
 import com.rivalhub.reservation.*;
 import com.rivalhub.station.NewStationDto;
 import com.rivalhub.station.NewStationDtoMapper;
 import com.rivalhub.station.Station;
 import com.rivalhub.station.StationRepository;
-import com.rivalhub.user.UserData;
-import com.rivalhub.user.UserRepository;
+import com.rivalhub.user.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.Option;
+import java.awt.print.Pageable;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -37,6 +41,8 @@ public class OrganizationService {
 
     private final ReservationMapper reservationMapper;
 
+    private final UserDtoMapper userDtoMapper;
+
 
     public OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email){
         Organization organizationToSave = organizationDTOMapper.map(organizationCreateDTO);
@@ -55,6 +61,16 @@ public class OrganizationService {
 
     public Optional<OrganizationDTO> findOrganization(Long id){
         return organizationRepository.findById(id).map(organizationDTOMapper::map);
+    }
+
+    public Page<?> findUsersByOrganization(Long id, int page, int size){
+        Optional<Organization> organization = organizationRepository.findById(id);
+        if (organization.isEmpty()) return Page.empty();
+
+        List<UserDisplayDTO> allUsers = organization.get().getUserList()
+                .stream().map(userDtoMapper::mapToUserDisplayDTO).toList();
+
+        return PaginationHelper.toPage(page, size, allUsers);
     }
 
     void updateOrganization(OrganizationDTO organizationDTO){
