@@ -39,6 +39,8 @@ class SecurityConfig implements WebMvcConfigurer {
         http.sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
+        http.headers().frameOptions().sameOrigin();
+
         http.authenticationProvider(authenticationProvider);
         http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

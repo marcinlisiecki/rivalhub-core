@@ -3,6 +3,7 @@ package com.rivalhub.user;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.rivalhub.common.ErrorMessages;
 import com.rivalhub.organization.Organization;
+import com.rivalhub.reservation.Reservation;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -46,9 +47,13 @@ public class UserData implements UserDetails {
     //@Length(min=8,message = ErrorMessages.PASSWORD_IS_TOO_SHORT)
     private String password;
 
-    @ManyToMany(mappedBy = "userList")
+    @ManyToMany(mappedBy = "userList", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JsonBackReference
     private List<Organization> organizationList = new ArrayList<>();
+
+    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, mappedBy = "userData")
+    @JsonBackReference
+    private List<Reservation> reservationList = new ArrayList<>();
 
 
     @Override

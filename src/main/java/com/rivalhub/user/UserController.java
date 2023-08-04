@@ -1,10 +1,7 @@
 package com.rivalhub.user;
 
 import com.rivalhub.common.dto.ErrorMessageDto;
-import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationCreateDTO;
-import com.rivalhub.organization.OrganizationDTO;
-import jakarta.validation.Valid;
 import com.rivalhub.email.EmailService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,8 +25,8 @@ public class UserController {
 
 
     @GetMapping("/users/{id}")
-    public ResponseEntity<UserDtoDetails> getUserById(@PathVariable Long id){
-        UserDtoDetails details = userService.findUserById(id);
+    public ResponseEntity<UserDetailsDto> getUserById(@PathVariable Long id){
+        UserDetailsDto details = userService.findUserById(id);
         return ResponseEntity.ok(details);
     }
 

@@ -5,9 +5,11 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import java.time.LocalDateTime;
+import org.springframework.data.repository.PagingAndSortingRepository;
+
 import java.util.Optional;
 
-public interface UserRepository extends CrudRepository<UserData, Long> {
+public interface UserRepository extends CrudRepository<UserData, Long>, PagingAndSortingRepository<UserData, Long> {
 
     Optional<UserData> findByEmail(String email);
     Optional<UserData> findByActivationHash(String activationHash);
