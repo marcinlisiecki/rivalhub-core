@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
+import com.rivalhub.event.EventType;
 import com.rivalhub.reservation.AddReservationDTO;
 import com.rivalhub.reservation.Reservation;
 import com.rivalhub.station.NewStationDto;
@@ -115,7 +116,20 @@ public class OrganizationController {
     }
 
     @GetMapping("/{id}/stations")
-    ResponseEntity<?> viewStations(@PathVariable Long id){
+    ResponseEntity<?> viewStations(
+            @PathVariable Long id,
+            @RequestParam(required = false) boolean onlyAvailable,
+            @RequestParam(required = false) String start,
+            @RequestParam(required = false) String end,
+            @RequestParam(required = false) EventType type) {
+
+        if (onlyAvailable && start != null && end != null) {
+            List<Station> availableStations = organizationService
+                    .getAvailableStations(id, start, end, type);
+
+            return ResponseEntity.ok(availableStations);
+        }
+
         Optional<List<Station>> stations = organizationService.findStations(id);
 
         if (stations.isEmpty()) return ResponseEntity.notFound().build();
