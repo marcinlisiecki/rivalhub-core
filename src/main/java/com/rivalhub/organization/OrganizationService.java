@@ -100,19 +100,15 @@ public class OrganizationService {
         return hash;
     }
 
-    public Optional<Organization> addUser(Long id, String hash, String email) {
-        Optional<Organization> organizationRepositoryById = organizationRepository.findById(id);
-        Optional<UserData> user = userRepository.findByEmail(email);
+    public Organization addUser(Long id, String hash, String email) {
+        Organization organizationRepositoryById = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        UserData user = userRepository.findByEmail(email).get();
 
-        if(user.isEmpty()) return Optional.empty();
-        if (organizationRepositoryById.isEmpty()) return Optional.empty();
+        if (!organizationRepositoryById.getInvitationHash().equals(hash)) throw new WrongInvitationException();
 
-        Organization organization = organizationRepositoryById.get();
-        if (!organization.getInvitationHash().equals(hash)) return Optional.empty();
+        organizationRepositoryById.addUser(user);
 
-        organization.addUser(user.get());
-
-        return Optional.of(organizationRepository.save(organization));
+        return organizationRepository.save(organizationRepositoryById);
     }
 
     NewStationDto addStation(NewStationDto newStationDto, Long id, String email) {

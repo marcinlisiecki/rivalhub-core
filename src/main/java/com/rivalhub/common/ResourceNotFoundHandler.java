@@ -2,6 +2,7 @@ package com.rivalhub.common;
 
 import com.rivalhub.common.dto.ErrorMessageDto;
 import com.rivalhub.organization.OrganizationNotFoundException;
+import com.rivalhub.organization.WrongInvitationException;
 import com.rivalhub.station.StationNotFoundException;
 import com.rivalhub.user.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,8 @@ public class ResourceNotFoundHandler {
     @ExceptionHandler({
             UserNotFoundException.class,
             StationNotFoundException.class,
-            OrganizationNotFoundException.class
+            OrganizationNotFoundException.class,
+            WrongInvitationException.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessageDto handlerResourceNotFound(Exception e) {

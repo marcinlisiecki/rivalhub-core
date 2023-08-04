@@ -90,11 +90,7 @@ public class OrganizationController {
 
     @GetMapping("/{id}/invitation/{hash}")
     public ResponseEntity<?> addUser(@PathVariable Long id, @PathVariable String hash, @AuthenticationPrincipal UserDetails userDetails){
-        if (userDetails == null) return ResponseEntity.notFound().build();
-
-        Optional<Organization> organization = organizationService.addUser(id, hash, userDetails.getUsername());
-        if (organization.isEmpty()) return ResponseEntity.notFound().build();
-
+        Organization organization = organizationService.addUser(id, hash, userDetails.getUsername());
         return ResponseEntity.ok(organization.toString());
     }
 
