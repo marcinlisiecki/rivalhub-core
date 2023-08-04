@@ -2,10 +2,10 @@ package com.rivalhub.user;
 
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationCreateDTO;
-import com.rivalhub.organization.OrganizationDTO;
 import com.rivalhub.organization.OrganizationDTOMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -67,7 +67,7 @@ public class UserService {
         if(user.isEmpty()){
             return false;
         } else{
-            user.get().setApproveTime(LocalDateTime.now());
+            user.get().setActivationTime(LocalDateTime.now());
             return true;
         }
     }
@@ -83,6 +83,14 @@ public class UserService {
                 .append(userDto.getActivationHash());
         String body = builder.toString();
         return body;
+    }
+
+    @Scheduled(cron = "0 0 12 * * *")
+    @Transactional
+    public void deleteInactivatedUsers(){
+        System.out.println("Usuwanko");
+        LocalDateTime deleteTime =LocalDateTime.now().minusDays(1);
+        userRepository.deleteInactiveUsers(deleteTime);
     }
 
 }

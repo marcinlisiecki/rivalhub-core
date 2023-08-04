@@ -37,7 +37,7 @@ public class UserData implements UserDetails {
 
     private LocalDateTime joinTime;
 
-    private LocalDateTime approveTime;
+    private LocalDateTime activationTime;
 
     private String activationHash;
 
