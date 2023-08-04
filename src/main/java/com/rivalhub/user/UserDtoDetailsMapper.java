@@ -1,27 +1,26 @@
 package com.rivalhub.user;
 
-import com.rivalhub.reservation.ReservationDTO;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserDtoDetailsMapper {
-    UserDtoDetails map(UserData userData){
-        UserDtoDetails userDtoDetails = new UserDtoDetails();
-        userDtoDetails.setId(userData.getId());
-        userDtoDetails.setEmail(userData.getEmail());
-        userDtoDetails.setName(userData.getName());
-        return userDtoDetails;
+    UserDetailsDto map(UserData userData){
+        UserDetailsDto userDetailsDto = new UserDetailsDto();
+        userDetailsDto.setId(userData.getId());
+        userDetailsDto.setEmail(userData.getEmail());
+        userDetailsDto.setName(userData.getName());
+        return userDetailsDto;
     }
-    UserData map(UserDtoDetails userDtoDetails){
+    UserData map(UserDetailsDto userDetailsDto){
         UserData user = new UserData();
-        user.setId(userDtoDetails.getId());
-        user.setEmail(userDtoDetails.getEmail());
-        user.setName(userDtoDetails.getName());
+        user.setId(userDetailsDto.getId());
+        user.setEmail(userDetailsDto.getEmail());
+        user.setName(userDetailsDto.getName());
         return user;
     }
 
-    public UserReservationDTO mapUserToReservationDTO(UserData user){
-        UserReservationDTO userReservationDTO = new UserReservationDTO();
+    public UserDetailsDto mapUserToReservationDTO(UserData user){
+        UserDetailsDto userReservationDTO = new UserDetailsDto();
 
         userReservationDTO.setProfilePictureUrl(user.getProfilePictureUrl());
         userReservationDTO.setName(user.getName());

@@ -1,7 +1,7 @@
 package com.rivalhub.reservation;
 
 import com.rivalhub.station.Station;
-import com.rivalhub.user.UserReservationDTO;
+import com.rivalhub.user.UserDetailsDto;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,5 +14,5 @@ public class ReservationDTO {
     private List<Station> stationList;
     private String startTime;
     private String endTime;
-    private UserReservationDTO user;
+    private UserDetailsDto user;
 }

@@ -1,5 +1,6 @@
 package com.rivalhub.organization;
 
+import com.rivalhub.reservation.Reservation;
 import com.rivalhub.station.Station;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.common.ErrorMessages;
@@ -8,6 +9,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.engine.internal.Cascade;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,7 +39,7 @@ public class Organization {
 
     private LocalDateTime addedDate;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JsonManagedReference
     @JoinTable(name = "organization_users",
             joinColumns = @JoinColumn(name = "organization_id", referencedColumnName = "organization_id"),
@@ -45,7 +47,7 @@ public class Organization {
     )
     private List<UserData> userList = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private List<Station> stationList;
 
     public Organization(String name, String invitationHash, String imageUrl) {

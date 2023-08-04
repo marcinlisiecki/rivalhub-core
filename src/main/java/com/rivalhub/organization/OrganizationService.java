@@ -10,25 +10,15 @@ import com.rivalhub.user.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
-import java.awt.print.Pageable;
-import java.time.Instant;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -81,7 +71,7 @@ public class OrganizationService {
         Optional<Organization> organization = organizationRepository.findById(id);
         if (organization.isEmpty()) return Page.empty();
 
-        List<UserDisplayDTO> allUsers = organization.get().getUserList()
+        List<UserDetailsDto> allUsers = organization.get().getUserList()
                 .stream().map(userDtoMapper::mapToUserDisplayDTO).toList();
 
         return PaginationHelper.toPage(page, size, allUsers);
@@ -139,6 +129,7 @@ public class OrganizationService {
 
         Station station = newStationDtoMapper.map(newStationDto);
         Station savedStation = stationRepository.save(station);
+
         organization.addStation(savedStation);
 
         organizationRepository.save(organization);
@@ -146,114 +137,25 @@ public class OrganizationService {
         return newStationDtoMapper.map(savedStation);
     }
 
-
-
-    // stanowiska sa w organizacji -
-    // stanowiska nie sa zarezerwowane w danym czasie -
-    // user jest w organizacji +
-    // stanowiska istnieja +
-    // oranizajca istnieje +
-
-
     public Optional<?> addReservation(AddReservationDTO reservationDTO,
                                       Long id, String email) {
-        boolean checkIfReservationIsPossible = checkIfReservationIsPossible(reservationDTO, id, email);
-
-        if (!checkIfReservationIsPossible) return Optional.empty();
-
+        Optional<Organization> organization = organizationRepository.findById(id);
         UserData user = userRepository.findByEmail(email).get();
 
         List<Station> stationList = reservationDTO.getStationsIdList().stream()
                 .map(ids -> stationRepository.findById(ids))
                 .map(Optional::get).toList();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
 
-        Reservation reservation = new Reservation(user, stationList,
-                LocalDateTime.parse(reservationDTO.getStartTime(), formatter),
-                LocalDateTime.parse(reservationDTO.getEndTime(), formatter));
-        ReservationDTO viewReservationDTO = reservationMapper.map(reservation);
+        boolean checkIfReservationIsPossible = ReservationValidator.checkIfReservationIsPossible(reservationDTO, organization, user, id, stationList);
+        if (!checkIfReservationIsPossible) return Optional.empty();
 
-        stationList.stream().forEach(station -> station.addReservation(reservation));
+        ReservationSaver saver = new ReservationSaver(reservationRepository, reservationMapper);
+        ReservationDTO viewReservationDTO = saver.saveReservation(user, stationList, reservationDTO);
 
-
-        List<List<LocalDateTime>> listsOfStartTime = stationList.stream().map(station
-                -> station.getReservationList().stream().map(reservations -> reservations.getStartTime()).toList()).toList();
-        List<List<LocalDateTime>> listsOfEndTime = stationList.stream().map(station
-                -> station.getReservationList().stream().map(reservations -> reservations.getEndTime()).toList()).toList();
-
-        List<LocalDateTime> listOfStartTime =
-                listsOfStartTime.stream()
-                        .flatMap(List::stream).toList();
-
-        List<LocalDateTime> listOfEndTime =
-                listsOfEndTime.stream()
-                        .flatMap(List::stream).toList();
-
-
-        List<Instant> instantsStartTime = listOfStartTime.stream().map(localDateTime -> localDateTime.atZone(ZoneId.systemDefault()).toInstant()).toList();
-        List<Instant> instantsEndTime = listOfEndTime.stream().map(localDateTime -> localDateTime.atZone(ZoneId.systemDefault()).toInstant()).toList();
-
-        instantsStartTime.forEach(t -> System.out.println(t.toEpochMilli()));
-        instantsEndTime.forEach(t -> System.out.println(t.toEpochMilli()));
-
-
-        long reservationStartTime =  reservation.getStartTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        long reservationEndTime =  reservation.getEndTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        for(int i = 0; i < instantsStartTime.size(); i++){
-            long timeStart = instantsStartTime.get(i).toEpochMilli();
-            long timeEnd = instantsEndTime.get(i).toEpochMilli();
-
-            long timeStartReservationStartControl = timeStart - reservationStartTime;
-            long timeStartReservationEndControl = timeStart - reservationEndTime;
-
-            long timeEndReservationStartControl = timeEnd - reservationStartTime;
-            long timeEndReservationEndControl = timeEnd - reservationEndTime;
-
-            if (timeStartReservationEndControl * timeStartReservationStartControl < 0) return Optional.empty();
-            if (timeEndReservationStartControl * timeEndReservationEndControl < 0) return Optional.empty();
-        }
-
-        reservationRepository.save(reservation);
         return Optional.of(viewReservationDTO);
     }
 
-    private boolean checkIfReservationIsPossible(AddReservationDTO reservationDTO, Long id, String email) {
-        // organizacja instnieje
-        Optional<Organization> organization = organizationRepository.findById(id);
-        if (organization.isEmpty()) return false;
-
-        // user jest w organizacji
-        UserData user = userRepository.findByEmail(email).get();
-        Organization userOrganization = user.getOrganizationList().stream().filter(org -> org.getId().equals(id)).findFirst().orElse(null);
-        if (userOrganization == null) return false;
-
-        // stanowiska istnieja
-        List<Station> stationList;
-        try{
-            stationList = reservationDTO.getStationsIdList().stream()
-                    .map(ids -> stationRepository.findById(ids))
-                    .map(Optional::get).toList();
-        }catch (NoSuchElementException noSuchElementException){
-            System.out.println(noSuchElementException);
-            return false;
-        }catch (Exception exception){
-            System.out.println(exception);
-            return false;
-        }
-
-        // czy stanowiska sa w organizacji
-        if (!checkIfStationsAreInOrganization(stationList, organization.get())) return false;
-
-        // stanowiska nie sa zarezerwowane w danym czasie
-        // reservationRepository;
-
-        return true;
-    }
-
-    private boolean checkIfStationsAreInOrganization(List<Station> stationList, Organization organization){
-        return stationList.stream().allMatch(organization.getStationList()::contains);
-    }
 
     public Optional<List<Station>> findStations(Long organizationId) {
         Optional<Organization> organization = organizationRepository.findById(organizationId);
@@ -268,7 +170,7 @@ public class OrganizationService {
     }
 
     void updateStation(NewStationDto newStationDto){
-        Station station = newStationDtoMapper.map(newStationDto);
+        Station station = newStationDtoMapper.mapNewStationDtoToStation(newStationDto);
         stationRepository.save(station);
     }
 

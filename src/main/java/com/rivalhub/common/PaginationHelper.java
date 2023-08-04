@@ -1,6 +1,5 @@
 package com.rivalhub.common;
 
-import com.rivalhub.user.UserDisplayDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;

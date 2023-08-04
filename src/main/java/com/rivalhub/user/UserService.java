@@ -33,7 +33,7 @@ public class UserService {
         }
     }
 
-    public UserDtoDetails findUserById(Long id) {
+    public UserDetailsDto findUserById(Long id) {
         return userDtoDetailsMapper.map(userRepository.findById(id).get());
     }
 

@@ -1,6 +1,5 @@
 package com.rivalhub.station;
 
-import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 
 import org.springframework.stereotype.Service;
@@ -21,6 +20,14 @@ public class NewStationDtoMapper {
         return newStationDto;
     }
     public Station map(NewStationDto newStationDto) {
+        Station station = new Station();
+        station.setType(newStationDto.getType());
+        station.setName(newStationDto.getName());
+
+        return station;
+    }
+
+    public Station mapNewStationDtoToStation(NewStationDto newStationDto) {
         Station station = new Station();
         station.setType(newStationDto.getType());
         station.setName(newStationDto.getName());

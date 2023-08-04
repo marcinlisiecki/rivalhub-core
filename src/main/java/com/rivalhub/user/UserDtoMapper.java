@@ -21,8 +21,8 @@ public class UserDtoMapper {
         return userDto;
     }
 
-    public UserDisplayDTO mapToUserDisplayDTO(UserData user){
-        UserDisplayDTO userDisplayDTO = new UserDisplayDTO();
+    public UserDetailsDto mapToUserDisplayDTO(UserData user){
+        UserDetailsDto userDisplayDTO = new UserDetailsDto();
 
         userDisplayDTO.setProfilePictureUrl(user.getProfilePictureUrl());
         userDisplayDTO.setEmail(user.getEmail());

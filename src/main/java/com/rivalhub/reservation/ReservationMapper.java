@@ -1,9 +1,7 @@
 package com.rivalhub.reservation;
 
-import com.rivalhub.user.UserData;
-import com.rivalhub.user.UserDtoDetails;
+import com.rivalhub.user.UserDetailsDto;
 import com.rivalhub.user.UserDtoDetailsMapper;
-import com.rivalhub.user.UserReservationDTO;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,12 +11,12 @@ public class ReservationMapper {
 
     public ReservationDTO map(Reservation reservation){
         ReservationDTO reservationDTO = new ReservationDTO();
-        UserReservationDTO userReservationDTO = userDtoDetailsMapper.mapUserToReservationDTO(reservation.getUserData());
+        UserDetailsDto userDetailsDto = userDtoDetailsMapper.mapUserToReservationDTO(reservation.getUserData());
 
         reservationDTO.setEndTime(reservation.getEndTime().toString());
         reservationDTO.setStartTime(reservation.getStartTime().toString());
         reservationDTO.setStationList(reservation.getStationList());
-        reservationDTO.setUser(userReservationDTO);
+        reservationDTO.setUser(userDetailsDto);
 
         return reservationDTO;
     }

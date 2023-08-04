@@ -1,16 +1,13 @@
 package com.rivalhub.reservation;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.cglib.core.Local;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +20,7 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JsonManagedReference
     @JoinTable(name = "user_reservations",
             joinColumns = @JoinColumn(name = "reservation_id", referencedColumnName = "id"),
@@ -31,7 +28,7 @@ public class Reservation {
     )
     private UserData userData;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JsonManagedReference
     @JoinTable(name = "reservations_stations",
             joinColumns = @JoinColumn(name = "reservation_id", referencedColumnName = "id"),
@@ -49,14 +46,6 @@ public class Reservation {
         this.stationList = stationList;
         this.startTime = startTime;
         this.endTime = endTime;
-    }
-
-    public void addUser(UserData user){
-        this.userData = user;
-    }
-
-    public void addStations(List<Station> stationList){
-        this.stationList = stationList;
     }
 
 //    private Event event
