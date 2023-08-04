@@ -12,6 +12,7 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -32,9 +33,14 @@ public class UserData implements UserDetails {
     @NotNull
     @Size(min = 3, max = 256,message = ErrorMessages.NAME_DONT_FIT_SIZE)
     private String name;
-
     @Email(message = ErrorMessages.EMAIL_IS_NOT_VALID)
     private String email;
+
+    private LocalDateTime joinTime;
+
+    private LocalDateTime activationTime;
+
+    private String activationHash;
 
     private String profilePictureUrl;
 
