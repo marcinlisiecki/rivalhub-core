@@ -10,6 +10,10 @@ import com.rivalhub.reservation.Reservation;
 import com.rivalhub.station.NewStationDto;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.*;
+import com.rivalhub.email.EmailService;
+import com.rivalhub.user.UserData;
+import com.rivalhub.user.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
@@ -33,12 +37,11 @@ public class OrganizationController {
 
     private OrganizationService organizationService;
     private final ObjectMapper objectMapper;
+    private final EmailService emailService;
+    private final UserRepository userRepository;
 
     @GetMapping("{id}")
-    public ResponseEntity<Optional<OrganizationDTO>> viewOrganization(@PathVariable Long id){
-        if (organizationService.findOrganization(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<OrganizationDTO> viewOrganization(@PathVariable Long id){
         return ResponseEntity.ok(organizationService.findOrganization(id));
     }
 
@@ -81,10 +84,10 @@ public class OrganizationController {
 
     @GetMapping("/{id}/invitation")
     public ResponseEntity<?> createInvitation(@PathVariable Long id){
-        String invitationLink = organizationService.createInvitationLink(id);
-        if(invitationLink == null) return ResponseEntity.notFound().build();
+        String invitationHash = organizationService.createInvitationHash(id);
+        if(invitationHash == null) return ResponseEntity.notFound().build();
 
-        return ResponseEntity.ok(invitationLink);
+        return ResponseEntity.ok(invitationHash);
     }
 
     @GetMapping("/{id}/invitation/{hash}")
@@ -176,4 +179,13 @@ public class OrganizationController {
     }
 
 
+    @GetMapping("/{id}/invite/{email}")
+    public ResponseEntity<OrganizationDTO> addUserThroughEmail(@PathVariable Long id, @PathVariable String email, @AuthenticationPrincipal UserDetails userDetails){
+        if(userDetails == null) return ResponseEntity.notFound().build();
+        OrganizationDTO organizationDTO = organizationService.findOrganization(id);
+        String subject = "Invitation to " + organizationDTO.getName();
+        String body = organizationService.createInvitationLink(organizationDTO);
+        emailService.sendSimpleMessage(email, subject, body);
+        return ResponseEntity.ok(organizationDTO);
+    }
 }

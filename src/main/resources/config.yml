@@ -17,7 +17,8 @@ spring:
           auth: true
           starttls:
             enable: true
-
+  jpa:
+    defer-datasource-initialization: true
 app:
   jwt:
     secret:

@@ -32,10 +32,12 @@ public class UserData implements UserDetails {
     @NotNull
     @Size(min = 3, max = 256,message = ErrorMessages.NAME_DONT_FIT_SIZE)
     private String name;
-    @Email
+
     @Email(message = ErrorMessages.EMAIL_IS_NOT_VALID)
     private String email;
+
     private String profilePictureUrl;
+
     //@Length(min=8,message = ErrorMessages.PASSWORD_IS_TOO_SHORT)
     private String password;
 
