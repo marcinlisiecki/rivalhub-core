@@ -1,5 +1,6 @@
 package com.rivalhub.security;
 
+import com.rivalhub.auth.CustomAuthenticationEntryPoint;
 import com.rivalhub.auth.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -22,6 +24,7 @@ class SecurityConfig implements WebMvcConfigurer {
 
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter authenticationFilter;
+    private final CustomAuthenticationEntryPoint authEntryPoint;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -41,11 +44,13 @@ class SecurityConfig implements WebMvcConfigurer {
 
         http.headers().frameOptions().sameOrigin();
 
+        http.exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPoint));
+
         http.authenticationProvider(authenticationProvider);
         http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-   }
+    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

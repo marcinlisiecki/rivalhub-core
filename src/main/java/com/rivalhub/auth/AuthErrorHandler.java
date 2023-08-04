@@ -1,8 +1,6 @@
 package com.rivalhub.auth;
 
-import com.rivalhub.common.ErrorMessages;
 import com.rivalhub.common.dto.ErrorMessageDto;
-import com.rivalhub.user.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
