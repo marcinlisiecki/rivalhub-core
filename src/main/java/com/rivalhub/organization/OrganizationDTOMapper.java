@@ -1,9 +1,14 @@
 package com.rivalhub.organization;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class OrganizationDTOMapper {
+
+    private final OrganizationRepository organizationRepository;
+
     OrganizationDTO map(Organization organization) {
         OrganizationDTO dto = new OrganizationDTO();
 
@@ -15,17 +20,28 @@ public class OrganizationDTOMapper {
         return dto;
     }
 
-    Organization map(OrganizationDTO dto){
+    Organization map(OrganizationDTO dto) {
         Organization organization = new Organization();
 
         organization.setName(dto.getName());
         organization.setId(dto.getId());
         organization.setImageUrl(dto.getImageUrl());
+        organization.setInvitationHash(dto.getInvitationHash());
+
+        organization.setStationList(organizationRepository
+                .findById(dto.getId())
+                .orElseThrow(OrganizationNotFoundException::new)
+                .getStationList());
+
+        organization.setUserList(organizationRepository
+                .findById(dto.getId())
+                .orElseThrow(OrganizationNotFoundException::new)
+                .getUserList());
 
         return organization;
     }
 
-    Organization map(OrganizationCreateDTO organizationCreateDTO){
+    Organization map(OrganizationCreateDTO organizationCreateDTO) {
         Organization organization = new Organization();
 
         organization.setName(organizationCreateDTO.getName());
@@ -35,7 +51,7 @@ public class OrganizationDTOMapper {
         return organization;
     }
 
-    OrganizationCreateDTO mapToOrganizationCreateDTO(Organization organization){
+    OrganizationCreateDTO mapToOrganizationCreateDTO(Organization organization) {
         OrganizationCreateDTO organizationCreateDTO = new OrganizationCreateDTO();
 
         organizationCreateDTO.setId(organization.getId());

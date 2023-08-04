@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
+import com.rivalhub.common.MergePatcher;
 import com.rivalhub.event.EventType;
 import com.rivalhub.reservation.AddReservationDTO;
 import com.rivalhub.reservation.Reservation;
@@ -35,9 +36,10 @@ import java.util.Optional;
 public class OrganizationController {
 
     private OrganizationService organizationService;
-    private final ObjectMapper objectMapper;
     private final EmailService emailService;
-    private final UserRepository userRepository;
+
+    private final MergePatcher<OrganizationDTO> organizationMergePatcher;
+    private final MergePatcher<NewStationDto> stationMergePatcher;
 
     @GetMapping("{id}")
     public ResponseEntity<OrganizationDTO> viewOrganization(@PathVariable Long id){
@@ -56,23 +58,16 @@ public class OrganizationController {
     }
 
     @PatchMapping("/{id}")
-    ResponseEntity<?> updateOrganization(@PathVariable Long id, @RequestBody JsonMergePatch patch) {
-        try {
-            OrganizationDTO organizationDTO = organizationService.findOrganization(id);
-            OrganizationDTO offerPatched = applyPatch(organizationDTO, patch);
-            organizationService.updateOrganization(offerPatched);
-        } catch (JsonPatchException | JsonProcessingException e) {
-            return ResponseEntity.internalServerError().build();
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.noContent().build();
-    }
+    ResponseEntity<?> updateOrganization(@PathVariable Long id, @RequestBody JsonMergePatch patch)
+            throws JsonPatchException, JsonProcessingException {
+        // JsonPatchException & JsonProcessingException are handled by an ExceptionHandler
 
-    private OrganizationDTO applyPatch(OrganizationDTO organizationDTO, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
-        JsonNode organizationNode = objectMapper.valueToTree(organizationDTO);
-        JsonNode organizationPatchedNode = patch.apply(organizationNode);
-        return objectMapper.treeToValue(organizationPatchedNode, OrganizationDTO.class);
+        OrganizationDTO organizationDTO = organizationService.findOrganization(id);
+        OrganizationDTO patchedOrganizationDto = organizationMergePatcher.patch(patch, organizationDTO, OrganizationDTO.class);
+        patchedOrganizationDto.setId(id);
+        organizationService.updateOrganization(patchedOrganizationDto);
+
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
@@ -139,23 +134,15 @@ public class OrganizationController {
 
     @PatchMapping("/stations/{stationId}")
     ResponseEntity<?> updateOrganization(@RequestBody JsonMergePatch patch,
-                                         @PathVariable Long stationId) {
-        try {
-            NewStationDto station = organizationService.findStation(stationId).orElseThrow();
-            NewStationDto stationPatched = applyPatch(station, patch);
-            organizationService.updateStation(stationPatched);
-        } catch (JsonPatchException | JsonProcessingException e) {
-            return ResponseEntity.internalServerError().build();
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.noContent().build();
-    }
+                                         @PathVariable Long stationId) throws JsonPatchException, JsonProcessingException {
+        // JsonPatchException & JsonProcessingException are handled by an ExceptionHandler
 
-    private NewStationDto applyPatch(NewStationDto station, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
-        JsonNode stationNode = objectMapper.valueToTree(station);
-        JsonNode stationPatchedNode = patch.apply(stationNode);
-        return objectMapper.treeToValue(stationPatchedNode, NewStationDto.class);
+        NewStationDto station = organizationService.findStation(stationId);
+        NewStationDto stationPatched = stationMergePatcher.patch(patch, station, NewStationDto.class);
+        stationPatched.setId(stationId);
+        organizationService.updateStation(stationPatched);
+
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("{organizationId}/stations/{stationId}")
