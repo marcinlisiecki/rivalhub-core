@@ -2,15 +2,14 @@ package com.rivalhub.station;
 
 import com.rivalhub.organization.OrganizationRepository;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class NewStationDtoMapper {
-    OrganizationRepository organizationRepository;
 
-    public NewStationDtoMapper(OrganizationRepository organizationRepository) {
-        this.organizationRepository = organizationRepository;
-    }
+    private final StationRepository stationRepository;
 
     public NewStationDto map(Station station) {
         NewStationDto newStationDto = new NewStationDto();
@@ -19,6 +18,7 @@ public class NewStationDtoMapper {
         newStationDto.setId(station.getId());
         return newStationDto;
     }
+
     public Station map(NewStationDto newStationDto) {
         Station station = new Station();
         station.setType(newStationDto.getType());
@@ -29,9 +29,15 @@ public class NewStationDtoMapper {
 
     public Station mapNewStationDtoToStation(NewStationDto newStationDto) {
         Station station = new Station();
+
         station.setType(newStationDto.getType());
         station.setName(newStationDto.getName());
         station.setId(newStationDto.getId());
+
+        station.setReservationList(stationRepository
+                .findById(newStationDto.getId())
+                .orElseThrow(StationNotFoundException::new)
+                .getReservationList());
 
         return station;
     }

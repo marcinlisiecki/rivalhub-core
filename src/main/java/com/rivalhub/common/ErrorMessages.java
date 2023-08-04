@@ -26,4 +26,6 @@ public class ErrorMessages {
     public static final String ORGANIZATION_NOT_FOUND = "Nie znaleziono organizacji";
 
     public static final String NOT_AUTHENTICATED = "Musisz być zalogowany aby wykonać tę akcję";
+
+    public static final String SERVER_ERROR = "Błąd serwera";
 }

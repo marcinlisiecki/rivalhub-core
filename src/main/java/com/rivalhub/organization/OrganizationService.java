@@ -3,10 +3,7 @@ package com.rivalhub.organization;
 import com.rivalhub.common.PaginationHelper;
 import com.rivalhub.event.EventType;
 import com.rivalhub.reservation.*;
-import com.rivalhub.station.NewStationDto;
-import com.rivalhub.station.NewStationDtoMapper;
-import com.rivalhub.station.Station;
-import com.rivalhub.station.StationRepository;
+import com.rivalhub.station.*;
 import com.rivalhub.user.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -167,8 +164,11 @@ public class OrganizationService {
         return Optional.of(stationList);
     }
 
-    public Optional<NewStationDto> findStation(Long stationId) {
-        return stationRepository.findById(stationId).map(newStationDtoMapper::map);
+    public NewStationDto findStation(Long stationId) {
+        return stationRepository
+                .findById(stationId)
+                .map(newStationDtoMapper::map)
+                .orElseThrow(StationNotFoundException::new);
     }
 
     void updateStation(NewStationDto newStationDto) {
