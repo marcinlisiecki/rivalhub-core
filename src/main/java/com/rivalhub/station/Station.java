@@ -49,6 +49,4 @@ public class Station {
         this.reservationList.add(reservation);
     }
 
-    @ManyToOne
-    private Organization organization;
 }
