@@ -1,6 +1,8 @@
 package com.rivalhub.auth;
 
+import com.rivalhub.common.ErrorMessages;
 import com.rivalhub.common.dto.ErrorMessageDto;
+import com.rivalhub.user.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,7 +14,13 @@ public class AuthErrorHandler {
 
     @ExceptionHandler({BadCredentialsException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorMessageDto handleAuthErrors(Exception e) {
+    public ErrorMessageDto handleBadCredentials(Exception e) {
+        return new ErrorMessageDto(e.getMessage());
+    }
+
+    @ExceptionHandler({UserNotAuthenticatedException.class})
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorMessageDto handleNotAuthenticated(Exception e) {
         return new ErrorMessageDto(e.getMessage());
     }
 }
