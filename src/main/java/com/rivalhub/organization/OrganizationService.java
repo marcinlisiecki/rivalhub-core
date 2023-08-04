@@ -146,24 +146,114 @@ public class OrganizationService {
         return newStationDtoMapper.map(savedStation);
     }
 
+
+
+    // stanowiska sa w organizacji -
+    // stanowiska nie sa zarezerwowane w danym czasie -
+    // user jest w organizacji +
+    // stanowiska istnieja +
+    // oranizajca istnieje +
+
+
     public Optional<?> addReservation(AddReservationDTO reservationDTO,
                                       Long id, String email) {
-        Optional<Organization> organization = organizationRepository.findById(id);
+        boolean checkIfReservationIsPossible = checkIfReservationIsPossible(reservationDTO, id, email);
+
+        if (!checkIfReservationIsPossible) return Optional.empty();
+
         UserData user = userRepository.findByEmail(email).get();
 
         List<Station> stationList = reservationDTO.getStationsIdList().stream()
                 .map(ids -> stationRepository.findById(ids))
                 .map(Optional::get).toList();
 
-        boolean checkIfReservationIsPossible = ReservationValidator.checkIfReservationIsPossible(reservationDTO, organization, user, id, stationList);
-        if (!checkIfReservationIsPossible) return Optional.empty();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
 
-        ReservationSaver saver = new ReservationSaver(reservationRepository, reservationMapper);
-        ReservationDTO viewReservationDTO = saver.saveReservation(user, stationList, reservationDTO);
+        Reservation reservation = new Reservation(user, stationList,
+                LocalDateTime.parse(reservationDTO.getStartTime(), formatter),
+                LocalDateTime.parse(reservationDTO.getEndTime(), formatter));
+        ReservationDTO viewReservationDTO = reservationMapper.map(reservation);
 
+        stationList.stream().forEach(station -> station.addReservation(reservation));
+
+
+        List<List<LocalDateTime>> listsOfStartTime = stationList.stream().map(station
+                -> station.getReservationList().stream().map(reservations -> reservations.getStartTime()).toList()).toList();
+        List<List<LocalDateTime>> listsOfEndTime = stationList.stream().map(station
+                -> station.getReservationList().stream().map(reservations -> reservations.getEndTime()).toList()).toList();
+
+        List<LocalDateTime> listOfStartTime =
+                listsOfStartTime.stream()
+                        .flatMap(List::stream).toList();
+
+        List<LocalDateTime> listOfEndTime =
+                listsOfEndTime.stream()
+                        .flatMap(List::stream).toList();
+
+
+        List<Instant> instantsStartTime = listOfStartTime.stream().map(localDateTime -> localDateTime.atZone(ZoneId.systemDefault()).toInstant()).toList();
+        List<Instant> instantsEndTime = listOfEndTime.stream().map(localDateTime -> localDateTime.atZone(ZoneId.systemDefault()).toInstant()).toList();
+
+        instantsStartTime.forEach(t -> System.out.println(t.toEpochMilli()));
+        instantsEndTime.forEach(t -> System.out.println(t.toEpochMilli()));
+
+
+        long reservationStartTime =  reservation.getStartTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        long reservationEndTime =  reservation.getEndTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        for(int i = 0; i < instantsStartTime.size(); i++){
+            long timeStart = instantsStartTime.get(i).toEpochMilli();
+            long timeEnd = instantsEndTime.get(i).toEpochMilli();
+
+            long timeStartReservationStartControl = timeStart - reservationStartTime;
+            long timeStartReservationEndControl = timeStart - reservationEndTime;
+
+            long timeEndReservationStartControl = timeEnd - reservationStartTime;
+            long timeEndReservationEndControl = timeEnd - reservationEndTime;
+
+            if (timeStartReservationEndControl * timeStartReservationStartControl < 0) return Optional.empty();
+            if (timeEndReservationStartControl * timeEndReservationEndControl < 0) return Optional.empty();
+        }
+
+        reservationRepository.save(reservation);
         return Optional.of(viewReservationDTO);
     }
 
+    private boolean checkIfReservationIsPossible(AddReservationDTO reservationDTO, Long id, String email) {
+        // organizacja instnieje
+        Optional<Organization> organization = organizationRepository.findById(id);
+        if (organization.isEmpty()) return false;
+
+        // user jest w organizacji
+        UserData user = userRepository.findByEmail(email).get();
+        Organization userOrganization = user.getOrganizationList().stream().filter(org -> org.getId().equals(id)).findFirst().orElse(null);
+        if (userOrganization == null) return false;
+
+        // stanowiska istnieja
+        List<Station> stationList;
+        try{
+            stationList = reservationDTO.getStationsIdList().stream()
+                    .map(ids -> stationRepository.findById(ids))
+                    .map(Optional::get).toList();
+        }catch (NoSuchElementException noSuchElementException){
+            System.out.println(noSuchElementException);
+            return false;
+        }catch (Exception exception){
+            System.out.println(exception);
+            return false;
+        }
+
+        // czy stanowiska sa w organizacji
+        if (!checkIfStationsAreInOrganization(stationList, organization.get())) return false;
+
+        // stanowiska nie sa zarezerwowane w danym czasie
+        // reservationRepository;
+
+        return true;
+    }
+
+    private boolean checkIfStationsAreInOrganization(List<Station> stationList, Organization organization){
+        return stationList.stream().allMatch(organization.getStationList()::contains);
+    }
 
     public Optional<List<Station>> findStations(Long organizationId) {
         Optional<Organization> organization = organizationRepository.findById(organizationId);

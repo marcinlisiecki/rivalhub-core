@@ -40,6 +40,9 @@ public class OrganizationController {
     private final EmailService emailService;
     private final UserRepository userRepository;
 
+    private final UserRepository userRepository;
+
+
     @GetMapping("{id}")
     public ResponseEntity<OrganizationDTO> viewOrganization(@PathVariable Long id){
         return ResponseEntity.ok(organizationService.findOrganization(id));
