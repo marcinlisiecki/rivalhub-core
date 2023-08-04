@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserDtoMapper {
-    UserData map(UserDto userDto){
+    public UserData map(UserDto userDto){
         UserData userData = new UserData();
         userData.setName(userDto.getName());
         userData.setEmail(userDto.getEmail());
@@ -13,7 +13,7 @@ public class UserDtoMapper {
         return userData;
     }
 
-    UserDto map(UserData userData){
+    public UserDto map(UserData userData){
         UserDto userDto = new UserDto();
         userDto.setEmail(userData.getEmail());
         userDto.setId(userData.getId());
@@ -23,5 +23,15 @@ public class UserDtoMapper {
         return userDto;
     }
 
+    public UserDetailsDto mapToUserDisplayDTO(UserData user){
+        UserDetailsDto userDisplayDTO = new UserDetailsDto();
+
+        userDisplayDTO.setProfilePictureUrl(user.getProfilePictureUrl());
+        userDisplayDTO.setEmail(user.getEmail());
+        userDisplayDTO.setName(user.getName());
+        userDisplayDTO.setId(user.getId());
+
+        return userDisplayDTO;
+    }
 
 }
