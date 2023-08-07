@@ -1,6 +1,9 @@
 package com.rivalhub.organization;
 
 import com.rivalhub.common.PaginationHelper;
+import com.rivalhub.organization.exception.AlreadyInOrganizationException;
+import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.organization.exception.WrongInvitationException;
 import com.rivalhub.reservation.*;
 import com.rivalhub.station.NewStationDto;
 import com.rivalhub.station.NewStationDtoMapper;
@@ -101,14 +104,15 @@ public class OrganizationService {
     }
 
     public Organization addUser(Long id, String hash, String email) {
-        Organization organizationRepositoryById = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
         UserData user = userRepository.findByEmail(email).get();
 
-        if (!organizationRepositoryById.getInvitationHash().equals(hash)) throw new WrongInvitationException();
+        if (!organization.getInvitationHash().equals(hash)) throw new WrongInvitationException();
+        if (user.getOrganizationList().contains(organization)) throw new AlreadyInOrganizationException();
 
-        organizationRepositoryById.addUser(user);
+        organization.addUser(user);
 
-        return organizationRepository.save(organizationRepositoryById);
+        return organizationRepository.save(organization);
     }
 
     NewStationDto addStation(NewStationDto newStationDto, Long id, String email) {

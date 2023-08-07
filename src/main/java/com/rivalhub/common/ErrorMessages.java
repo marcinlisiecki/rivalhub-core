@@ -26,4 +26,7 @@ public class ErrorMessages {
     public static final String ORGANIZATION_NOT_FOUND = "Nie znaleziono organizacji";
 
     public static final String WRONG_INVITATION = "Te zaproszenie jest nie aktywne";
+
+    public static final String ALREADY_IN_ORGANIZATION = "Jesteś już członkiem tej organizacji";
+
 }
