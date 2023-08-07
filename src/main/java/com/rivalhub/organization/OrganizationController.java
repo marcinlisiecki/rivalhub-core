@@ -9,7 +9,6 @@ import com.rivalhub.reservation.AddReservationDTO;
 import com.rivalhub.reservation.ReservationDTO;
 import com.rivalhub.station.NewStationDto;
 import com.rivalhub.station.Station;
-import com.rivalhub.email.EmailService;
 import com.rivalhub.user.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,7 +29,6 @@ public class OrganizationController {
 
     private OrganizationService organizationService;
     private final ObjectMapper objectMapper;
-    private final UserRepository userRepository;
 
     @GetMapping("{id}")
     public ResponseEntity<OrganizationDTO> viewOrganization(@PathVariable Long id){
