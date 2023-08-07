@@ -231,7 +231,7 @@ public class OrganizationService {
 
             if (ReservationValidator.checkIfReservationIsPossible(
                     reservationDTO,
-                    Optional.of(organization),
+                    organization,
                     user,
                     organizationId,
                     List.of(station))) {

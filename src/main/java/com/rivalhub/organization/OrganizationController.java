@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.common.MergePatcher;
+import com.rivalhub.email.EmailService;
 import com.rivalhub.event.EventType;
 import com.rivalhub.reservation.AddReservationDTO;
 import com.rivalhub.reservation.ReservationDTO;
@@ -107,7 +108,8 @@ public class OrganizationController {
             @RequestParam(required = false) boolean onlyAvailable,
             @RequestParam(required = false) String start,
             @RequestParam(required = false) String end,
-            @RequestParam(required = false) EventType type) {
+            @RequestParam(required = false) EventType type,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
         if (onlyAvailable && start != null && end != null) {
             List<Station> availableStations = organizationService
@@ -121,8 +123,8 @@ public class OrganizationController {
     }
 
     @PatchMapping("/{organizationId}/stations/{stationId}")
-    ResponseEntity<?> updateOrganization(@RequestBody JsonMergePatch patch,
-                                         @PathVariable Long stationId) throws JsonPatchException, JsonProcessingException {
+    ResponseEntity<?> updateOrganization(@RequestBody JsonMergePatch patch,@AuthenticationPrincipal UserDetails userDetails,
+                                         @PathVariable Long stationId, @PathVariable Long organizationId) throws JsonPatchException, JsonProcessingException {
         // JsonPatchException & JsonProcessingException are handled by an ExceptionHandler
 
         NewStationDto station = organizationService.findStation(organizationId, stationId, userDetails.getUsername());
