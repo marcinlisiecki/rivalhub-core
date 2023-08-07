@@ -1,14 +1,13 @@
 package com.rivalhub.organization;
 
 import com.rivalhub.common.PaginationHelper;
+import com.rivalhub.email.EmailService;
 import com.rivalhub.organization.exception.AlreadyInOrganizationException;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.organization.exception.ReservationIsNotPossible;
 import com.rivalhub.organization.exception.WrongInvitationException;
 import com.rivalhub.reservation.*;
-import com.rivalhub.station.NewStationDto;
-import com.rivalhub.station.NewStationDtoMapper;
-import com.rivalhub.station.Station;
-import com.rivalhub.station.StationRepository;
+import com.rivalhub.station.*;
 import com.rivalhub.user.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +41,7 @@ public class OrganizationService {
 
     private final UserDtoMapper userDtoMapper;
 
+    private final EmailService emailService;
 
     public OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email){
         Organization organizationToSave = organizationDTOMapper.map(organizationCreateDTO);
@@ -116,16 +116,11 @@ public class OrganizationService {
     }
 
     NewStationDto addStation(NewStationDto newStationDto, Long id, String email) {
-        Optional<Organization> organizationOptional = organizationRepository.findById(id);
-        if (organizationOptional.isEmpty()) return null;
-        Organization organization = organizationOptional.get();
+        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
 
         UserData user = userRepository.findByEmail(email).get();
         List<Organization> organizationList = user.getOrganizationList();
-
-        Organization currentOrganization = organizationList.stream().filter(org -> org.getId().equals(id)).findFirst().orElse(null);
-
-        if (currentOrganization == null) return null;
+        organizationList.stream().filter(org -> org.getId().equals(id)).findFirst().orElseThrow(OrganizationNotFoundException::new);
 
         Station station = newStationDtoMapper.map(newStationDto);
         Station savedStation = stationRepository.save(station);
@@ -136,9 +131,9 @@ public class OrganizationService {
         return newStationDtoMapper.map(savedStation);
     }
 
-    public Optional<?> addReservation(AddReservationDTO reservationDTO,
+    public ReservationDTO addReservation(AddReservationDTO reservationDTO,
                                       Long id, String email) {
-        Optional<Organization> organization = organizationRepository.findById(id);
+        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
         UserData user = userRepository.findByEmail(email).get();
 
         List<Station> stationList = reservationDTO.getStationsIdList().stream()
@@ -147,25 +142,31 @@ public class OrganizationService {
 
 
         boolean checkIfReservationIsPossible = ReservationValidator.checkIfReservationIsPossible(reservationDTO, organization, user, id, stationList);
-        if (!checkIfReservationIsPossible) return Optional.empty();
+        if (!checkIfReservationIsPossible) throw new ReservationIsNotPossible();
 
         ReservationSaver saver = new ReservationSaver(reservationRepository, reservationMapper);
         ReservationDTO viewReservationDTO = saver.saveReservation(user, stationList, reservationDTO);
 
-        return Optional.of(viewReservationDTO);
+        return viewReservationDTO;
     }
 
 
-    public Optional<List<Station>> findStations(Long organizationId) {
-        Optional<Organization> organization = organizationRepository.findById(organizationId);
-        if (organization.isEmpty()) return Optional.empty();
+    public List<Station> findStations(Long organizationId, String email) {
+        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
 
-        List<Station> stationList = organization.get().getStationList();
-        return Optional.of(stationList);
+        UserData user = userRepository.findByEmail(email).get();
+        user.getOrganizationList().stream().filter(org -> org.getId().equals(organizationId)).findFirst().orElseThrow(OrganizationNotFoundException::new);
+
+        return organization.getStationList();
     }
 
-    public Optional<NewStationDto> findStation(Long stationId){
-        return stationRepository.findById(stationId).map(newStationDtoMapper::map);
+    public NewStationDto findStation(Long organizationId, Long stationId, String email){
+        organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+        UserData user = userRepository.findByEmail(email).get();
+
+        user.getOrganizationList().stream().filter(org -> org.getId().equals(organizationId)).findFirst().orElseThrow(OrganizationNotFoundException::new);
+
+        return stationRepository.findById(stationId).map(newStationDtoMapper::map).orElseThrow(StationNotFoundException::new);
     }
 
     void updateStation(NewStationDto newStationDto){
@@ -175,8 +176,8 @@ public class OrganizationService {
 
     @Transactional
     public void deleteStation(Long stationId, Long organizationId) {
-        Organization organization = organizationRepository.findById(organizationId).get();
-        organization.removeStation(stationRepository.findById(stationId).get());
+        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+        organization.removeStation(stationRepository.findById(stationId).orElseThrow(StationNotFoundException::new));
     }
 
     public String createInvitationLink(OrganizationDTO organizationDTO){
@@ -191,5 +192,15 @@ public class OrganizationService {
                 .append(organizationDTO.getInvitationHash());
         String body = builder.toString();
         return body;
+    }
+
+    public OrganizationDTO addUserThroughEmail(Long id, String email) {
+        OrganizationDTO organizationDTO = findOrganization(id);
+
+        String subject = "Invitation to " + organizationDTO.getName();
+        String body = createInvitationLink(organizationDTO);
+        emailService.sendSimpleMessage(email, subject, body);
+
+        return organizationDTO;
     }
 }

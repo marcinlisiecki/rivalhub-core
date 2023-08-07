@@ -28,5 +28,6 @@ public class ErrorMessages {
     public static final String WRONG_INVITATION = "Te zaproszenie jest nie aktywne";
 
     public static final String ALREADY_IN_ORGANIZATION = "Jesteś już członkiem tej organizacji";
+    public static final String RESERVATION_IS_NOT_POSSIBLE = "Nie można dokonać rezerwacji";
 
 }

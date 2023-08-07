@@ -3,6 +3,7 @@ package com.rivalhub.common;
 import com.rivalhub.common.dto.ErrorMessageDto;
 import com.rivalhub.organization.exception.AlreadyInOrganizationException;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.organization.exception.ReservationIsNotPossible;
 import com.rivalhub.organization.exception.WrongInvitationException;
 import com.rivalhub.station.StationNotFoundException;
 import com.rivalhub.user.UserNotFoundException;
@@ -20,6 +21,7 @@ public class ResourceNotFoundHandler {
             OrganizationNotFoundException.class,
             WrongInvitationException.class,
 
+            ReservationIsNotPossible.class,
             AlreadyInOrganizationException.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)

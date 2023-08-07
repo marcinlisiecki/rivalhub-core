@@ -65,14 +65,13 @@ public class ReservationValidator {
         return stationList.stream().allMatch(organization.getStationList()::contains);
     }
 
-    public static boolean checkIfReservationIsPossible(AddReservationDTO reservationDTO, Optional<Organization> organization,
+    public static boolean checkIfReservationIsPossible(AddReservationDTO reservationDTO, Organization organization,
                                                 UserData user, Long id, List<Station> stationList) {
-        if (organization.isEmpty()) return false;
 
         Organization userOrganization = user.getOrganizationList().stream().filter(org -> org.getId().equals(id)).findFirst().orElse(null);
         if (userOrganization == null) return false;
 
-        if (!ReservationValidator.checkIfStationsAreInOrganization(stationList, organization.get())) return false;
+        if (!ReservationValidator.checkIfStationsAreInOrganization(stationList, organization)) return false;
 
         Reservation reservation = new Reservation(user, stationList,
                 LocalDateTime.parse(reservationDTO.getStartTime(), formatter),
