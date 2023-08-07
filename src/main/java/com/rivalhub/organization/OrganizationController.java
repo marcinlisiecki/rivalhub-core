@@ -30,14 +30,7 @@ import java.util.NoSuchElementException;
 @RequestMapping("/organizations")
 @AllArgsConstructor
 public class OrganizationController {
-
     private OrganizationService organizationService;
-    private final ObjectMapper objectMapper;
-    private final EmailService emailService;
-
-    private final MergePatcher<OrganizationDTO> organizationMergePatcher;
-    private final MergePatcher<NewStationDto> stationMergePatcher;
-
     @GetMapping("{id}")
     public ResponseEntity<OrganizationDTO> viewOrganization(@PathVariable Long id){
         return ResponseEntity.ok(organizationService.findOrganization(id));
@@ -57,13 +50,7 @@ public class OrganizationController {
     @PatchMapping("/{id}")
     ResponseEntity<?> updateOrganization(@PathVariable Long id, @RequestBody JsonMergePatch patch)
             throws JsonPatchException, JsonProcessingException {
-        // JsonPatchException & JsonProcessingException are handled by an ExceptionHandler
-
-        OrganizationDTO organizationDTO = organizationService.findOrganization(id);
-        OrganizationDTO patchedOrganizationDto = organizationMergePatcher.patch(patch, organizationDTO, OrganizationDTO.class);
-        patchedOrganizationDto.setId(id);
-        organizationService.updateOrganization(patchedOrganizationDto);
-
+        organizationService.updateOrganization(id, patch);
         return ResponseEntity.noContent().build();
     }
 
@@ -75,27 +62,18 @@ public class OrganizationController {
 
     @GetMapping("/{id}/invitation")
     public ResponseEntity<?> createInvitation(@PathVariable Long id){
-        String invitationHash = organizationService.createInvitationHash(id);
-        if(invitationHash == null) return ResponseEntity.notFound().build();
-
-        return ResponseEntity.ok(invitationHash);
+        return ResponseEntity.ok(organizationService.createInvitationHash(id));
     }
 
     @GetMapping("/{id}/invitation/{hash}")
     public ResponseEntity<?> addUser(@PathVariable Long id, @PathVariable String hash, @AuthenticationPrincipal UserDetails userDetails){
-        Organization organization = organizationService.addUser(id, hash, userDetails.getUsername());
-        return ResponseEntity.ok(organization.toString());
+        return ResponseEntity.ok(organizationService.addUser(id, hash, userDetails.getUsername()));
     }
 
     @PostMapping("/{id}/stations")
     ResponseEntity<NewStationDto> saveStation(@PathVariable Long id, @RequestBody NewStationDto newStation,
                                               @AuthenticationPrincipal UserDetails userDetails) {
         NewStationDto savedStation = organizationService.addStation(newStation, id, userDetails.getUsername());
-
-        if (savedStation == null) {
-            return ResponseEntity.notFound().build();
-        }
-
         URI savedStationUri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(savedStation.getId())
@@ -111,28 +89,14 @@ public class OrganizationController {
             @RequestParam(required = false) String end,
             @RequestParam(required = false) EventType type,
             @AuthenticationPrincipal UserDetails userDetails) {
-
-        if (onlyAvailable && start != null && end != null) {
-            List<Station> availableStations = organizationService
-                    .getAvailableStations(id, start, end, type);
-
-            return ResponseEntity.ok(availableStations);
-        }
-        List<Station> stations = organizationService.findStations(id, userDetails.getUsername());
-
-        return ResponseEntity.ok(stations);
+        return ResponseEntity.ok(organizationService.viewStations(id, start, end, type, onlyAvailable, userDetails));
     }
 
     @PatchMapping("/{organizationId}/stations/{stationId}")
-    ResponseEntity<?> updateOrganization(@RequestBody JsonMergePatch patch,@AuthenticationPrincipal UserDetails userDetails,
+    ResponseEntity<?> updateStation(@RequestBody JsonMergePatch patch,@AuthenticationPrincipal UserDetails userDetails,
                                          @PathVariable Long stationId, @PathVariable Long organizationId) throws JsonPatchException, JsonProcessingException {
         // JsonPatchException & JsonProcessingException are handled by an ExceptionHandler
-
-        NewStationDto station = organizationService.findStation(organizationId, stationId, userDetails.getUsername());
-        NewStationDto stationPatched = stationMergePatcher.patch(patch, station, NewStationDto.class);
-        stationPatched.setId(stationId);
-        organizationService.updateStation(stationPatched);
-
+        organizationService.updateStation(organizationId,stationId, userDetails.getUsername(), patch);
         return ResponseEntity.noContent().build();
     }
 
@@ -146,17 +110,14 @@ public class OrganizationController {
     @PostMapping("{id}/reservations")
     ResponseEntity<?> addReservations(@RequestBody AddReservationDTO reservationDTO,
             @AuthenticationPrincipal UserDetails userDetails,@PathVariable Long id){
-
         ReservationDTO reservation = organizationService.addReservation(reservationDTO, id, userDetails.getUsername());
-
         return ResponseEntity.ok(reservation);
     }
 
     @GetMapping("{id}/reservations")
     public ResponseEntity<?> viewReservations(@PathVariable Long id,
                                               @AuthenticationPrincipal UserDetails userDetails){
-        List<ReservationDTO> reservations = organizationService.viewReservations(id, userDetails.getUsername());
-        return ResponseEntity.ok(reservations);
+        return ResponseEntity.ok(organizationService.viewReservations(id, userDetails.getUsername()));
     }
 
 
@@ -169,8 +130,7 @@ public class OrganizationController {
 
     @GetMapping("/{id}/invite/{email}")
     public ResponseEntity<OrganizationDTO> addUserThroughEmail(@PathVariable Long id, @PathVariable String email){
-        OrganizationDTO organizationDTO = organizationService.addUserThroughEmail(id, email);
-        return ResponseEntity.ok(organizationDTO);
+        return ResponseEntity.ok(organizationService.addUserThroughEmail(id, email));
     }
 
 }
