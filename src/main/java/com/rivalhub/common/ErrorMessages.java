@@ -34,7 +34,7 @@ public class ErrorMessages {
 
     public static final String USER_ALREADY_EXISTS = "Adres email jest już w użyciu";
 
-
+    public static final String EMAIL_NOT_SENT = "Wiadomość email nie została wysłana";
 
 
     public static final String NOT_AUTHENTICATED = "Musisz być zalogowany aby wykonać tę akcję";

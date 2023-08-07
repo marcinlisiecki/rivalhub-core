@@ -65,18 +65,6 @@ public class UserService {
         user.setActivationTime(LocalDateTime.now());
     }
 
-    public String createActivationLink(UserDto userDto) {
-        StringBuilder builder = new StringBuilder();
-        builder.setLength(0);
-        ServletUriComponentsBuilder uri = ServletUriComponentsBuilder.fromCurrentRequest();
-        uri.replacePath("");
-        builder.append("Enter the link to join: \n")
-                .append(uri.toUriString())
-                .append("/confirm/")
-                .append(userDto.getActivationHash());
-        String body = builder.toString();
-        return body;
-    }
 
     @Scheduled(cron = "0 0 12 * * *")
     @Transactional
@@ -90,9 +78,7 @@ public class UserService {
                 .path("/users/{id}")
                 .buildAndExpand(savedUser.getId())
                 .toUri();
-        emailService.sendSimpleMessage(savedUser.getEmail(),
-                "Welcome on RivalHub",
-                "Your account was successfully created\n Activate your account: " + createActivationLink(savedUser));
+        emailService.sendThymeleafInvitation(savedUser,"Activate your account");
         return savedUserUri;
     }
 }
