@@ -2,6 +2,8 @@ package com.rivalhub.common;
 
 public class ErrorMessages {
 
+    private ErrorMessages() {}
+
     public static final String DEFAULT_ERROR = "Wystąpił błąd";
 
     public static final String BAD_CREDENTIALS = "Niepoprawny adres email lub/i hasło";

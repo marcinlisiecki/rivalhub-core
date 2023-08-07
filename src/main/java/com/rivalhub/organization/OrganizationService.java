@@ -1,5 +1,9 @@
 package com.rivalhub.organization;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.fge.jsonpatch.JsonPatchException;
+import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
+import com.rivalhub.common.MergePatcher;
 import com.rivalhub.common.PaginationHelper;
 import com.rivalhub.email.EmailService;
 import com.rivalhub.organization.exception.AlreadyInOrganizationException;
@@ -17,12 +21,12 @@ import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -44,23 +48,22 @@ public class OrganizationService {
     private final ReservationMapper reservationMapper;
 
     private final UserDtoMapper userDtoMapper;
-
+    private final MergePatcher<OrganizationDTO> organizationMergePatcher;
+    private final MergePatcher<NewStationDto> stationMergePatcher;
     private final EmailService emailService;
+
+
 
     public OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email){
         Organization organizationToSave = organizationDTOMapper.map(organizationCreateDTO);
-        organizationToSave.setAddedDate(LocalDateTime.now());
 
         Organization savedOrganization = organizationRepository.save(organizationToSave);
 
         createInvitationHash(savedOrganization.getId());
 
-        Optional<UserData> user = userRepository.findByEmail(email);
-        if (user.isEmpty()) {
-            throw new UserNotFoundException();
-        }
+        UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
 
-        savedOrganization.addUser(user.get());
+        UserOrganizationService.addUser(user, savedOrganization);
         Organization save = organizationRepository.save(savedOrganization);
 
 
@@ -89,34 +92,34 @@ public class OrganizationService {
         organizationRepository.save(organization);
     }
 
+
+
     public void deleteOrganization(Long id) {
         organizationRepository.deleteById(id);
     }
 
     public String createInvitationHash(Long id) {
-        Optional<Organization> organizationById = organizationRepository.findById(id);
+        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
 
-        if (organizationById.isEmpty()) return null;
-
-        Organization organization = organizationById.get();
         String valueToHash = organization.getName() + organization.getId() + LocalDateTime.now();
         String hash = String.valueOf(valueToHash.hashCode() & 0x7fffffff);
 
         organization.setInvitationHash(hash);
         organizationRepository.save(organization);
-        return hash;
+        return createInvitationLink(organizationDTOMapper.map(organization));
     }
 
-    public Organization addUser(Long id, String hash, String email) {
+    public OrganizationDTO addUser(Long id, String hash, String email) {
         Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
         UserData user = userRepository.findByEmail(email).get();
 
         if (!organization.getInvitationHash().equals(hash)) throw new WrongInvitationException();
         if (user.getOrganizationList().contains(organization)) throw new AlreadyInOrganizationException();
 
-        organization.addUser(user);
+        UserOrganizationService.addUser(user, organization);
+        Organization save = organizationRepository.save(organization);
 
-        return organizationRepository.save(organization);
+        return organizationDTOMapper.map(save);
     }
 
     NewStationDto addStation(NewStationDto newStationDto, Long id, String email) {
@@ -129,7 +132,8 @@ public class OrganizationService {
         Station station = newStationDtoMapper.map(newStationDto);
         Station savedStation = stationRepository.save(station);
 
-        organization.addStation(savedStation);
+        UserOrganizationService.addStation(savedStation, organization);
+
         organizationRepository.save(organization);
 
         return newStationDtoMapper.map(savedStation);
@@ -181,7 +185,7 @@ public class OrganizationService {
     @Transactional
     public void deleteStation(Long stationId, Long organizationId) {
         Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
-        organization.removeStation(stationRepository.findById(stationId).orElseThrow(StationNotFoundException::new));
+        UserOrganizationService.removeStation(stationRepository.findById(stationId).orElseThrow(StationNotFoundException::new), organization);
     }
 
     public String createInvitationLink(OrganizationDTO organizationDTO){
@@ -253,5 +257,26 @@ public class OrganizationService {
                 .stream().map(reservationMapper::map).toList();
 
         return reservations;
+    }
+
+    void updateOrganization(Long id, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
+        OrganizationDTO organizationDTO = findOrganization(id);
+        OrganizationDTO patchedOrganizationDto = organizationMergePatcher.patch(patch, organizationDTO, OrganizationDTO.class);
+        patchedOrganizationDto.setId(id);
+        updateOrganization(patchedOrganizationDto);
+    }
+
+    public List<Station> viewStations(Long id, String start, String end, EventType type, boolean onlyAvailable, UserDetails userDetails) {
+        if (onlyAvailable && start != null && end != null) {
+            return getAvailableStations(id, start, end, type);
+        }
+        return findStations(id, userDetails.getUsername());
+    }
+
+    public void updateStation(Long organizationId, Long stationId, String username, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
+        NewStationDto station = findStation(organizationId, stationId, username);
+        NewStationDto stationPatched = stationMergePatcher.patch(patch, station, NewStationDto.class);
+        stationPatched.setId(stationId);
+        updateStation(stationPatched);
     }
 }
