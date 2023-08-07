@@ -6,6 +6,7 @@ import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.exception.ReservationIsNotPossible;
 import com.rivalhub.organization.exception.WrongInvitationException;
 import com.rivalhub.station.StationNotFoundException;
+import com.rivalhub.user.UserAlreadyExistsException;
 import com.rivalhub.user.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,7 +23,8 @@ public class ResourceNotFoundHandler {
             WrongInvitationException.class,
 
             ReservationIsNotPossible.class,
-            AlreadyInOrganizationException.class
+            AlreadyInOrganizationException.class,
+            UserAlreadyExistsException.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessageDto handlerResourceNotFound(Exception e) {

@@ -69,7 +69,8 @@ public class ReservationValidator {
     public static boolean checkIfReservationIsPossible(AddReservationDTO reservationDTO, Organization organization,
                                                 UserData user, Long id, List<Station> stationList) {
 
-        user.getOrganizationList().stream().filter(org -> org.getId().equals(id)).findFirst().orElseThrow(OrganizationNotFoundException::new);
+        user.getOrganizationList().stream().filter(org -> org.getId().equals(id))
+                .findFirst().orElseThrow(OrganizationNotFoundException::new);
 
         if (!ReservationValidator.checkIfStationsAreInOrganization(stationList, organization)) return false;
 

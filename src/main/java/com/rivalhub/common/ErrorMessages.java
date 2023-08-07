@@ -30,4 +30,8 @@ public class ErrorMessages {
     public static final String ALREADY_IN_ORGANIZATION = "Jesteś już członkiem tej organizacji";
     public static final String RESERVATION_IS_NOT_POSSIBLE = "Nie można dokonać rezerwacji";
 
+    public static final String USER_ALREADY_EXISTS = "Adres email jest już w użyciu";
+
+
+
 }
