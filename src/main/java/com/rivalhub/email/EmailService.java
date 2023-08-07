@@ -44,10 +44,6 @@ public class EmailService {
 
     public void sendThymeleafInvitation(UserDto user, String subject)  {
 
-
-        MimeMultipart multipart = new MimeMultipart("related");
-
-
         Context context = new Context();
         context.setVariable("username",user.getName());
         ServletUriComponentsBuilder uri = ServletUriComponentsBuilder.fromCurrentRequest();
