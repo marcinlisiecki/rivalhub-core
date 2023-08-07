@@ -1,6 +1,11 @@
 package com.rivalhub.organization;
 
 import com.rivalhub.common.PaginationHelper;
+import com.rivalhub.email.EmailService;
+import com.rivalhub.organization.exception.AlreadyInOrganizationException;
+import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.organization.exception.ReservationIsNotPossible;
+import com.rivalhub.organization.exception.WrongInvitationException;
 import com.rivalhub.event.EventType;
 import com.rivalhub.reservation.*;
 import com.rivalhub.station.*;
@@ -17,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -39,8 +45,9 @@ public class OrganizationService {
 
     private final UserDtoMapper userDtoMapper;
 
+    private final EmailService emailService;
 
-    public OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email) {
+    public OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email){
         Organization organizationToSave = organizationDTOMapper.map(organizationCreateDTO);
         organizationToSave.setAddedDate(LocalDateTime.now());
 
@@ -60,14 +67,14 @@ public class OrganizationService {
         return organizationDTOMapper.map(save);
     }
 
-    public OrganizationDTO findOrganization(Long id) {
+    public OrganizationDTO findOrganization(Long id){
         return organizationRepository
                 .findById(id)
                 .map(organizationDTOMapper::map)
                 .orElseThrow(OrganizationNotFoundException::new);
     }
 
-    public Page<?> findUsersByOrganization(Long id, int page, int size) {
+    public Page<?> findUsersByOrganization(Long id, int page, int size){
         Optional<Organization> organization = organizationRepository.findById(id);
         if (organization.isEmpty()) return Page.empty();
 
@@ -77,7 +84,7 @@ public class OrganizationService {
         return PaginationHelper.toPage(page, size, allUsers);
     }
 
-    void updateOrganization(OrganizationDTO organizationDTO) {
+    void updateOrganization(OrganizationDTO organizationDTO){
         Organization organization = organizationDTOMapper.map(organizationDTO);
         organizationRepository.save(organization);
     }
@@ -100,32 +107,24 @@ public class OrganizationService {
         return hash;
     }
 
-    public Optional<Organization> addUser(Long id, String hash, String email) {
-        Optional<Organization> organizationRepositoryById = organizationRepository.findById(id);
-        Optional<UserData> user = userRepository.findByEmail(email);
+    public Organization addUser(Long id, String hash, String email) {
+        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        UserData user = userRepository.findByEmail(email).get();
 
-        if (user.isEmpty()) return Optional.empty();
-        if (organizationRepositoryById.isEmpty()) return Optional.empty();
+        if (!organization.getInvitationHash().equals(hash)) throw new WrongInvitationException();
+        if (user.getOrganizationList().contains(organization)) throw new AlreadyInOrganizationException();
 
-        Organization organization = organizationRepositoryById.get();
-        if (!organization.getInvitationHash().equals(hash)) return Optional.empty();
+        organization.addUser(user);
 
-        organization.addUser(user.get());
-
-        return Optional.of(organizationRepository.save(organization));
+        return organizationRepository.save(organization);
     }
 
     NewStationDto addStation(NewStationDto newStationDto, Long id, String email) {
-        Optional<Organization> organizationOptional = organizationRepository.findById(id);
-        if (organizationOptional.isEmpty()) return null;
-        Organization organization = organizationOptional.get();
+        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
 
         UserData user = userRepository.findByEmail(email).get();
         List<Organization> organizationList = user.getOrganizationList();
-
-        Organization currentOrganization = organizationList.stream().filter(org -> org.getId().equals(id)).findFirst().orElse(null);
-
-        if (currentOrganization == null) return null;
+        organizationList.stream().filter(org -> org.getId().equals(id)).findFirst().orElseThrow(OrganizationNotFoundException::new);
 
         Station station = newStationDtoMapper.map(newStationDto);
         Station savedStation = stationRepository.save(station);
@@ -136,9 +135,9 @@ public class OrganizationService {
         return newStationDtoMapper.map(savedStation);
     }
 
-    public Optional<?> addReservation(AddReservationDTO reservationDTO,
+    public ReservationDTO addReservation(AddReservationDTO reservationDTO,
                                       Long id, String email) {
-        Optional<Organization> organization = organizationRepository.findById(id);
+        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
         UserData user = userRepository.findByEmail(email).get();
 
         List<Station> stationList = reservationDTO.getStationsIdList().stream()
@@ -147,42 +146,45 @@ public class OrganizationService {
 
 
         boolean checkIfReservationIsPossible = ReservationValidator.checkIfReservationIsPossible(reservationDTO, organization, user, id, stationList);
-        if (!checkIfReservationIsPossible) return Optional.empty();
+        if (!checkIfReservationIsPossible) throw new ReservationIsNotPossible();
 
         ReservationSaver saver = new ReservationSaver(reservationRepository, reservationMapper);
         ReservationDTO viewReservationDTO = saver.saveReservation(user, stationList, reservationDTO);
 
-        return Optional.of(viewReservationDTO);
+        return viewReservationDTO;
     }
 
 
-    public Optional<List<Station>> findStations(Long organizationId) {
-        Optional<Organization> organization = organizationRepository.findById(organizationId);
-        if (organization.isEmpty()) return Optional.empty();
+    public List<Station> findStations(Long organizationId, String email) {
+        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
 
-        List<Station> stationList = organization.get().getStationList();
-        return Optional.of(stationList);
+        UserData user = userRepository.findByEmail(email).get();
+        user.getOrganizationList().stream().filter(org -> org.getId().equals(organizationId)).findFirst().orElseThrow(OrganizationNotFoundException::new);
+
+        return organization.getStationList();
     }
 
-    public NewStationDto findStation(Long stationId) {
-        return stationRepository
-                .findById(stationId)
-                .map(newStationDtoMapper::map)
-                .orElseThrow(StationNotFoundException::new);
+    public NewStationDto findStation(Long organizationId, Long stationId, String email){
+        organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+        UserData user = userRepository.findByEmail(email).get();
+
+        user.getOrganizationList().stream().filter(org -> org.getId().equals(organizationId)).findFirst().orElseThrow(OrganizationNotFoundException::new);
+
+        return stationRepository.findById(stationId).map(newStationDtoMapper::map).orElseThrow(StationNotFoundException::new);
     }
 
-    void updateStation(NewStationDto newStationDto) {
+    void updateStation(NewStationDto newStationDto){
         Station station = newStationDtoMapper.mapNewStationDtoToStation(newStationDto);
         stationRepository.save(station);
     }
 
     @Transactional
     public void deleteStation(Long stationId, Long organizationId) {
-        Organization organization = organizationRepository.findById(organizationId).get();
-        organization.removeStation(stationRepository.findById(stationId).get());
+        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+        organization.removeStation(stationRepository.findById(stationId).orElseThrow(StationNotFoundException::new));
     }
 
-    public String createInvitationLink(OrganizationDTO organizationDTO) {
+    public String createInvitationLink(OrganizationDTO organizationDTO){
         StringBuilder builder = new StringBuilder();
         builder.setLength(0);
         ServletUriComponentsBuilder uri = ServletUriComponentsBuilder.fromCurrentRequest();
@@ -194,6 +196,16 @@ public class OrganizationService {
                 .append(organizationDTO.getInvitationHash());
         String body = builder.toString();
         return body;
+    }
+
+    public OrganizationDTO addUserThroughEmail(Long id, String email) {
+        OrganizationDTO organizationDTO = findOrganization(id);
+
+        String subject = "Invitation to " + organizationDTO.getName();
+        String body = createInvitationLink(organizationDTO);
+        emailService.sendSimpleMessage(email, subject, body);
+
+        return organizationDTO;
     }
 
     public List<Station> getAvailableStations(long organizationId, String startTime, String endTime, EventType type) {
@@ -219,7 +231,7 @@ public class OrganizationService {
 
             if (ReservationValidator.checkIfReservationIsPossible(
                     reservationDTO,
-                    Optional.of(organization),
+                    organization,
                     user,
                     organizationId,
                     List.of(station))) {

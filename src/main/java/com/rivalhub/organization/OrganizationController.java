@@ -6,18 +6,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.common.MergePatcher;
+import com.rivalhub.email.EmailService;
 import com.rivalhub.event.EventType;
 import com.rivalhub.reservation.AddReservationDTO;
-import com.rivalhub.reservation.Reservation;
+import com.rivalhub.reservation.ReservationDTO;
 import com.rivalhub.station.NewStationDto;
 import com.rivalhub.station.Station;
-import com.rivalhub.user.*;
-import com.rivalhub.email.EmailService;
-import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,7 +24,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/organizations")
@@ -36,6 +31,7 @@ import java.util.Optional;
 public class OrganizationController {
 
     private OrganizationService organizationService;
+    private final ObjectMapper objectMapper;
     private final EmailService emailService;
 
     private final MergePatcher<OrganizationDTO> organizationMergePatcher;
@@ -86,11 +82,7 @@ public class OrganizationController {
 
     @GetMapping("/{id}/invitation/{hash}")
     public ResponseEntity<?> addUser(@PathVariable Long id, @PathVariable String hash, @AuthenticationPrincipal UserDetails userDetails){
-        if (userDetails == null) return ResponseEntity.notFound().build();
-
-        Optional<Organization> organization = organizationService.addUser(id, hash, userDetails.getUsername());
-        if (organization.isEmpty()) return ResponseEntity.notFound().build();
-
+        Organization organization = organizationService.addUser(id, hash, userDetails.getUsername());
         return ResponseEntity.ok(organization.toString());
     }
 
@@ -116,7 +108,8 @@ public class OrganizationController {
             @RequestParam(required = false) boolean onlyAvailable,
             @RequestParam(required = false) String start,
             @RequestParam(required = false) String end,
-            @RequestParam(required = false) EventType type) {
+            @RequestParam(required = false) EventType type,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
         if (onlyAvailable && start != null && end != null) {
             List<Station> availableStations = organizationService
@@ -124,20 +117,17 @@ public class OrganizationController {
 
             return ResponseEntity.ok(availableStations);
         }
+        List<Station> stations = organizationService.findStations(id, userDetails.getUsername());
 
-        Optional<List<Station>> stations = organizationService.findStations(id);
-
-        if (stations.isEmpty()) return ResponseEntity.notFound().build();
-
-        return ResponseEntity.ok(stations.get());
+        return ResponseEntity.ok(stations);
     }
 
-    @PatchMapping("/stations/{stationId}")
-    ResponseEntity<?> updateOrganization(@RequestBody JsonMergePatch patch,
-                                         @PathVariable Long stationId) throws JsonPatchException, JsonProcessingException {
+    @PatchMapping("/{organizationId}/stations/{stationId}")
+    ResponseEntity<?> updateOrganization(@RequestBody JsonMergePatch patch,@AuthenticationPrincipal UserDetails userDetails,
+                                         @PathVariable Long stationId, @PathVariable Long organizationId) throws JsonPatchException, JsonProcessingException {
         // JsonPatchException & JsonProcessingException are handled by an ExceptionHandler
 
-        NewStationDto station = organizationService.findStation(stationId);
+        NewStationDto station = organizationService.findStation(organizationId, stationId, userDetails.getUsername());
         NewStationDto stationPatched = stationMergePatcher.patch(patch, station, NewStationDto.class);
         stationPatched.setId(stationId);
         organizationService.updateStation(stationPatched);
@@ -152,20 +142,14 @@ public class OrganizationController {
         return ResponseEntity.noContent().build();
     }
 
-
-
     @PostMapping("{id}/reservations")
     ResponseEntity<?> addReservations(@RequestBody AddReservationDTO reservationDTO,
             @AuthenticationPrincipal UserDetails userDetails,@PathVariable Long id){
 
-        Optional<?> reservation = organizationService.addReservation(reservationDTO, id, userDetails.getUsername());
-
-        if (reservation.isEmpty())
-            return ResponseEntity.notFound().build();
+        ReservationDTO reservation = organizationService.addReservation(reservationDTO, id, userDetails.getUsername());
 
         return ResponseEntity.ok(reservation);
     }
-
 
     @GetMapping("{id}/users")
     ResponseEntity<Page<?>> viewUsers(@PathVariable Long id,
@@ -174,14 +158,9 @@ public class OrganizationController {
         return ResponseEntity.ok(organizationService.findUsersByOrganization(id, page, size));
     }
 
-
     @GetMapping("/{id}/invite/{email}")
-    public ResponseEntity<OrganizationDTO> addUserThroughEmail(@PathVariable Long id, @PathVariable String email, @AuthenticationPrincipal UserDetails userDetails){
-        if(userDetails == null) return ResponseEntity.notFound().build();
-        OrganizationDTO organizationDTO = organizationService.findOrganization(id);
-        String subject = "Invitation to " + organizationDTO.getName();
-        String body = organizationService.createInvitationLink(organizationDTO);
-        emailService.sendSimpleMessage(email, subject, body);
+    public ResponseEntity<OrganizationDTO> addUserThroughEmail(@PathVariable Long id, @PathVariable String email){
+        OrganizationDTO organizationDTO = organizationService.addUserThroughEmail(id, email);
         return ResponseEntity.ok(organizationDTO);
     }
 }

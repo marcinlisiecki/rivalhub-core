@@ -25,6 +25,16 @@ public class ErrorMessages {
     public static final String USER_NOT_FOUND = "Nie znaleziono użytkownika";
     public static final String ORGANIZATION_NOT_FOUND = "Nie znaleziono organizacji";
 
+    public static final String WRONG_INVITATION = "Te zaproszenie jest nie aktywne";
+
+    public static final String ALREADY_IN_ORGANIZATION = "Jesteś już członkiem tej organizacji";
+    public static final String RESERVATION_IS_NOT_POSSIBLE = "Nie można dokonać rezerwacji";
+
+    public static final String USER_ALREADY_EXISTS = "Adres email jest już w użyciu";
+
+
+
+
     public static final String NOT_AUTHENTICATED = "Musisz być zalogowany aby wykonać tę akcję";
 
     public static final String SERVER_ERROR = "Błąd serwera";
