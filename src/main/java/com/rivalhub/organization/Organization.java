@@ -47,6 +47,17 @@ public class Organization {
     private List<UserData> userList = new ArrayList<>();
 
     @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
+    @JoinTable(
+            name = "ORGANIZATION_STATION_LIST",
+            joinColumns = @JoinColumn(
+                    name = "ORGANIZATION_ID",
+                    referencedColumnName = "organization_id"
+            ),
+            inverseJoinColumns = @JoinColumn(
+                    name = "STATION_LIST_ID",
+                    referencedColumnName = "id"
+            )
+    )
     private List<Station> stationList;
 
     public Organization(String name, String invitationHash, String imageUrl) {

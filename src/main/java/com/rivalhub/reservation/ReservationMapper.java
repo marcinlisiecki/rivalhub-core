@@ -17,6 +17,7 @@ public class ReservationMapper {
         reservationDTO.setStartTime(reservation.getStartTime().toString());
         reservationDTO.setStationList(reservation.getStationList());
         reservationDTO.setUser(userDetailsDto);
+        reservationDTO.setId(reservation.getId());
 
         return reservationDTO;
     }

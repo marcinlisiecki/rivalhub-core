@@ -9,6 +9,7 @@ import com.rivalhub.common.MergePatcher;
 import com.rivalhub.email.EmailService;
 import com.rivalhub.event.EventType;
 import com.rivalhub.reservation.AddReservationDTO;
+import com.rivalhub.reservation.Reservation;
 import com.rivalhub.reservation.ReservationDTO;
 import com.rivalhub.station.NewStationDto;
 import com.rivalhub.station.Station;
@@ -151,6 +152,14 @@ public class OrganizationController {
         return ResponseEntity.ok(reservation);
     }
 
+    @GetMapping("{id}/reservations")
+    public ResponseEntity<?> viewReservations(@PathVariable Long id,
+                                              @AuthenticationPrincipal UserDetails userDetails){
+        List<ReservationDTO> reservations = organizationService.viewReservations(id, userDetails.getUsername());
+        return ResponseEntity.ok(reservations);
+    }
+
+
     @GetMapping("{id}/users")
     ResponseEntity<Page<?>> viewUsers(@PathVariable Long id,
                                                    @RequestParam(defaultValue = "0") int page,
@@ -163,4 +172,5 @@ public class OrganizationController {
         OrganizationDTO organizationDTO = organizationService.addUserThroughEmail(id, email);
         return ResponseEntity.ok(organizationDTO);
     }
+
 }

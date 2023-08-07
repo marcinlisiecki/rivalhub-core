@@ -242,4 +242,16 @@ public class OrganizationService {
 
         return availableStations;
     }
+
+    public List<ReservationDTO> viewReservations(Long id, String email) {
+        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        UserData user = userRepository.findByEmail(email).get();
+
+        user.getOrganizationList().stream().filter(org -> org.getId().equals(id)).findFirst().orElseThrow(OrganizationNotFoundException::new);
+
+        List<ReservationDTO> reservations = reservationRepository.reservationsByOrganization(organization.getId())
+                .stream().map(reservationMapper::map).toList();
+
+        return reservations;
+    }
 }
