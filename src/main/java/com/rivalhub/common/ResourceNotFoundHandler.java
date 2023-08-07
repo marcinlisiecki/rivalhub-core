@@ -27,7 +27,7 @@ public class ResourceNotFoundHandler {
             UserAlreadyExistsException.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorMessageDto handlerResourceNotFound(Exception e) {
+    public ErrorMessageDto handleResourceNotFound(Exception e) {
         return new ErrorMessageDto(e.getMessage());
     }
 }

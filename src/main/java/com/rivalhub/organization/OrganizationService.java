@@ -6,6 +6,7 @@ import com.rivalhub.organization.exception.AlreadyInOrganizationException;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.exception.ReservationIsNotPossible;
 import com.rivalhub.organization.exception.WrongInvitationException;
+import com.rivalhub.event.EventType;
 import com.rivalhub.reservation.*;
 import com.rivalhub.station.*;
 import com.rivalhub.user.*;
@@ -15,12 +16,14 @@ import org.springframework.data.domain.Page;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -97,7 +100,7 @@ public class OrganizationService {
 
         Organization organization = organizationById.get();
         String valueToHash = organization.getName() + organization.getId() + LocalDateTime.now();
-        String hash = String.valueOf(valueToHash.hashCode()  & 0x7fffffff);
+        String hash = String.valueOf(valueToHash.hashCode() & 0x7fffffff);
 
         organization.setInvitationHash(hash);
         organizationRepository.save(organization);
@@ -203,5 +206,40 @@ public class OrganizationService {
         emailService.sendSimpleMessage(email, subject, body);
 
         return organizationDTO;
+    }
+
+    public List<Station> getAvailableStations(long organizationId, String startTime, String endTime, EventType type) {
+        Organization organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
+
+        List<Station> allStations = organization.getStationList();
+        List<Station> availableStations = new ArrayList<>();
+
+        UserData user = userRepository
+                .findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+                .orElseThrow(UserNotFoundException::new);
+
+        allStations.forEach(station -> {
+            AddReservationDTO reservationDTO = new AddReservationDTO();
+            reservationDTO.setStartTime(startTime);
+            reservationDTO.setEndTime(endTime);
+            reservationDTO.setStationsIdList(List.of(station.getId()));
+
+            if (type != null && !station.getType().equals(type)) {
+                return;
+            }
+
+            if (ReservationValidator.checkIfReservationIsPossible(
+                    reservationDTO,
+                    Optional.of(organization),
+                    user,
+                    organizationId,
+                    List.of(station))) {
+
+                availableStations.add(station);
+            }
+        });
+
+        return availableStations;
     }
 }
