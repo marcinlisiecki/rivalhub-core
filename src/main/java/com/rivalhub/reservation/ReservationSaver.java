@@ -1,5 +1,6 @@
 package com.rivalhub.reservation;
 
+import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
@@ -12,15 +13,15 @@ import java.util.List;
 @RequiredArgsConstructor
 @Component
 public class ReservationSaver {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
     private final ReservationRepository reservationRepository;
 
     private final ReservationMapper reservationMapper;
 
+
     public ReservationDTO saveReservation(UserData user, List<Station> stationList, AddReservationDTO reservationDTO){
         Reservation reservation = new Reservation(user, stationList,
-                LocalDateTime.parse(reservationDTO.getStartTime(), formatter),
-                LocalDateTime.parse(reservationDTO.getEndTime(), formatter));
+                LocalDateTime.parse(reservationDTO.getStartTime(), FormatterHelper.formatter()),
+                LocalDateTime.parse(reservationDTO.getEndTime(), FormatterHelper.formatter()));
 
         stationList.forEach(station -> station.addReservation(reservation));
         reservationRepository.save(reservation);

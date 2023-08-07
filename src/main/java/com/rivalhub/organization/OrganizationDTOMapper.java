@@ -1,5 +1,6 @@
 package com.rivalhub.organization;
 
+import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

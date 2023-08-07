@@ -33,34 +33,21 @@ public class UserController {
     @PostMapping("/register")
     ResponseEntity<?> register(@RequestBody UserDto userDto){
         UserDto savedUser = userService.register(userDto);
-        if(savedUser != null) {
-            URI savedUserUri = ServletUriComponentsBuilder.fromCurrentRequest()
-                    .path("/users/{id}")
-                    .buildAndExpand(savedUser.getId())
-                    .toUri();
-            emailService.sendSimpleMessage(savedUser.getEmail(),
-                    "Welcome on RivalHub",
-                    "Your account was successfully created\n Activate your account: " + userService.createActivationLink(savedUser));
-            return ResponseEntity.created(savedUserUri).body(savedUser);
-        }
-        return ResponseEntity.badRequest().body(new ErrorMessageDto("Adres email jest już w użyciu"));
+        URI savedUserUri = userService.sendEmail(savedUser);
+
+        return ResponseEntity.created(savedUserUri).body(savedUser);
     }
 
     @GetMapping("/users/organizations")
-    public ResponseEntity<List<OrganizationCreateDTO>> listAllOrganizationsByUser(@AuthenticationPrincipal UserDetails userDetails){
-        Optional<List<OrganizationCreateDTO>> userOrganizations = userService.findOrganizationsByUser(userDetails.getUsername());
-
-
-        if (userOrganizations.isEmpty()) return ResponseEntity.notFound().build();
-
-        return ResponseEntity.ok(userOrganizations.get());
+    public ResponseEntity<?> listAllOrganizationsByUser(@AuthenticationPrincipal UserDetails userDetails){
+        List<OrganizationCreateDTO> userOrganizations = userService.findOrganizationsByUser(userDetails.getUsername());
+        return ResponseEntity.ok(userOrganizations);
     }
 
     @GetMapping("/confirm/{hash}")
     public ResponseEntity<?> confirmUserEmail(@PathVariable String hash){
-        if(userService.confirmUserEmail(hash))
+        userService.confirmUserEmail(hash);
         return ResponseEntity.ok("Confirmed");
-        return ResponseEntity.noContent().build();
     }
 
 }

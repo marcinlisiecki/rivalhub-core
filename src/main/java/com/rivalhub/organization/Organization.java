@@ -31,7 +31,6 @@ public class Organization {
     @Size(min = 2, max = 256, message = ErrorMessages.NAME_SIZE)
     private String name;
 
-    @Size(min = 9, max = 10)
     private String invitationHash;
 
     @Size(min = 2, max = 512)
