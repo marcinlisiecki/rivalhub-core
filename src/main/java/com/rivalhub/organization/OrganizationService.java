@@ -3,6 +3,7 @@ package com.rivalhub.organization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
+import com.rivalhub.common.InvitationHelper;
 import com.rivalhub.common.MergePatcher;
 import com.rivalhub.common.PaginationHelper;
 import com.rivalhub.email.EmailService;
@@ -34,27 +35,20 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class OrganizationService {
-
     private final OrganizationRepository organizationRepository;
     private final OrganizationDTOMapper organizationDTOMapper;
     private final UserRepository userRepository;
-
     private final NewStationDtoMapper newStationDtoMapper;
-
     private final StationRepository stationRepository;
-
     private final ReservationRepository reservationRepository;
-
     private final ReservationMapper reservationMapper;
-
-    private final UserDtoMapper userDtoMapper;
     private final MergePatcher<OrganizationDTO> organizationMergePatcher;
     private final MergePatcher<NewStationDto> stationMergePatcher;
-    private final EmailService emailService;
 
 
+    // ZROBIC REFACTOR WYRZUCIC DO RESERVATION SERVICE STATION SERVICE I TAK DALEJ
 
-    public OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email){
+    OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email){
         Organization organizationToSave = organizationDTOMapper.map(organizationCreateDTO);
 
         Organization savedOrganization = organizationRepository.save(organizationToSave);
@@ -66,25 +60,14 @@ public class OrganizationService {
         UserOrganizationService.addUser(user, savedOrganization);
         Organization save = organizationRepository.save(savedOrganization);
 
-
         return organizationDTOMapper.map(save);
     }
 
-    public OrganizationDTO findOrganization(Long id){
+    OrganizationDTO findOrganization(Long id){
         return organizationRepository
                 .findById(id)
                 .map(organizationDTOMapper::map)
                 .orElseThrow(OrganizationNotFoundException::new);
-    }
-
-    public Page<?> findUsersByOrganization(Long id, int page, int size){
-        Optional<Organization> organization = organizationRepository.findById(id);
-        if (organization.isEmpty()) return Page.empty();
-
-        List<UserDetailsDto> allUsers = organization.get().getUserList()
-                .stream().map(userDtoMapper::mapToUserDisplayDTO).toList();
-
-        return PaginationHelper.toPage(page, size, allUsers);
     }
 
     void updateOrganization(OrganizationDTO organizationDTO){
@@ -92,13 +75,11 @@ public class OrganizationService {
         organizationRepository.save(organization);
     }
 
-
-
-    public void deleteOrganization(Long id) {
+    void deleteOrganization(Long id) {
         organizationRepository.deleteById(id);
     }
 
-    public String createInvitationHash(Long id) {
+    String createInvitationHash(Long id) {
         Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
 
         String valueToHash = organization.getName() + organization.getId() + LocalDateTime.now();
@@ -106,20 +87,7 @@ public class OrganizationService {
 
         organization.setInvitationHash(hash);
         organizationRepository.save(organization);
-        return createInvitationLink(organizationDTOMapper.map(organization));
-    }
-
-    public OrganizationDTO addUser(Long id, String hash, String email) {
-        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
-        UserData user = userRepository.findByEmail(email).get();
-
-        if (!organization.getInvitationHash().equals(hash)) throw new WrongInvitationException();
-        if (user.getOrganizationList().contains(organization)) throw new AlreadyInOrganizationException();
-
-        UserOrganizationService.addUser(user, organization);
-        Organization save = organizationRepository.save(organization);
-
-        return organizationDTOMapper.map(save);
+        return InvitationHelper.createInvitationLink(organizationDTOMapper.map(organization));
     }
 
     NewStationDto addStation(NewStationDto newStationDto, Long id, String email) {
@@ -186,30 +154,6 @@ public class OrganizationService {
     public void deleteStation(Long stationId, Long organizationId) {
         Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
         UserOrganizationService.removeStation(stationRepository.findById(stationId).orElseThrow(StationNotFoundException::new), organization);
-    }
-
-    public String createInvitationLink(OrganizationDTO organizationDTO){
-        StringBuilder builder = new StringBuilder();
-        builder.setLength(0);
-        ServletUriComponentsBuilder uri = ServletUriComponentsBuilder.fromCurrentRequest();
-        uri.replacePath("");
-        builder.append("Enter the link to join: \n")
-                .append(uri.toUriString()).append("/")
-                .append(organizationDTO.getId())
-                .append("/invitation/")
-                .append(organizationDTO.getInvitationHash());
-        String body = builder.toString();
-        return body;
-    }
-
-    public OrganizationDTO addUserThroughEmail(Long id, String email) {
-        OrganizationDTO organizationDTO = findOrganization(id);
-
-        String subject = "Invitation to " + organizationDTO.getName();
-        String body = createInvitationLink(organizationDTO);
-        emailService.sendSimpleMessage(email, subject, body);
-
-        return organizationDTO;
     }
 
     public List<Station> getAvailableStations(long organizationId, String startTime, String endTime, EventType type) {

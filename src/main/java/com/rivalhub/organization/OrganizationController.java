@@ -65,11 +65,6 @@ public class OrganizationController {
         return ResponseEntity.ok(organizationService.createInvitationHash(id));
     }
 
-    @GetMapping("/{id}/invitation/{hash}")
-    public ResponseEntity<?> addUser(@PathVariable Long id, @PathVariable String hash, @AuthenticationPrincipal UserDetails userDetails){
-        return ResponseEntity.ok(organizationService.addUser(id, hash, userDetails.getUsername()));
-    }
-
     @PostMapping("/{id}/stations")
     ResponseEntity<NewStationDto> saveStation(@PathVariable Long id, @RequestBody NewStationDto newStation,
                                               @AuthenticationPrincipal UserDetails userDetails) {
@@ -119,18 +114,4 @@ public class OrganizationController {
                                               @AuthenticationPrincipal UserDetails userDetails){
         return ResponseEntity.ok(organizationService.viewReservations(id, userDetails.getUsername()));
     }
-
-
-    @GetMapping("{id}/users")
-    ResponseEntity<Page<?>> viewUsers(@PathVariable Long id,
-                                                   @RequestParam(defaultValue = "0") int page,
-                                                   @RequestParam(defaultValue = "10") int size){
-        return ResponseEntity.ok(organizationService.findUsersByOrganization(id, page, size));
-    }
-
-    @GetMapping("/{id}/invite/{email}")
-    public ResponseEntity<OrganizationDTO> addUserThroughEmail(@PathVariable Long id, @PathVariable String email){
-        return ResponseEntity.ok(organizationService.addUserThroughEmail(id, email));
-    }
-
 }
