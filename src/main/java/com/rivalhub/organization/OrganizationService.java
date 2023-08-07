@@ -1,11 +1,9 @@
 package com.rivalhub.organization;
 
 import com.rivalhub.common.PaginationHelper;
+import com.rivalhub.event.EventType;
 import com.rivalhub.reservation.*;
-import com.rivalhub.station.NewStationDto;
-import com.rivalhub.station.NewStationDtoMapper;
-import com.rivalhub.station.Station;
-import com.rivalhub.station.StationRepository;
+import com.rivalhub.station.*;
 import com.rivalhub.user.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -13,11 +11,13 @@ import org.springframework.data.domain.Page;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,7 +40,7 @@ public class OrganizationService {
     private final UserDtoMapper userDtoMapper;
 
 
-    public OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email){
+    public OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email) {
         Organization organizationToSave = organizationDTOMapper.map(organizationCreateDTO);
         organizationToSave.setAddedDate(LocalDateTime.now());
 
@@ -60,14 +60,14 @@ public class OrganizationService {
         return organizationDTOMapper.map(save);
     }
 
-    public OrganizationDTO findOrganization(Long id){
+    public OrganizationDTO findOrganization(Long id) {
         return organizationRepository
                 .findById(id)
                 .map(organizationDTOMapper::map)
                 .orElseThrow(OrganizationNotFoundException::new);
     }
 
-    public Page<?> findUsersByOrganization(Long id, int page, int size){
+    public Page<?> findUsersByOrganization(Long id, int page, int size) {
         Optional<Organization> organization = organizationRepository.findById(id);
         if (organization.isEmpty()) return Page.empty();
 
@@ -77,7 +77,7 @@ public class OrganizationService {
         return PaginationHelper.toPage(page, size, allUsers);
     }
 
-    void updateOrganization(OrganizationDTO organizationDTO){
+    void updateOrganization(OrganizationDTO organizationDTO) {
         Organization organization = organizationDTOMapper.map(organizationDTO);
         organizationRepository.save(organization);
     }
@@ -93,7 +93,7 @@ public class OrganizationService {
 
         Organization organization = organizationById.get();
         String valueToHash = organization.getName() + organization.getId() + LocalDateTime.now();
-        String hash = String.valueOf(valueToHash.hashCode()  & 0x7fffffff);
+        String hash = String.valueOf(valueToHash.hashCode() & 0x7fffffff);
 
         organization.setInvitationHash(hash);
         organizationRepository.save(organization);
@@ -104,7 +104,7 @@ public class OrganizationService {
         Optional<Organization> organizationRepositoryById = organizationRepository.findById(id);
         Optional<UserData> user = userRepository.findByEmail(email);
 
-        if(user.isEmpty()) return Optional.empty();
+        if (user.isEmpty()) return Optional.empty();
         if (organizationRepositoryById.isEmpty()) return Optional.empty();
 
         Organization organization = organizationRepositoryById.get();
@@ -164,11 +164,14 @@ public class OrganizationService {
         return Optional.of(stationList);
     }
 
-    public Optional<NewStationDto> findStation(Long stationId){
-        return stationRepository.findById(stationId).map(newStationDtoMapper::map);
+    public NewStationDto findStation(Long stationId) {
+        return stationRepository
+                .findById(stationId)
+                .map(newStationDtoMapper::map)
+                .orElseThrow(StationNotFoundException::new);
     }
 
-    void updateStation(NewStationDto newStationDto){
+    void updateStation(NewStationDto newStationDto) {
         Station station = newStationDtoMapper.mapNewStationDtoToStation(newStationDto);
         stationRepository.save(station);
     }
@@ -179,7 +182,7 @@ public class OrganizationService {
         organization.removeStation(stationRepository.findById(stationId).get());
     }
 
-    public String createInvitationLink(OrganizationDTO organizationDTO){
+    public String createInvitationLink(OrganizationDTO organizationDTO) {
         StringBuilder builder = new StringBuilder();
         builder.setLength(0);
         ServletUriComponentsBuilder uri = ServletUriComponentsBuilder.fromCurrentRequest();
@@ -191,5 +194,40 @@ public class OrganizationService {
                 .append(organizationDTO.getInvitationHash());
         String body = builder.toString();
         return body;
+    }
+
+    public List<Station> getAvailableStations(long organizationId, String startTime, String endTime, EventType type) {
+        Organization organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
+
+        List<Station> allStations = organization.getStationList();
+        List<Station> availableStations = new ArrayList<>();
+
+        UserData user = userRepository
+                .findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+                .orElseThrow(UserNotFoundException::new);
+
+        allStations.forEach(station -> {
+            AddReservationDTO reservationDTO = new AddReservationDTO();
+            reservationDTO.setStartTime(startTime);
+            reservationDTO.setEndTime(endTime);
+            reservationDTO.setStationsIdList(List.of(station.getId()));
+
+            if (type != null && !station.getType().equals(type)) {
+                return;
+            }
+
+            if (ReservationValidator.checkIfReservationIsPossible(
+                    reservationDTO,
+                    Optional.of(organization),
+                    user,
+                    organizationId,
+                    List.of(station))) {
+
+                availableStations.add(station);
+            }
+        });
+
+        return availableStations;
     }
 }

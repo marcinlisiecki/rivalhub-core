@@ -12,7 +12,13 @@ public class AuthErrorHandler {
 
     @ExceptionHandler({BadCredentialsException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorMessageDto handleAuthErrors(Exception e) {
+    public ErrorMessageDto handleBadCredentials(Exception e) {
+        return new ErrorMessageDto(e.getMessage());
+    }
+
+    @ExceptionHandler({UserNotAuthenticatedException.class})
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorMessageDto handleNotAuthenticated(Exception e) {
         return new ErrorMessageDto(e.getMessage());
     }
 }
