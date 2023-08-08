@@ -21,7 +21,7 @@ public class OrganizationDTOMapper {
         return dto;
     }
 
-    Organization map(OrganizationDTO dto) {
+    public Organization map(OrganizationDTO dto) {
         Organization organization = new Organization();
 
         organization.setName(dto.getName());

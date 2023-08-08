@@ -1,6 +1,7 @@
 package com.rivalhub.event.PingPong;
 
 import com.rivalhub.event.EventDto;
+import com.rivalhub.user.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,7 +16,7 @@ public class PingPongEventController {
     final PingPongService pingPongService;
     @PostMapping("/{id}/events/pingpong")
     public ResponseEntity<?> addPingPongEvent(@PathVariable long id, @RequestBody EventDto eventDto){
-        pingPongService.addEvent(eventDto);
+        //pingPongService.addEvent(eventDto);
         return ResponseEntity.ok().build();
     }
 
