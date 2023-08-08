@@ -65,43 +65,6 @@ public class OrganizationController {
         return ResponseEntity.ok(organizationService.createInvitationHash(id));
     }
 
-    @PostMapping("/{id}/stations")
-    ResponseEntity<NewStationDto> saveStation(@PathVariable Long id, @RequestBody NewStationDto newStation,
-                                              @AuthenticationPrincipal UserDetails userDetails) {
-        NewStationDto savedStation = organizationService.addStation(newStation, id, userDetails.getUsername());
-        URI savedStationUri = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(savedStation.getId())
-                .toUri();
-        return ResponseEntity.created(savedStationUri).body(savedStation);
-    }
-
-    @GetMapping("/{id}/stations")
-    ResponseEntity<?> viewStations(
-            @PathVariable Long id,
-            @RequestParam(required = false) boolean onlyAvailable,
-            @RequestParam(required = false) String start,
-            @RequestParam(required = false) String end,
-            @RequestParam(required = false) EventType type,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(organizationService.viewStations(id, start, end, type, onlyAvailable, userDetails));
-    }
-
-    @PatchMapping("/{organizationId}/stations/{stationId}")
-    ResponseEntity<?> updateStation(@RequestBody JsonMergePatch patch,@AuthenticationPrincipal UserDetails userDetails,
-                                         @PathVariable Long stationId, @PathVariable Long organizationId) throws JsonPatchException, JsonProcessingException {
-        // JsonPatchException & JsonProcessingException are handled by an ExceptionHandler
-        organizationService.updateStation(organizationId,stationId, userDetails.getUsername(), patch);
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("{organizationId}/stations/{stationId}")
-    ResponseEntity<?> deleteStation(@PathVariable Long stationId,
-                                    @PathVariable Long organizationId) {
-        organizationService.deleteStation(stationId, organizationId);
-        return ResponseEntity.noContent().build();
-    }
-
     @PostMapping("{id}/reservations")
     ResponseEntity<?> addReservations(@RequestBody AddReservationDTO reservationDTO,
             @AuthenticationPrincipal UserDetails userDetails,@PathVariable Long id){
