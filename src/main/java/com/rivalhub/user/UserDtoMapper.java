@@ -1,5 +1,6 @@
 package com.rivalhub.user;
 
+import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,6 +33,17 @@ public class UserDtoMapper {
         userDisplayDTO.setId(user.getId());
 
         return userDisplayDTO;
+    }
+
+    public UserDetailsDto mapToUserDetailsDto(UserData user){
+        UserDetailsDto userDetailsDto = new UserDetailsDto();
+
+        userDetailsDto.setEmail(user.getEmail());
+        userDetailsDto.setName(user.getName());
+        userDetailsDto.setId(user.getId());
+        userDetailsDto.setProfilePictureUrl(user.getProfilePictureUrl());
+
+        return userDetailsDto;
     }
 
 }
