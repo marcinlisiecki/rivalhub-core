@@ -1,6 +1,8 @@
 package com.rivalhub.reservation;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
@@ -22,7 +24,7 @@ public class Reservation {
     private Long id;
 
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JsonManagedReference
+    @JsonManagedReference("user-reservations")
     @JoinTable(name = "user_reservations",
             joinColumns = @JoinColumn(name = "reservation_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id")
@@ -30,7 +32,8 @@ public class Reservation {
     private UserData userData;
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JsonManagedReference
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonManagedReference("reservation-stations")
     @JoinTable(name = "reservations_stations",
             joinColumns = @JoinColumn(name = "reservation_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "station_id", referencedColumnName = "id")

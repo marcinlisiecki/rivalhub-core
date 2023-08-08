@@ -1,33 +1,26 @@
 package com.rivalhub.event;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.reservation.Reservation;
-import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
-import jakarta.persistence.*;
-import lombok.Data;
-import org.apache.catalina.User;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-
-@Data
-@MappedSuperclass
-public class Event {
-    @Id
+@Getter
+@Setter
+public class EventDto {
     Long eventId;
-    @OneToOne(cascade = CascadeType.ALL)
-    @JsonManagedReference
-    @JoinColumn(name = "reservation_id")
     Reservation reservation;
     LocalDateTime startTime;
     LocalDateTime endTime;
-    @ManyToOne
     UserData host;
-    @OneToMany
     List<UserData> participants;
-    @ManyToOne
     Organization organization;
 }
