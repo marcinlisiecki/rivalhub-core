@@ -6,9 +6,11 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.common.ErrorMessages;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.engine.internal.Cascade;
 
 import java.time.LocalDateTime;
@@ -28,6 +30,7 @@ public class Organization {
     private Long id;
 
     @NotNull(message = ErrorMessages.NAME_IS_REQUIRED)
+    @NotBlank(message = ErrorMessages.NAME_IS_REQUIRED)
     @Size(min = 2, max = 256, message = ErrorMessages.NAME_SIZE)
     private String name;
 
@@ -36,6 +39,7 @@ public class Organization {
     @Size(min = 2, max = 512)
     private String imageUrl;
 
+    @CreationTimestamp
     private LocalDateTime addedDate;
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
@@ -47,26 +51,18 @@ public class Organization {
     private List<UserData> userList = new ArrayList<>();
 
     @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
+    @JoinTable(
+            name = "ORGANIZATION_STATION_LIST",
+            joinColumns = @JoinColumn(
+                    name = "ORGANIZATION_ID",
+                    referencedColumnName = "organization_id"
+            ),
+            inverseJoinColumns = @JoinColumn(
+                    name = "STATION_LIST_ID",
+                    referencedColumnName = "id"
+            )
+    )
     private List<Station> stationList;
-
-    public Organization(String name, String invitationHash, String imageUrl) {
-        this.name = name;
-        this.invitationHash = invitationHash;
-        this.imageUrl = imageUrl;
-    }
-
-    public void addUser(UserData userData){
-        userData.getOrganizationList().add(this);
-        userList.add(userData);
-    }
-
-    public void addStation(Station station){
-        this.stationList.add(station);
-    }
-
-    public void removeStation(Station station){
-        this.stationList.remove(station);
-    }
 
     @Override
     public String toString() {

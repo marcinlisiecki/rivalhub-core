@@ -11,6 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 public class ReservationDTO {
+    private Long id;
     private List<Station> stationList;
     private String startTime;
     private String endTime;

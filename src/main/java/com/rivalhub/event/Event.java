@@ -1,6 +1,7 @@
 package com.rivalhub.event;
 
 import com.rivalhub.organization.Organization;
+import com.rivalhub.reservation.Reservation;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
@@ -20,7 +21,8 @@ public class Event {
     Reservation reservation;
     LocalDateTime startTime;
     LocalDateTime endTime;
-    UserData host;
+
+//    UserData host;
     @OneToMany
     List<UserData> participants;
     @ManyToOne
