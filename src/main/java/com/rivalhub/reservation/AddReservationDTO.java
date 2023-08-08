@@ -7,7 +7,6 @@ import java.util.List;
 
 @Data
 public class AddReservationDTO {
-
     private List<Long> stationsIdList;
     private String startTime;
     private String endTime;

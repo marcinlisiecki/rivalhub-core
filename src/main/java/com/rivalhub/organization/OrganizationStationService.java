@@ -96,7 +96,7 @@ public class OrganizationStationService {
 
         user.getOrganizationList().stream().filter(org -> org.getId().equals(organizationId)).findFirst().orElseThrow(OrganizationNotFoundException::new);
 
-        return stationRepository.findById(stationId).map(newStationDtoMapper::map).orElseThrow(StationNotFoundException::new);
+        return stationRepository.findById(stationId).map(NewStationDtoMapper::map).orElseThrow(StationNotFoundException::new);
     }
 
     List<Station> findStations(Long organizationId, String email) {

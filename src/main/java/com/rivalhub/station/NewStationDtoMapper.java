@@ -8,10 +8,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class NewStationDtoMapper {
-
     private final StationRepository stationRepository;
 
-    public NewStationDto map(Station station) {
+    public static NewStationDto map(Station station) {
         NewStationDto newStationDto = new NewStationDto();
         newStationDto.setType(station.getType());
         newStationDto.setName(station.getName());
