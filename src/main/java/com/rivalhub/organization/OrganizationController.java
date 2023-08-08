@@ -64,17 +64,4 @@ public class OrganizationController {
     public ResponseEntity<?> createInvitation(@PathVariable Long id){
         return ResponseEntity.ok(organizationService.createInvitationHash(id));
     }
-
-    @PostMapping("{id}/reservations")
-    ResponseEntity<?> addReservations(@RequestBody AddReservationDTO reservationDTO,
-            @AuthenticationPrincipal UserDetails userDetails,@PathVariable Long id){
-        ReservationDTO reservation = organizationService.addReservation(reservationDTO, id, userDetails.getUsername());
-        return ResponseEntity.ok(reservation);
-    }
-
-    @GetMapping("{id}/reservations")
-    public ResponseEntity<?> viewReservations(@PathVariable Long id,
-                                              @AuthenticationPrincipal UserDetails userDetails){
-        return ResponseEntity.ok(organizationService.viewReservations(id, userDetails.getUsername()));
-    }
 }

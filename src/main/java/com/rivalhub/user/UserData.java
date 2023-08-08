@@ -6,6 +6,7 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.reservation.Reservation;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -32,6 +33,7 @@ public class UserData implements UserDetails {
 
     @NotNull
     @Size(min = 3, max = 256,message = ErrorMessages.NAME_DONT_FIT_SIZE)
+    @NotBlank
     private String name;
     @Email(message = ErrorMessages.EMAIL_IS_NOT_VALID)
     private String email;

@@ -38,13 +38,7 @@ public class OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final OrganizationDTOMapper organizationDTOMapper;
     private final UserRepository userRepository;
-    private final StationRepository stationRepository;
-    private final ReservationRepository reservationRepository;
-    private final ReservationMapper reservationMapper;
     private final MergePatcher<OrganizationDTO> organizationMergePatcher;
-
-
-    // ZROBIC REFACTOR WYRZUCIC DO RESERVATION SERVICE STATION SERVICE I TAK DALEJ
 
     OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email){
         Organization organizationToSave = organizationDTOMapper.map(organizationCreateDTO);
@@ -88,45 +82,10 @@ public class OrganizationService {
         return InvitationHelper.createInvitationLink(organizationDTOMapper.map(organization));
     }
 
-    public ReservationDTO addReservation(AddReservationDTO reservationDTO,
-                                      Long id, String email) {
-        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
-        UserData user = userRepository.findByEmail(email).get();
-
-        List<Station> stationList = reservationDTO.getStationsIdList().stream()
-                .map(ids -> stationRepository.findById(ids))
-                .map(Optional::get).toList();
-
-
-        boolean checkIfReservationIsPossible = ReservationValidator.checkIfReservationIsPossible(reservationDTO, organization, user, id, stationList);
-        if (!checkIfReservationIsPossible) throw new ReservationIsNotPossible();
-
-        ReservationSaver saver = new ReservationSaver(reservationRepository, reservationMapper);
-        ReservationDTO viewReservationDTO = saver.saveReservation(user, stationList, reservationDTO);
-
-        return viewReservationDTO;
-    }
-
-    public List<ReservationDTO> viewReservations(Long id, String email) {
-        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
-        UserData user = userRepository.findByEmail(email).get();
-
-        user.getOrganizationList().stream().filter(org -> org.getId().equals(id)).findFirst().orElseThrow(OrganizationNotFoundException::new);
-
-        List<ReservationDTO> reservations = reservationRepository.reservationsByOrganization(organization.getId())
-                .stream().map(reservationMapper::map).toList();
-
-        return reservations;
-    }
-
     void updateOrganization(Long id, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
         OrganizationDTO organizationDTO = findOrganization(id);
         OrganizationDTO patchedOrganizationDto = organizationMergePatcher.patch(patch, organizationDTO, OrganizationDTO.class);
         patchedOrganizationDto.setId(id);
         updateOrganization(patchedOrganizationDto);
     }
-
-
-
-
 }

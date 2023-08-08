@@ -30,12 +30,10 @@ public class OrganizationStationService {
     private final NewStationDtoMapper newStationDtoMapper;
     private final MergePatcher<NewStationDto> stationMergePatcher;
 
-
-
     NewStationDto addStation(NewStationDto newStationDto, Long id, String email) {
         Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
 
-        UserData user = userRepository.findByEmail(email).get();
+        UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
         List<Organization> organizationList = user.getOrganizationList();
         organizationList.stream().filter(org -> org.getId().equals(id)).findFirst().orElseThrow(OrganizationNotFoundException::new);
 
@@ -92,10 +90,9 @@ public class OrganizationStationService {
         return availableStations;
     }
 
-
     NewStationDto findStation(Long organizationId, Long stationId, String email){
         organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
-        UserData user = userRepository.findByEmail(email).get();
+        UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
 
         user.getOrganizationList().stream().filter(org -> org.getId().equals(organizationId)).findFirst().orElseThrow(OrganizationNotFoundException::new);
 
@@ -105,7 +102,7 @@ public class OrganizationStationService {
     List<Station> findStations(Long organizationId, String email) {
         Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
 
-        UserData user = userRepository.findByEmail(email).get();
+        UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
         user.getOrganizationList().stream().filter(org -> org.getId().equals(organizationId)).findFirst().orElseThrow(OrganizationNotFoundException::new);
 
         return organization.getStationList();
