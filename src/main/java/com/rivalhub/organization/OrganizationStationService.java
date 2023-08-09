@@ -10,8 +10,11 @@ import com.rivalhub.event.EventType;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.reservation.AddReservationDTO;
 import com.rivalhub.reservation.Reservation;
+import com.rivalhub.reservation.ReservationUtils;
 import com.rivalhub.reservation.ReservationValidator;
-import com.rivalhub.station.*;
+import com.rivalhub.station.EventTypeStationsDto;
+import com.rivalhub.station.Station;
+import com.rivalhub.station.StationDTO;
 import com.rivalhub.user.UserData;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,16 +25,17 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class OrganizationStationService {
+
     private final RepositoryManager repositoryManager;
     private final AutoMapper autoMapper;
     private final MergePatcher<StationDTO> stationMergePatcher;
     private final OrganizationStationValidator validator;
+    private final ReservationUtils reservationUtils;
 
     StationDTO addStation(StationDTO stationDTO, Long id, String email) {
         Organization organization = repositoryManager.findOrganization(id);
@@ -82,16 +86,29 @@ public class OrganizationStationService {
         List<EventTypeStationsDto> eventStations = new ArrayList<>();
         Duration timeNeeded = Duration.ofSeconds(ChronoUnit.SECONDS.between(startTime, endTime));
 
-        for (EventType eventType : EventType.values()) {
-            EventTypeStationsDto eventStation = new EventTypeStationsDto();
-            eventStation.setType(eventType);
-            eventStation.setStations(availableStations.stream().map(autoMapper::mapToNewStationDto).toList());
+        if (type != null) {
+            eventStations.add(getEventTypeStation(type, availableStations, organization, timeNeeded));
+            return eventStations;
+        }
 
-            eventStation.setFirstAvailable(getFirstDateAvailableForDuration(organization, timeNeeded));
-            eventStations.add(eventStation);
+        for (EventType eventType : EventType.values()) {
+            eventStations.add(getEventTypeStation(eventType, availableStations, organization, timeNeeded));
         }
 
         return eventStations;
+    }
+
+    private EventTypeStationsDto getEventTypeStation(EventType eventType,
+                                                     List<Station> availableStations,
+                                                     Organization organization,
+                                                     Duration timeNeeded) {
+
+        EventTypeStationsDto eventStation = new EventTypeStationsDto();
+        eventStation.setType(eventType);
+        eventStation.setStations(availableStations.stream().map(autoMapper::mapToNewStationDto).toList());
+        eventStation.setFirstAvailable(getFirstDateAvailableForDuration(organization, timeNeeded));
+
+        return eventStation;
     }
 
     private LocalDateTime getFirstDateAvailableForDuration(Organization organization, Duration timeWindow) {
@@ -100,11 +117,7 @@ public class OrganizationStationService {
 
         for (Station station : stations) {
             LocalDateTime currentStationFirstAvailable = LocalDateTime.now();
-
-            List<Reservation> reservations = station.getReservationList()
-                    .stream()
-                    .sorted(Comparator.comparing(Reservation::getStartTime))
-                    .toList();
+            List<Reservation> reservations = reservationUtils.getSortedReservations(station.getReservationList());
 
             for (int i = 0; i < reservations.size(); i++) {
                 Reservation currentReservation = reservations.get(i);
