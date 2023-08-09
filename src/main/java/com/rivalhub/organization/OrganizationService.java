@@ -6,32 +6,14 @@ import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.InvitationHelper;
 import com.rivalhub.common.MergePatcher;
-import com.rivalhub.common.PaginationHelper;
-import com.rivalhub.email.EmailService;
-import com.rivalhub.organization.exception.AlreadyInOrganizationException;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
-import com.rivalhub.organization.exception.ReservationIsNotPossible;
-import com.rivalhub.organization.exception.WrongInvitationException;
-import com.rivalhub.event.EventType;
-import com.rivalhub.reservation.*;
-import com.rivalhub.station.*;
-import com.rivalhub.user.*;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +22,7 @@ public class OrganizationService {
     private final AutoMapper autoMapper;
     private final UserRepository userRepository;
     private final MergePatcher<OrganizationDTO> organizationMergePatcher;
+    private final InvitationHelper invitationHelper;
 
     OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email){
         Organization organizationToSave = autoMapper.mapToOrganization(organizationCreateDTO);
@@ -80,7 +63,7 @@ public class OrganizationService {
 
         organization.setInvitationHash(hash);
         organizationRepository.save(organization);
-        return InvitationHelper.createInvitationLink(autoMapper.mapToOrganizationDto(organization));
+        return invitationHelper.createInvitationLink(autoMapper.mapToOrganizationDto(organization));
     }
 
     void updateOrganization(Long id, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
