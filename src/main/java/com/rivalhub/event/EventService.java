@@ -1,5 +1,7 @@
 package com.rivalhub.event;
 
+import com.rivalhub.common.exception.InvalidPathParamException;
+import com.rivalhub.email.EmailService;
 import com.rivalhub.event.pingpong.PingPongService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,43 +17,34 @@ import java.util.List;
 public class EventService {
 
     final PingPongService pingPongService;
+    public EventDto findEvent(long eventId, String type) {
+         final  String PING_PONG = EventType.PING_PONG.getType();
 
-    public ResponseEntity<?> findEvent(long eventId, String type) {
-        switch (type){
-            case "PING_PONG":
-                return ResponseEntity.ok(pingPongService.findEvent(eventId));
-        }
-        return ResponseEntity.badRequest().build();
+        if(type.equals(EventType.PING_PONG.getType()))
+            return pingPongService.findEvent(eventId);
+
+        throw new InvalidPathParamException();
     }
 
-    public ResponseEntity<?> addEvent(long id, EventDto eventDto, String type) {
-        switch (type){
-            case "PING_PONG":
-                EventDto savedEvent = pingPongService.addEvent(id, eventDto);
-                URI savedEventUri = ServletUriComponentsBuilder.fromCurrentRequest()
-                        .path("/events/{eventId}")
-                        .queryParam("type","PING_PONG")
-                        .buildAndExpand(savedEvent.getEventId())
-                        .toUri();
-                return ResponseEntity.created(savedEventUri).build();
+    public EventDto addEvent(long id, EventDto eventDto, String type) {
+
+        if(type.equals(EventType.PING_PONG.getType())) {
+            EventDto savedEvent = pingPongService.addEvent(id, eventDto);
         }
-        return ResponseEntity.badRequest().build();
+        throw new InvalidPathParamException();
     }
 
-    public ResponseEntity<?> findAllEvents(long id, String type) {
+    public List<EventDto> findAllEvents(long id, String type) {
         List<EventDto> eventDtoList = new ArrayList<>();
-        switch (type)
-        {
-            case "ALL":
-
-                eventDtoList.addAll(pingPongService.findAllEvents(id));
-                //Dodać reszte
-                return ResponseEntity.ok(eventDtoList);
-            case "PING_PONG":
-                eventDtoList.addAll(pingPongService.findAllEvents(id));
-                return ResponseEntity.ok(eventDtoList);
-
+        if(type.equals(EventType.ALL.getType())) {
+            eventDtoList.addAll(pingPongService.findAllEvents(id));
+            //Dodać reszte
+            return eventDtoList;
         }
-        return ResponseEntity.badRequest().build();
+        if(type.equals(EventType.PING_PONG.getType())) {
+                eventDtoList.addAll(pingPongService.findAllEvents(id));
+                return eventDtoList;
+        }
+        throw  new InvalidPathParamException();
     }
 }

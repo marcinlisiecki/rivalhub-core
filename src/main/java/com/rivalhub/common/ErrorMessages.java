@@ -42,4 +42,6 @@ public class ErrorMessages {
     public static final String SERVER_ERROR = "Błąd serwera";
 
     public static final String EVENT_NOT_FOUND = "Nie znaleziono wydarzenia";
+
+    public static final String INVALID_PATH_PARAM_EXCEPTION = "Podano zły parametr";
 }
