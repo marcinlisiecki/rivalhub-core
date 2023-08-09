@@ -1,15 +1,11 @@
 package com.rivalhub.event;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.reservation.Reservation;
-import com.rivalhub.reservation.Reservation;
-import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.apache.catalina.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,7 +13,7 @@ import java.util.List;
 
 @Data
 @MappedSuperclass
-public class Event implements  EventInterface{
+public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long eventId;

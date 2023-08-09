@@ -32,7 +32,7 @@ public class Reservation {
     private UserData userData;
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+//    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonManagedReference("reservation-stations")
     @JoinTable(name = "reservations_stations",
             joinColumns = @JoinColumn(name = "reservation_id", referencedColumnName = "id"),
