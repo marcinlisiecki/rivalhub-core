@@ -1,7 +1,6 @@
-package com.rivalhub.event.PingPong;
+package com.rivalhub.event.pingpong;
 
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
 
 public interface PingPongEventRepository extends CrudRepository<PingPongEvent,Long> {
 }

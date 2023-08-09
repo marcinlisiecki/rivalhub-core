@@ -1,7 +1,6 @@
-package com.rivalhub.event.PingPong;
+package com.rivalhub.event.pingpong;
 
 
-import com.rivalhub.event.Event;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
