@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class InvitationHelper {
-    @Value("${frontUrl.url}")
+    @Value("${app.frontUrl}")
     private String url;
     public String createInvitationLink(OrganizationDTO organizationDTO){
         StringBuilder builder = new StringBuilder();
