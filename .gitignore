@@ -10,6 +10,7 @@
 .springBeans
 .sts4-cache
 
+application.yml
 
 # Created by https://www.gitignore.io/api/git,java,maven,eclipse,windows
 
@@ -199,3 +200,6 @@ README.html
 *.iml
 .idea
 .exercism
+
+.application.*
+/target
