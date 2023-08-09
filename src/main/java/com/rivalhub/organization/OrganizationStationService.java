@@ -15,8 +15,6 @@ import com.rivalhub.user.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,18 +23,23 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OrganizationStationService {
-    private final OrganizationRepository organizationRepository;
     private final UserRepository userRepository;
+    private final OrganizationRepository organizationRepository;
     private final StationRepository stationRepository;
     private final AutoMapper autoMapper;
     private final MergePatcher<NewStationDto> stationMergePatcher;
+    private final OrganizationStationValidator validator;
 
     NewStationDto addStation(NewStationDto newStationDto, Long id, String email) {
-        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        Organization organization = organizationRepository.findById(id)
+                .orElseThrow(OrganizationNotFoundException::new);
 
         UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
         List<Organization> organizationList = user.getOrganizationList();
-        organizationList.stream().filter(org -> org.getId().equals(id)).findFirst().orElseThrow(OrganizationNotFoundException::new);
+        organizationList
+                .stream().filter(org -> org.getId().equals(id))
+                .findFirst()
+                .orElseThrow(OrganizationNotFoundException::new);
 
         Station station = autoMapper.mapToStation(newStationDto);
         Station savedStation = stationRepository.save(station);
@@ -49,25 +52,27 @@ public class OrganizationStationService {
     }
 
 
-    List<Station> viewStations(Long id, String start, String end, EventType type, boolean onlyAvailable, UserDetails userDetails) {
-        if (onlyAvailable && start != null && end != null) {
-            return getAvailableStations(id, start, end, type);
-        }
-        return findStations(id, userDetails.getUsername());
-    }
-
-    public List<Station> getAvailableStations(long organizationId, String startTime, String endTime, EventType type) {
-        Organization organization = organizationRepository.findById(organizationId)
-                .orElseThrow(OrganizationNotFoundException::new);
-
-        List<Station> allStations = organization.getStationList();
-        List<Station> availableStations = new ArrayList<>();
-
-        UserData user = userRepository
-                .findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+    List<Station> viewStations(Long organizationId, String start, String end, EventType type,
+                               boolean onlyAvailable, String email, boolean showInactive) {
+        UserData user = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
 
-        allStations.forEach(station -> {
+        Organization organization = validator.checkIfViewStationIsPossible(organizationId, user);
+
+        List<Station> stationList = organization.getStationList();
+        if (!showInactive) stationList = filterForActiveStations(stationList);
+
+        if (onlyAvailable && start != null && end != null)
+            return getAvailableStations(organization, start, end, type, user, stationList);
+
+        return stationList;
+    }
+
+    public List<Station> getAvailableStations(Organization organization, String startTime,
+                                              String endTime, EventType type, UserData user, List<Station> stationList) {
+        List<Station> availableStations = new ArrayList<>();
+
+        stationList.forEach(station -> {
             AddReservationDTO reservationDTO = new AddReservationDTO();
             reservationDTO.setStartTime(startTime);
             reservationDTO.setEndTime(endTime);
@@ -81,7 +86,7 @@ public class OrganizationStationService {
                     reservationDTO,
                     organization,
                     user,
-                    organizationId,
+                    organization.getId(),
                     List.of(station))) {
 
                 availableStations.add(station);
@@ -91,26 +96,19 @@ public class OrganizationStationService {
         return availableStations;
     }
 
-    NewStationDto findStation(Long organizationId, Long stationId, String email){
-        organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
-        UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-
-        user.getOrganizationList().stream().filter(org -> org.getId().equals(organizationId)).findFirst().orElseThrow(OrganizationNotFoundException::new);
-
-        return stationRepository.findById(stationId).map(autoMapper::mapToNewStationDto).orElseThrow(StationNotFoundException::new);
+    NewStationDto findStation(Long stationId){
+        return stationRepository.findById(stationId)
+                .map(autoMapper::mapToNewStationDto)
+                .orElseThrow(StationNotFoundException::new);
     }
 
-    List<Station> findStations(Long organizationId, String email) {
-        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+    public void updateStation(Long organizationId, Long stationId, String email, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
+        UserData user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
 
-        UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-        user.getOrganizationList().stream().filter(org -> org.getId().equals(organizationId)).findFirst().orElseThrow(OrganizationNotFoundException::new);
+        validator.checkIfUpdateStationIsPossible(organizationId, user);
 
-        return organization.getStationList();
-    }
-
-    public void updateStation(Long organizationId, Long stationId, String username, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
-        NewStationDto station = findStation(organizationId, stationId, username);
+        NewStationDto station = findStation(stationId);
         NewStationDto stationPatched = stationMergePatcher.patch(patch, station, NewStationDto.class);
         stationPatched.setId(stationId);
         updateStation(stationPatched);
@@ -125,6 +123,12 @@ public class OrganizationStationService {
     public void deleteStation(Long stationId, Long organizationId) {
         Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
         UserOrganizationService.removeStation(stationRepository.findById(stationId).orElseThrow(StationNotFoundException::new), organization);
+    }
+
+    private List<Station> filterForActiveStations(List<Station> stationList){
+        return stationList
+                .stream().filter(Station::isActive)
+                .toList();
     }
 
 }

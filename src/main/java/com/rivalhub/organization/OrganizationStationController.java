@@ -39,8 +39,9 @@ public class OrganizationStationController {
             @RequestParam(required = false) String start,
             @RequestParam(required = false) String end,
             @RequestParam(required = false) EventType type,
+            @RequestParam(required = false, defaultValue = "false") boolean showInactive,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(organizationStationService.viewStations(id, start, end, type, onlyAvailable, userDetails));
+        return ResponseEntity.ok(organizationStationService.viewStations(id, start, end, type, onlyAvailable,userDetails.getUsername(), showInactive));
     }
 
     @PatchMapping("/{organizationId}/stations/{stationId}")

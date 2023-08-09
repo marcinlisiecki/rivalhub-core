@@ -10,4 +10,5 @@ public class NewStationDto {
     private Long id;
     private EventType type;
     private String name;
+    private boolean isActive;
 }
