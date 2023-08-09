@@ -1,5 +1,7 @@
 package com.rivalhub.organization;
 
+import com.rivalhub.event.Event;
+import com.rivalhub.event.EventInterface;
 import com.rivalhub.reservation.Reservation;
 import com.rivalhub.station.Station;
 import com.fasterxml.jackson.annotation.JsonManagedReference;

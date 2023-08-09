@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class EventController {
 
 
-    @GetMapping("/{id}/events")
-    public ResponseEntity<?> findAllPingPongEvents(@PathVariable long id){
-        pingPongService.findAllPingPongEvents(eventDto);
-        return ResponseEntity.ok().build();
-    }
+//    @GetMapping("/{id}/events")
+//    public ResponseEntity<?> findAllPingPongEvents(@PathVariable long id){
+//        pingPongService.findAllPingPongEvents(eventDto);
+//        return ResponseEntity.ok().build();
+//    }
 
 }

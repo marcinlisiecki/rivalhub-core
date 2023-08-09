@@ -1,5 +1,7 @@
 package com.rivalhub.common;
 
+import com.rivalhub.event.EventDto;
+import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationCreateDTO;
 import com.rivalhub.organization.OrganizationDTO;
@@ -79,5 +81,15 @@ public class AutoMapper {
     public ReservationDTO mapToReservationDto(Reservation reservation) {
         ReservationDTO reservationDTO = modelMapper.map(reservation,ReservationDTO.class);
         return reservationDTO;
+    }
+
+    public PingPongEvent mapToPingPongEvent(EventDto eventDto){
+        PingPongEvent pingPongEvent = modelMapper.map(eventDto,PingPongEvent.class);
+        return pingPongEvent;
+    }
+
+    public EventDto mapToEventDto(PingPongEvent pingPongEvent){
+        EventDto eventDto = modelMapper.map(pingPongEvent,EventDto.class);
+        return eventDto;
     }
 }

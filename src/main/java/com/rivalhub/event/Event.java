@@ -17,8 +17,9 @@ import java.util.List;
 
 @Data
 @MappedSuperclass
-public class Event {
+public class Event implements  EventInterface{
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long eventId;
     @OneToOne(cascade = CascadeType.ALL)
     @JsonManagedReference
