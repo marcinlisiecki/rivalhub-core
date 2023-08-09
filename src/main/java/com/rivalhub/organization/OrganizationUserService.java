@@ -23,6 +23,7 @@ public class OrganizationUserService {
     private final AutoMapper autoMapper;
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final InvitationHelper invitationHelper;
 
     Page<?> findUsersByOrganization(Long id, int page, int size) {
         Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
@@ -59,7 +60,7 @@ public class OrganizationUserService {
                 .orElseThrow(OrganizationNotFoundException::new);
         String subject = "Invitation to " + organizationDTO.getName();
 
-        String body = InvitationHelper.createInvitationLink(organizationDTO);
+        String body = invitationHelper.createInvitationLink(organizationDTO);
         emailService.sendSimpleMessage(email, subject, body);
 
         return organizationDTO;
