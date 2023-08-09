@@ -15,8 +15,6 @@ import com.rivalhub.user.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,49 +23,50 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OrganizationStationService {
-    private final OrganizationRepository organizationRepository;
-    private final UserRepository userRepository;
-    private final StationRepository stationRepository;
+    private final RepositoryManager repositoryManager;
     private final AutoMapper autoMapper;
-    private final MergePatcher<NewStationDto> stationMergePatcher;
+    private final MergePatcher<StationDTO> stationMergePatcher;
+    private final OrganizationStationValidator validator;
 
-    NewStationDto addStation(NewStationDto newStationDto, Long id, String email) {
-        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+    StationDTO addStation(StationDTO stationDTO, Long id, String email) {
+        Organization organization = repositoryManager.findOrganization(id);
 
-        UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        UserData user = repositoryManager.findUser(email);
         List<Organization> organizationList = user.getOrganizationList();
-        organizationList.stream().filter(org -> org.getId().equals(id)).findFirst().orElseThrow(OrganizationNotFoundException::new);
-
-        Station station = autoMapper.mapToStation(newStationDto);
-        Station savedStation = stationRepository.save(station);
-
-        UserOrganizationService.addStation(savedStation, organization);
-
-        organizationRepository.save(organization);
-
-        return autoMapper.mapToNewStationDto(savedStation);
-    }
-
-
-    List<Station> viewStations(Long id, String start, String end, EventType type, boolean onlyAvailable, UserDetails userDetails) {
-        if (onlyAvailable && start != null && end != null) {
-            return getAvailableStations(id, start, end, type);
-        }
-        return findStations(id, userDetails.getUsername());
-    }
-
-    public List<Station> getAvailableStations(long organizationId, String startTime, String endTime, EventType type) {
-        Organization organization = organizationRepository.findById(organizationId)
+        organizationList
+                .stream().filter(org -> org.getId().equals(id))
+                .findFirst()
                 .orElseThrow(OrganizationNotFoundException::new);
 
-        List<Station> allStations = organization.getStationList();
+        Station station = autoMapper.mapToStation(stationDTO);
+        UserOrganizationService.addStation(station, organization);
+
+        station = repositoryManager.save(station);
+
+        return autoMapper.mapToNewStationDto(station);
+    }
+
+
+    List<Station> viewStations(Long organizationId, String start, String end, EventType type,
+                               boolean onlyAvailable, String email, boolean showInactive) {
+        UserData user = repositoryManager.findUser(email);
+
+        Organization organization = validator.checkIfViewStationIsPossible(organizationId, user);
+
+        List<Station> stationList = organization.getStationList();
+        if (!showInactive) stationList = filterForActiveStations(stationList);
+
+        if (onlyAvailable && start != null && end != null)
+            return getAvailableStations(organization, start, end, type, user, stationList);
+
+        return stationList;
+    }
+
+    public List<Station> getAvailableStations(Organization organization, String startTime,
+                                              String endTime, EventType type, UserData user, List<Station> stationList) {
         List<Station> availableStations = new ArrayList<>();
 
-        UserData user = userRepository
-                .findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
-                .orElseThrow(UserNotFoundException::new);
-
-        allStations.forEach(station -> {
+        stationList.forEach(station -> {
             AddReservationDTO reservationDTO = new AddReservationDTO();
             reservationDTO.setStartTime(startTime);
             reservationDTO.setEndTime(endTime);
@@ -81,7 +80,7 @@ public class OrganizationStationService {
                     reservationDTO,
                     organization,
                     user,
-                    organizationId,
+                    organization.getId(),
                     List.of(station))) {
 
                 availableStations.add(station);
@@ -91,40 +90,36 @@ public class OrganizationStationService {
         return availableStations;
     }
 
-    NewStationDto findStation(Long organizationId, Long stationId, String email){
-        organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
-        UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-
-        user.getOrganizationList().stream().filter(org -> org.getId().equals(organizationId)).findFirst().orElseThrow(OrganizationNotFoundException::new);
-
-        return stationRepository.findById(stationId).map(autoMapper::mapToNewStationDto).orElseThrow(StationNotFoundException::new);
+    StationDTO findStation(Long stationId){
+        return autoMapper.mapToNewStationDto(repositoryManager.findStationById(stationId));
     }
 
-    List<Station> findStations(Long organizationId, String email) {
-        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+    public void updateStation(Long organizationId, Long stationId, String email, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
+        UserData user = repositoryManager.findUser(email);
 
-        UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-        user.getOrganizationList().stream().filter(org -> org.getId().equals(organizationId)).findFirst().orElseThrow(OrganizationNotFoundException::new);
+        validator.checkIfUpdateStationIsPossible(organizationId, user);
 
-        return organization.getStationList();
-    }
-
-    public void updateStation(Long organizationId, Long stationId, String username, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
-        NewStationDto station = findStation(organizationId, stationId, username);
-        NewStationDto stationPatched = stationMergePatcher.patch(patch, station, NewStationDto.class);
+        StationDTO station = findStation(stationId);
+        StationDTO stationPatched = stationMergePatcher.patch(patch, station, StationDTO.class);
         stationPatched.setId(stationId);
         updateStation(stationPatched);
     }
 
-    void updateStation(NewStationDto newStationDto){
-        Station station = autoMapper.mapToStation(newStationDto);
-        stationRepository.save(station);
+    void updateStation(StationDTO stationDTO){
+        Station station = autoMapper.mapToStation(stationDTO);
+        repositoryManager.save(station);
     }
 
     @Transactional
     public void deleteStation(Long stationId, Long organizationId) {
-        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
-        UserOrganizationService.removeStation(stationRepository.findById(stationId).orElseThrow(StationNotFoundException::new), organization);
+        Organization organization = repositoryManager.findOrganizationById(organizationId);
+        UserOrganizationService.removeStation(repositoryManager.findStationById(stationId), organization);
+    }
+
+    private List<Station> filterForActiveStations(List<Station> stationList){
+        return stationList
+                .stream().filter(Station::isActive)
+                .toList();
     }
 
 }

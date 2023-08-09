@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.event.EventType;
-import com.rivalhub.station.NewStationDto;
+import com.rivalhub.station.StationDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,9 +22,9 @@ public class OrganizationStationController {
     private final OrganizationStationService organizationStationService;
 
     @PostMapping("/{id}/stations")
-    ResponseEntity<NewStationDto> saveStation(@PathVariable Long id, @RequestBody NewStationDto newStation,
-                                              @AuthenticationPrincipal UserDetails userDetails) {
-        NewStationDto savedStation = organizationStationService.addStation(newStation, id, userDetails.getUsername());
+    ResponseEntity<StationDTO> saveStation(@PathVariable Long id, @RequestBody StationDTO newStation,
+                                           @AuthenticationPrincipal UserDetails userDetails) {
+        StationDTO savedStation = organizationStationService.addStation(newStation, id, userDetails.getUsername());
         URI savedStationUri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(savedStation.getId())
@@ -39,8 +39,9 @@ public class OrganizationStationController {
             @RequestParam(required = false) String start,
             @RequestParam(required = false) String end,
             @RequestParam(required = false) EventType type,
+            @RequestParam(required = false, defaultValue = "false") boolean showInactive,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(organizationStationService.viewStations(id, start, end, type, onlyAvailable, userDetails));
+        return ResponseEntity.ok(organizationStationService.viewStations(id, start, end, type, onlyAvailable,userDetails.getUsername(), showInactive));
     }
 
     @PatchMapping("/{organizationId}/stations/{stationId}")

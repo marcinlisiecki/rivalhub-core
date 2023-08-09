@@ -41,6 +41,8 @@ public class Station {
 //    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
 //    private Organization organization;
 
+    private boolean isActive;
+
     public Station(Long id, EventType type) {
         this.id = id;
         this.type = type;
