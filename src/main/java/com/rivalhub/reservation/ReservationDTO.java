@@ -1,5 +1,6 @@
 package com.rivalhub.reservation;
 
+import com.rivalhub.station.NewStationDto;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserDetailsDto;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import java.util.List;
 @Setter
 public class ReservationDTO {
     private Long id;
-    private List<Station> stationList;
+    private List<NewStationDto> stationList;
     private String startTime;
     private String endTime;
     private UserDetailsDto user;
