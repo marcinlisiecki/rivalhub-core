@@ -14,6 +14,7 @@ import java.security.Key;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Map;
 import java.util.function.Function;
 
 @Service
@@ -25,16 +26,21 @@ public class JwtService {
 
     private final Duration JWT_EXPIRATION = Duration.ofHours(1);
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails, Map<String, Object> extraClaims) {
         Date expiration = new Date(Instant.now().plus(JWT_EXPIRATION).toEpochMilli());
 
         return Jwts
                 .builder()
+                .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(expiration)
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public String generateToken(UserDetails userDetails) {
+        return generateToken(userDetails, Map.of());
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
