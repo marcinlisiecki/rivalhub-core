@@ -28,10 +28,9 @@ public class OrganizationUserService {
     Page<?> findUsersByOrganization(Long id, int page, int size) {
         Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
 
-//        List<UserDetailsDto> allUsers = organization.getUserList()
-//                .stream().map(::mapToUserDisplayDTO).toList();
-//        return PaginationHelper.toPage(page, size, allUsers);
-        return null;
+        List<UserDetailsDto> allUsers = organization.getUserList()
+                .stream().map(autoMapper::mapToUserDisplayDTO).toList();
+        return PaginationHelper.toPage(page, size, allUsers);
     }
 
     OrganizationDTO addUser(Long id, String hash, String email) {
