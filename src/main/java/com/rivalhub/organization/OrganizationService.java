@@ -191,10 +191,10 @@ public class OrganizationService {
     public String createInvitationLink(OrganizationDTO organizationDTO){
         StringBuilder builder = new StringBuilder();
         builder.setLength(0);
-        ServletUriComponentsBuilder uri = ServletUriComponentsBuilder.fromCurrentRequest();
-        uri.replacePath("");
+        String frontUrl = "http://localhost:4200";
         builder.append("Enter the link to join: \n")
-                .append(uri.toUriString()).append("/")
+                .append(frontUrl)
+                .append("/organizations/")
                 .append(organizationDTO.getId())
                 .append("/invitation/")
                 .append(organizationDTO.getInvitationHash());
