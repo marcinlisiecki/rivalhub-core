@@ -1,5 +1,6 @@
 package com.rivalhub.organization;
 
+import com.rivalhub.common.AutoMapper;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.exception.ReservationIsNotPossible;
 import com.rivalhub.reservation.*;
@@ -21,7 +22,8 @@ public class OrganizationReservationService {
     private final UserRepository userRepository;
     private final StationRepository stationRepository;
     private final ReservationRepository reservationRepository;
-    private final ReservationMapper reservationMapper;
+    private final AutoMapper autoMapper;
+    private final ReservationSaver reservationSaver;
 
 
     ReservationDTO addReservation(AddReservationDTO reservationDTO,
@@ -37,9 +39,7 @@ public class OrganizationReservationService {
         boolean checkIfReservationIsPossible = ReservationValidator.checkIfReservationIsPossible(reservationDTO, organization, user, id, stationList);
         if (!checkIfReservationIsPossible) throw new ReservationIsNotPossible();
 
-        ReservationSaver saver = new ReservationSaver(reservationRepository, reservationMapper);
-
-        return saver.saveReservation(user, stationList, reservationDTO);
+        return reservationSaver.saveReservation(user, stationList, reservationDTO);
     }
 
     List<ReservationDTO> viewReservations(Long id, String email) {
@@ -49,6 +49,6 @@ public class OrganizationReservationService {
         user.getOrganizationList().stream().filter(org -> org.getId().equals(id)).findFirst().orElseThrow(OrganizationNotFoundException::new);
 
         return reservationRepository.reservationsByOrganization(organization.getId())
-                .stream().map(reservationMapper::map).toList();
+                .stream().map(autoMapper::mapToReservationDto).toList();
     }
 }

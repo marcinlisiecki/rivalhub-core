@@ -1,13 +1,11 @@
 package com.rivalhub.user;
 
+import com.rivalhub.common.AutoMapper;
 import com.rivalhub.email.EmailService;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationCreateDTO;
-import com.rivalhub.organization.OrganizationDTOMapper;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,7 +14,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,14 +21,14 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UserDtoMapper userDtoMapper;
+    private final AutoMapper autoMapper;
     private final EmailService emailService;
 
 
     UserDto register(UserDto userDto) {
         userRepository.findByEmail(userDto.getEmail()).ifPresent(userData -> {throw new UserAlreadyExistsException();});
 
-        UserData user = userDtoMapper.map(userDto);
+        UserData user = autoMapper.mapToUserData(userDto);
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         user.setJoinTime(LocalDateTime.now());
         user.setActivationHash(passwordEncoder.encode(userDto.getEmail())
@@ -40,11 +37,11 @@ public class UserService {
                 .replace(".", "")
         );
         user = userRepository.save(user);
-        return userDtoMapper.map(user);
+        return autoMapper.mapToUserDto(user);
     }
 
     UserDetailsDto findUserById(Long id) {
-        return userDtoMapper.mapToUserDetailsDto(userRepository.findById(id).orElseThrow(UserNotFoundException::new));
+        return autoMapper.mapToUserDetails(userRepository.findById(id).orElseThrow(UserNotFoundException::new));
     }
 
     List<OrganizationCreateDTO> findOrganizationsByUser(String email) {
@@ -59,7 +56,7 @@ public class UserService {
     }
 
     @Transactional
-    void confirmUserEmail(String hash) {
+    public void confirmUserEmail(String hash) {
         UserData user = userRepository.findByActivationHash(hash).orElseThrow(UserNotFoundException::new);
         user.setActivationTime(LocalDateTime.now());
     }
@@ -67,7 +64,7 @@ public class UserService {
 
     @Scheduled(cron = "0 0 12 * * *")
     @Transactional
-    void deleteInactivatedUsers() {
+    public void deleteInactivatedUsers() {
         LocalDateTime deleteTime = LocalDateTime.now().minusDays(1);
         userRepository.deleteInactiveUsers(deleteTime);
     }

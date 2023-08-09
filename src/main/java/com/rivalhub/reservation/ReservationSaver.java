@@ -1,5 +1,6 @@
 package com.rivalhub.reservation;
 
+import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
@@ -14,8 +15,7 @@ import java.util.List;
 @Component
 public class ReservationSaver {
     private final ReservationRepository reservationRepository;
-
-    private final ReservationMapper reservationMapper;
+    private final AutoMapper autoMapper;
 
 
     public ReservationDTO saveReservation(UserData user, List<Station> stationList, AddReservationDTO reservationDTO){
@@ -26,6 +26,6 @@ public class ReservationSaver {
         stationList.forEach(station -> station.addReservation(reservation));
         reservationRepository.save(reservation);
 
-        return reservationMapper.map(reservation);
+        return autoMapper.mapToReservationDto(reservation);
     }
 }

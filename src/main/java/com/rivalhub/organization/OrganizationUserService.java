@@ -1,5 +1,6 @@
 package com.rivalhub.organization;
 
+import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.InvitationHelper;
 import com.rivalhub.common.PaginationHelper;
 import com.rivalhub.email.EmailService;
@@ -8,7 +9,6 @@ import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.exception.WrongInvitationException;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
-import com.rivalhub.user.UserDtoMapper;
 import com.rivalhub.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,17 +20,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrganizationUserService {
     private final OrganizationRepository organizationRepository;
-    private final UserDtoMapper userDtoMapper;
+    private final AutoMapper autoMapper;
     private final UserRepository userRepository;
-    private final OrganizationDTOMapper organizationDTOMapper;
     private final EmailService emailService;
 
     Page<?> findUsersByOrganization(Long id, int page, int size) {
         Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
 
-        List<UserDetailsDto> allUsers = organization.getUserList()
-                .stream().map(userDtoMapper::mapToUserDisplayDTO).toList();
-        return PaginationHelper.toPage(page, size, allUsers);
+//        List<UserDetailsDto> allUsers = organization.getUserList()
+//                .stream().map(::mapToUserDisplayDTO).toList();
+//        return PaginationHelper.toPage(page, size, allUsers);
+        return null;
     }
 
     OrganizationDTO addUser(Long id, String hash, String email) {
@@ -44,7 +44,7 @@ public class OrganizationUserService {
         UserOrganizationService.addUser(user, organization);
         Organization save = organizationRepository.save(organization);
 
-        return organizationDTOMapper.map(save);
+        return autoMapper.mapToOrganizationDto(save);
     }
 
     private UserData checkIfUserIsInOrganization(UserData user, Organization organization) {
@@ -55,7 +55,7 @@ public class OrganizationUserService {
     OrganizationDTO addUserThroughEmail(Long id, String email) {
         OrganizationDTO organizationDTO = organizationRepository
                 .findById(id)
-                .map(organizationDTOMapper::map)
+                .map(autoMapper::mapToOrganizationDto)
                 .orElseThrow(OrganizationNotFoundException::new);
         String subject = "Invitation to " + organizationDTO.getName();
 
