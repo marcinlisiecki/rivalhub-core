@@ -1,23 +1,14 @@
 package com.rivalhub.organization;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
-import lombok.*;
-
-@ToString
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrganizationCreateDTO {
     private Long id;
-
     private String name;
-
-
     private String imageUrl;
-
-    public OrganizationCreateDTO(String name, String imageUrl) {
-        this.name = name;
-        this.imageUrl = imageUrl;
-    }
 }
