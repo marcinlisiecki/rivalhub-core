@@ -3,6 +3,7 @@ package com.rivalhub.organization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
+import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.MergePatcher;
 import com.rivalhub.event.EventType;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
@@ -27,7 +28,7 @@ public class OrganizationStationService {
     private final OrganizationRepository organizationRepository;
     private final UserRepository userRepository;
     private final StationRepository stationRepository;
-    private final NewStationDtoMapper newStationDtoMapper;
+    private final AutoMapper autoMapper;
     private final MergePatcher<NewStationDto> stationMergePatcher;
 
     NewStationDto addStation(NewStationDto newStationDto, Long id, String email) {
@@ -37,14 +38,14 @@ public class OrganizationStationService {
         List<Organization> organizationList = user.getOrganizationList();
         organizationList.stream().filter(org -> org.getId().equals(id)).findFirst().orElseThrow(OrganizationNotFoundException::new);
 
-        Station station = newStationDtoMapper.map(newStationDto);
+        Station station = autoMapper.mapToStation(newStationDto);
         Station savedStation = stationRepository.save(station);
 
         UserOrganizationService.addStation(savedStation, organization);
 
         organizationRepository.save(organization);
 
-        return newStationDtoMapper.map(savedStation);
+        return autoMapper.mapToNewStationDto(savedStation);
     }
 
 
@@ -96,7 +97,7 @@ public class OrganizationStationService {
 
         user.getOrganizationList().stream().filter(org -> org.getId().equals(organizationId)).findFirst().orElseThrow(OrganizationNotFoundException::new);
 
-        return stationRepository.findById(stationId).map(newStationDtoMapper::map).orElseThrow(StationNotFoundException::new);
+        return stationRepository.findById(stationId).map(autoMapper::mapToNewStationDto).orElseThrow(StationNotFoundException::new);
     }
 
     List<Station> findStations(Long organizationId, String email) {
@@ -116,12 +117,12 @@ public class OrganizationStationService {
     }
 
     void updateStation(NewStationDto newStationDto){
-        Station station = newStationDtoMapper.mapNewStationDtoToStation(newStationDto);
+        Station station = autoMapper.mapToStation(newStationDto);
         stationRepository.save(station);
     }
 
     @Transactional
-    void deleteStation(Long stationId, Long organizationId) {
+    public void deleteStation(Long stationId, Long organizationId) {
         Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
         UserOrganizationService.removeStation(stationRepository.findById(stationId).orElseThrow(StationNotFoundException::new), organization);
     }

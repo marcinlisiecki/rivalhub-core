@@ -3,6 +3,7 @@ package com.rivalhub.organization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
+import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.InvitationHelper;
 import com.rivalhub.common.MergePatcher;
 import com.rivalhub.common.PaginationHelper;
@@ -36,12 +37,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OrganizationService {
     private final OrganizationRepository organizationRepository;
-    private final OrganizationDTOMapper organizationDTOMapper;
+    private final AutoMapper autoMapper;
     private final UserRepository userRepository;
     private final MergePatcher<OrganizationDTO> organizationMergePatcher;
 
     OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email){
-        Organization organizationToSave = organizationDTOMapper.map(organizationCreateDTO);
+        Organization organizationToSave = autoMapper.mapToOrganization(organizationCreateDTO);
 
         Organization savedOrganization = organizationRepository.save(organizationToSave);
 
@@ -52,18 +53,18 @@ public class OrganizationService {
         UserOrganizationService.addUser(user, savedOrganization);
         Organization save = organizationRepository.save(savedOrganization);
 
-        return organizationDTOMapper.map(save);
+        return autoMapper.mapToOrganizationDto(save);
     }
 
     OrganizationDTO findOrganization(Long id){
         return organizationRepository
                 .findById(id)
-                .map(organizationDTOMapper::map)
+                .map(autoMapper::mapToOrganizationDto)
                 .orElseThrow(OrganizationNotFoundException::new);
     }
 
     void updateOrganization(OrganizationDTO organizationDTO){
-        Organization organization = organizationDTOMapper.map(organizationDTO);
+        Organization organization = autoMapper.mapToOrganization(organizationDTO);
         organizationRepository.save(organization);
     }
 
@@ -79,7 +80,7 @@ public class OrganizationService {
 
         organization.setInvitationHash(hash);
         organizationRepository.save(organization);
-        return InvitationHelper.createInvitationLink(organizationDTOMapper.map(organization));
+        return InvitationHelper.createInvitationLink(autoMapper.mapToOrganizationDto(organization));
     }
 
     void updateOrganization(Long id, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
