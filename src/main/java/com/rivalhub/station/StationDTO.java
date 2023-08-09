@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class NewStationDto {
+public class StationDTO {
     private Long id;
     private EventType type;
     private String name;

@@ -6,7 +6,7 @@ import com.rivalhub.organization.OrganizationDTO;
 import com.rivalhub.reservation.AddReservationDTO;
 import com.rivalhub.reservation.Reservation;
 import com.rivalhub.reservation.ReservationDTO;
-import com.rivalhub.station.NewStationDto;
+import com.rivalhub.station.StationDTO;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
@@ -39,14 +39,14 @@ public class AutoMapper {
         return userDetailsDto;
     }
 
-    public Station mapToStation(NewStationDto newStationDto){
-        Station station = modelMapper.map(newStationDto,Station.class);
+    public Station mapToStation(StationDTO stationDTO){
+        Station station = modelMapper.map(stationDTO,Station.class);
         return station;
     }
 
-    public NewStationDto mapToNewStationDto(Station station){
-        NewStationDto newStationDto = modelMapper.map(station,NewStationDto.class);
-        return newStationDto;
+    public StationDTO mapToNewStationDto(Station station){
+        StationDTO stationDTO = modelMapper.map(station, StationDTO.class);
+        return stationDTO;
     }
 
     public Reservation mapToReservation(ReservationDTO reservationDTO){

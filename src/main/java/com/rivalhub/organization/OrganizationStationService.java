@@ -23,39 +23,33 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OrganizationStationService {
-    private final UserRepository userRepository;
-    private final OrganizationRepository organizationRepository;
-    private final StationRepository stationRepository;
+    private final RepositoryManager repositoryManager;
     private final AutoMapper autoMapper;
-    private final MergePatcher<NewStationDto> stationMergePatcher;
+    private final MergePatcher<StationDTO> stationMergePatcher;
     private final OrganizationStationValidator validator;
 
-    NewStationDto addStation(NewStationDto newStationDto, Long id, String email) {
-        Organization organization = organizationRepository.findById(id)
-                .orElseThrow(OrganizationNotFoundException::new);
+    StationDTO addStation(StationDTO stationDTO, Long id, String email) {
+        Organization organization = repositoryManager.findOrganization(id);
 
-        UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        UserData user = repositoryManager.findUser(email);
         List<Organization> organizationList = user.getOrganizationList();
         organizationList
                 .stream().filter(org -> org.getId().equals(id))
                 .findFirst()
                 .orElseThrow(OrganizationNotFoundException::new);
 
-        Station station = autoMapper.mapToStation(newStationDto);
-        Station savedStation = stationRepository.save(station);
+        Station station = autoMapper.mapToStation(stationDTO);
+        UserOrganizationService.addStation(station, organization);
 
-        UserOrganizationService.addStation(savedStation, organization);
+        station = repositoryManager.save(station);
 
-        organizationRepository.save(organization);
-
-        return autoMapper.mapToNewStationDto(savedStation);
+        return autoMapper.mapToNewStationDto(station);
     }
 
 
     List<Station> viewStations(Long organizationId, String start, String end, EventType type,
                                boolean onlyAvailable, String email, boolean showInactive) {
-        UserData user = userRepository.findByEmail(email)
-                .orElseThrow(UserNotFoundException::new);
+        UserData user = repositoryManager.findUser(email);
 
         Organization organization = validator.checkIfViewStationIsPossible(organizationId, user);
 
@@ -96,33 +90,30 @@ public class OrganizationStationService {
         return availableStations;
     }
 
-    NewStationDto findStation(Long stationId){
-        return stationRepository.findById(stationId)
-                .map(autoMapper::mapToNewStationDto)
-                .orElseThrow(StationNotFoundException::new);
+    StationDTO findStation(Long stationId){
+        return autoMapper.mapToNewStationDto(repositoryManager.findStationById(stationId));
     }
 
     public void updateStation(Long organizationId, Long stationId, String email, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
-        UserData user = userRepository.findByEmail(email)
-                .orElseThrow(UserNotFoundException::new);
+        UserData user = repositoryManager.findUser(email);
 
         validator.checkIfUpdateStationIsPossible(organizationId, user);
 
-        NewStationDto station = findStation(stationId);
-        NewStationDto stationPatched = stationMergePatcher.patch(patch, station, NewStationDto.class);
+        StationDTO station = findStation(stationId);
+        StationDTO stationPatched = stationMergePatcher.patch(patch, station, StationDTO.class);
         stationPatched.setId(stationId);
         updateStation(stationPatched);
     }
 
-    void updateStation(NewStationDto newStationDto){
-        Station station = autoMapper.mapToStation(newStationDto);
-        stationRepository.save(station);
+    void updateStation(StationDTO stationDTO){
+        Station station = autoMapper.mapToStation(stationDTO);
+        repositoryManager.save(station);
     }
 
     @Transactional
     public void deleteStation(Long stationId, Long organizationId) {
-        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
-        UserOrganizationService.removeStation(stationRepository.findById(stationId).orElseThrow(StationNotFoundException::new), organization);
+        Organization organization = repositoryManager.findOrganizationById(organizationId);
+        UserOrganizationService.removeStation(repositoryManager.findStationById(stationId), organization);
     }
 
     private List<Station> filterForActiveStations(List<Station> stationList){

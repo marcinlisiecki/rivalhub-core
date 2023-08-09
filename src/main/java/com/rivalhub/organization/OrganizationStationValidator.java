@@ -15,7 +15,6 @@ public class OrganizationStationValidator {
         return userIsInOrganization(organization, user);
     }
 
-
     private Organization organizationExists(Long id) {
         return organizationRepository.findById(id)
             .orElseThrow(OrganizationNotFoundException::new);
