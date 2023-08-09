@@ -1,15 +1,18 @@
 package com.rivalhub.common;
 
 import com.rivalhub.organization.OrganizationDTO;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class InvitationHelper {
-    public static String createInvitationLink(OrganizationDTO organizationDTO){
+    @Value("${app.frontUrl}")
+    private String url;
+    public String createInvitationLink(OrganizationDTO organizationDTO){
         StringBuilder builder = new StringBuilder();
         builder.setLength(0);
-        ServletUriComponentsBuilder uri = ServletUriComponentsBuilder.fromCurrentRequest();
-        uri.replacePath("");
-        builder.append(uri.toUriString()).append("/")
+        builder.append(url)
+                .append("/organizations/")
                 .append(organizationDTO.getId())
                 .append("/invitation/")
                 .append(organizationDTO.getInvitationHash());

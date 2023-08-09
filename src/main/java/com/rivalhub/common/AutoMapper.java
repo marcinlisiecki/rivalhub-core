@@ -23,17 +23,14 @@ import org.springframework.stereotype.Component;
 public class AutoMapper {
     private final ModelMapper modelMapper;
     public UserData mapToUserData(UserDto userDto){
-        UserData userData = modelMapper.map(userDto, UserData.class);
-        return userData;
+        return modelMapper.map(userDto, UserData.class);
     }
     public UserDto mapToUserDto(UserData userData){
-        UserDto userDto = modelMapper.map(userData, UserDto.class);
-        return userDto;
+        return modelMapper.map(userData, UserDto.class);
     }
 
     public UserData mapToUserData(UserDetails userDetailsDto){
-        UserData userData = modelMapper.map(userDetailsDto, UserData.class);
-        return  userData;
+        return modelMapper.map(userDetailsDto, UserData.class);
     }
 
     public UserDetailsDto mapToUserDetails(UserData userData){
@@ -42,47 +39,43 @@ public class AutoMapper {
     }
 
     public Station mapToStation(StationDTO stationDTO){
-        Station station = modelMapper.map(stationDTO,Station.class);
-        return station;
+        return modelMapper.map(stationDTO,Station.class);
     }
 
     public StationDTO mapToNewStationDto(Station station){
-        StationDTO stationDTO = modelMapper.map(station, StationDTO.class);
-        return stationDTO;
+        return modelMapper.map(station, StationDTO.class);
     }
 
     public Reservation mapToReservation(ReservationDTO reservationDTO){
-        Reservation reservation = modelMapper.map(reservationDTO,Reservation.class);
-        return reservation;
+        return modelMapper.map(reservationDTO,Reservation.class);
     }
 
     public Reservation mapToReservation(AddReservationDTO addReservationDTO){
-        Reservation reservation = modelMapper.map(addReservationDTO,Reservation.class);
-        return reservation;
+        return modelMapper.map(addReservationDTO,Reservation.class);
     }
 
     public Organization mapToOrganization(OrganizationDTO organizationDTO){
-        Organization organization = modelMapper.map(organizationDTO,Organization.class);
-        return organization;
+        return modelMapper.map(organizationDTO,Organization.class);
     }
 
     public Organization mapToOrganization(OrganizationCreateDTO organizationCreateDTO){
-        Organization organization = modelMapper.map(organizationCreateDTO,Organization.class);
-        return organization;
+        return modelMapper.map(organizationCreateDTO,Organization.class);
     }
 
 
     public OrganizationDTO mapToOrganizationDto(Organization organization) {
-        OrganizationDTO organizationDTO = modelMapper.map(organization,OrganizationDTO.class);
-        return organizationDTO;
+        return modelMapper.map(organization,OrganizationDTO.class);
     }
 
 
     public ReservationDTO mapToReservationDto(Reservation reservation) {
-        ReservationDTO reservationDTO = modelMapper.map(reservation,ReservationDTO.class);
-        return reservationDTO;
+        return modelMapper.map(reservation,ReservationDTO.class);
     }
 
+    public UserDetailsDto mapToUserDisplayDTO(UserData userData) {
+        return modelMapper.map(userData, UserDetailsDto.class);
+
+    }
     public PingPongEvent mapToPingPongEvent(EventDto eventDto){
         PingPongEvent pingPongEvent = modelMapper.map(eventDto,PingPongEvent.class);
         return pingPongEvent;

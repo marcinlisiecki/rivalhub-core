@@ -11,6 +11,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -34,7 +37,11 @@ public class AuthService {
                 .findByEmail(loginRequestDto.getEmail())
                 .orElseThrow(UserNotFoundException::new);
 
-        String jwtToken = jwtService.generateToken(userData);
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("id", userData.getId());
+        extraClaims.put("name", userData.getName());
+
+        String jwtToken = jwtService.generateToken(userData, extraClaims);
         return new LoginResponseDto(jwtToken);
     }
 }
