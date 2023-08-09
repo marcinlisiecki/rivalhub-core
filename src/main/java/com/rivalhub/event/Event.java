@@ -5,9 +5,11 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.reservation.Reservation;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
+import javassist.expr.NewArray;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -29,4 +31,6 @@ public class Event {
     List<UserData> participants;
     @ManyToOne
     Organization organization;
+
+
 }

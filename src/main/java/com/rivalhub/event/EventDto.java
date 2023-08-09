@@ -20,6 +20,6 @@ public class EventDto {
     LocalDateTime startTime;
     LocalDateTime endTime;
     UserDto host;
-    List<UserDto> participants;
+    List<Long> participants;
     OrganizationDTO organization;
 }

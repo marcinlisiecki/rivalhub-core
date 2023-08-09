@@ -18,9 +18,9 @@ public class EventService {
 
     final PingPongService pingPongService;
     public EventDto findEvent(long eventId, String type) {
-         final  String PING_PONG = EventType.PING_PONG.getType();
+         final  String PING_PONG = EventType.PING_PONG.name();
 
-        if(type.equals(EventType.PING_PONG.getType()))
+        if(type.equals(EventType.PING_PONG.name()))
             return pingPongService.findEvent(eventId);
 
         throw new InvalidPathParamException();
@@ -28,20 +28,21 @@ public class EventService {
 
     public EventDto addEvent(long id, EventDto eventDto, String type) {
 
-        if(type.equals(EventType.PING_PONG.getType())) {
+        if(type.equals(EventType.PING_PONG.name())) {
             EventDto savedEvent = pingPongService.addEvent(id, eventDto);
+            return savedEvent;
         }
         throw new InvalidPathParamException();
     }
 
     public List<EventDto> findAllEvents(long id, String type) {
         List<EventDto> eventDtoList = new ArrayList<>();
-        if(type.equals(EventType.ALL.getType())) {
+        if(type.equals(EventType.ALL.name())) {
             eventDtoList.addAll(pingPongService.findAllEvents(id));
             //Dodać reszte
             return eventDtoList;
         }
-        if(type.equals(EventType.PING_PONG.getType())) {
+        if(type.equals(EventType.PING_PONG.name())) {
                 eventDtoList.addAll(pingPongService.findAllEvents(id));
                 return eventDtoList;
         }

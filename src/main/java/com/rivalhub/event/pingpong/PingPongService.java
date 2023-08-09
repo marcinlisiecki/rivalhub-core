@@ -10,6 +10,10 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationDTO;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.user.UserNotFoundException;
+import com.rivalhub.user.UserRepository;
+import com.rivalhub.user.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,32 +30,37 @@ public class PingPongService implements EventServiceInterface {
     final AutoMapper autoMapper;
     final OrganizationRepository organizationRepository;
     final PingPongEventRepository pingPongEventRepository;
+    final UserRepository userRepository;
 
     @Override
+    @Transactional
     public EventDto addEvent(Long organizationId, EventDto eventDto) {
-        OrganizationDTO organization = organizationRepository.findById(organizationId).map(autoMapper::mapToOrganizationDto).orElseThrow(OrganizationNotFoundException::new);
-        eventDto.setOrganization(organization);
-        PingPongEvent savedEvent = pingPongEventRepository.save(autoMapper.mapToPingPongEvent(eventDto));
+        PingPongEvent pingPongEvent = autoMapper.mapToPingPongEvent(eventDto);
+        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+        pingPongEvent.setOrganization(organization);
+        pingPongEvent.setParticipants(new ArrayList<>());
+        for (Long id:eventDto.getParticipants()) {
+            pingPongEvent.getParticipants().add(userRepository.findById(id).orElseThrow(UserNotFoundException::new));
+        }
+        PingPongEvent savedEvent = pingPongEventRepository.save(pingPongEvent);
+
         return autoMapper.mapToEventDto(savedEvent);
     }
 
     @Override
     public List<EventDto> findAllEvents(long id) {
-        List<EventDto> eventDtos = new ArrayList<>();
         Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
-        eventDtos = pingPongEventRepository.findAllByOrganization(organization)
+        return pingPongEventRepository.findAllByOrganization(organization)
                 .stream()
                 .map(autoMapper::mapToEventDto)
                 .collect(Collectors.toList());
-        return eventDtos;
     }
 
 
     public EventDto findEvent(long eventId) {
-        EventDto eventDto = pingPongEventRepository
+        return pingPongEventRepository
                 .findById(eventId)
                 .map(autoMapper::mapToEventDto)
                 .orElseThrow(EventNotFoundException::new);
-        return eventDto;
     }
 }
