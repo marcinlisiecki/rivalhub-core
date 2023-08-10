@@ -44,7 +44,6 @@ public class OrganizationStationService {
                 .orElseThrow(OrganizationNotFoundException::new);
 
         Station station = autoMapper.mapToStation(stationDTO);
-        station.setActive(true);
         UserOrganizationService.addStation(station, organization);
 
         station = repositoryManager.save(station);
