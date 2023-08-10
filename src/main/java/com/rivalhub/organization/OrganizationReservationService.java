@@ -26,7 +26,7 @@ public class OrganizationReservationService {
     private final ReservationSaver reservationSaver;
 
 
-    ReservationDTO addReservation(AddReservationDTO reservationDTO,
+    public ReservationDTO addReservation(AddReservationDTO reservationDTO,
                                          Long id, String email) {
         Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
         UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);

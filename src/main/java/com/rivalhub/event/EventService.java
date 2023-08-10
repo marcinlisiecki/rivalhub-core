@@ -18,8 +18,6 @@ public class EventService {
 
     final PingPongService pingPongService;
     public EventDto findEvent(long eventId, String type) {
-         final  String PING_PONG = EventType.PING_PONG.name();
-
         if(type.equals(EventType.PING_PONG.name()))
             return pingPongService.findEvent(eventId);
 

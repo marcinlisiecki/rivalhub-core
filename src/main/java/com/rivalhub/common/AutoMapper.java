@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AutoMapper {
     private final ModelMapper modelMapper;
+
     public UserData mapToUserData(UserDto userDto){
         return modelMapper.map(userDto, UserData.class);
     }
@@ -77,12 +78,10 @@ public class AutoMapper {
 
     }
     public PingPongEvent mapToPingPongEvent(EventDto eventDto){
-        PingPongEvent pingPongEvent = modelMapper.map(eventDto,PingPongEvent.class);
-        return pingPongEvent;
+        return modelMapper.map(eventDto,PingPongEvent.class);
     }
 
     public EventDto mapToEventDto(PingPongEvent pingPongEvent){
-        EventDto eventDto = modelMapper.map(pingPongEvent,EventDto.class);
-        return eventDto;
+        return modelMapper.map(pingPongEvent,EventDto.class);
     }
 }

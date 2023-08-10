@@ -20,7 +20,7 @@ public class EventController {
         return ResponseEntity.ok(eventService.findEvent(eventId,type));
     }
 
-    @PostMapping("/{id}/events/")
+    @PostMapping("/{id}/events")
     public ResponseEntity<?> addEvent(@PathVariable long id, @RequestBody EventDto eventDto, @PathParam("type") String type){
         EventDto savedEvent = eventService.addEvent(id,eventDto,type);
         URI savedEventUri = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -31,7 +31,7 @@ public class EventController {
         return ResponseEntity.created(savedEventUri).build();
     }
 
-    @GetMapping("/{id}/events/")
+    @GetMapping("/{id}/events")
     public ResponseEntity<?> findAllEvents(@PathVariable long id,@PathParam("type") String type){
         return ResponseEntity.ok(eventService.findAllEvents(id,type));
     }
