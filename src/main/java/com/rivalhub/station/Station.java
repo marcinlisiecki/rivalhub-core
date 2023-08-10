@@ -35,7 +35,7 @@ public class Station {
     private String name;
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, mappedBy = "stationList")
-    @JsonBackReference
+    @JsonBackReference("reservation-stations")
     private List<Reservation> reservationList = new ArrayList<>();
 
 //    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})

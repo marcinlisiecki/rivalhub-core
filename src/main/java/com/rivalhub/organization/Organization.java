@@ -1,6 +1,5 @@
 package com.rivalhub.organization;
 
-import com.rivalhub.reservation.Reservation;
 import com.rivalhub.station.Station;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.common.ErrorMessages;
@@ -11,7 +10,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.engine.internal.Cascade;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,7 +41,7 @@ public class Organization {
     private LocalDateTime addedDate;
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JsonManagedReference
+    @JsonManagedReference("user-organizations")
     @JoinTable(name = "organization_users",
             joinColumns = @JoinColumn(name = "organization_id", referencedColumnName = "organization_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id")

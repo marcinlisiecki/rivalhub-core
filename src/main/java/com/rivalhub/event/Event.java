@@ -1,14 +1,15 @@
 package com.rivalhub.event;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.reservation.Reservation;
-import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
+import javassist.expr.NewArray;
 import lombok.Data;
-import org.apache.catalina.User;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -16,15 +17,20 @@ import java.util.List;
 @MappedSuperclass
 public class Event {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long eventId;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
+    @JsonManagedReference
+    @JoinColumn(name = "reservation_id")
     Reservation reservation;
     LocalDateTime startTime;
     LocalDateTime endTime;
-
-//    UserData host;
+    @ManyToOne
+    UserData host;
     @OneToMany
     List<UserData> participants;
     @ManyToOne
     Organization organization;
+
+
 }

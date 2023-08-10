@@ -50,11 +50,11 @@ public class UserData implements UserDetails {
     private String password;
 
     @ManyToMany(mappedBy = "userList", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JsonBackReference
+    @JsonBackReference("user-organizations")
     private List<Organization> organizationList = new ArrayList<>();
 
     @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, mappedBy = "userData")
-    @JsonBackReference
+    @JsonBackReference("user-reservations")
     private List<Reservation> reservationList = new ArrayList<>();
 
 
