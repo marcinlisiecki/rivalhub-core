@@ -1,6 +1,7 @@
 package com.rivalhub.organization;
 
 import com.rivalhub.common.AutoMapper;
+import com.rivalhub.event.Event;
 import com.rivalhub.event.EventType;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.user.UserData;
@@ -8,7 +9,9 @@ import com.rivalhub.user.UserDetailsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,5 +56,20 @@ public class OrganizationSettingsService {
         OrganizationSettingsValidator.userIsInOrganization(organization, user);
 
         return organization.getEventTypeInOrganization();
+    }
+
+    EventType addEventType(String username, Long organizationId, EventType eventType) {
+        UserData loggedUser = repositoryManager.findUserByEmail(username);
+        Organization organization = repositoryManager.findOrganizationById(organizationId);
+
+        OrganizationSettingsValidator.checkIfUserIsAdmin(loggedUser, organization);
+        UserOrganizationService.addEventType(organization, eventType);
+        repositoryManager.save(organization);
+
+        return eventType;
+    }
+
+    public Set<EventType> allEventTypeInApp() {
+        return Arrays.stream(EventType.values()).collect(Collectors.toSet());
     }
 }

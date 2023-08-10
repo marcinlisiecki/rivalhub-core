@@ -7,9 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,6 +34,18 @@ public class OrganizationSettingsController {
     ResponseEntity<?> getEventTypesInOrganization(@AuthenticationPrincipal UserDetails userDetails,
                                                   @PathVariable Long organizationId){
         return ResponseEntity.ok(organizationSettingsService.getEventTypesInOrganization(userDetails.getUsername(), organizationId));
+    }
+
+    @PostMapping("{organizationId}/admin/events")
+    ResponseEntity<?> addEventType(@AuthenticationPrincipal UserDetails userDetails,
+                                   @PathVariable Long organizationId,
+                                   @RequestParam("type") EventType eventType){
+        return ResponseEntity.ok(organizationSettingsService.addEventType(userDetails.getUsername(), organizationId, eventType));
+    }
+
+    @GetMapping("/events")
+    ResponseEntity<?> allEventTypeInApp(){
+        return ResponseEntity.ok(organizationSettingsService.allEventTypeInApp());
     }
 
 }

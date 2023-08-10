@@ -43,5 +43,7 @@ public class UserOrganizationService {
         organization.getEventTypeInOrganization().remove(eventType);
     }
 
-
+    public static void addEventType(Organization organization, EventType eventType) {
+        organization.getEventTypeInOrganization().add(eventType);
+    }
 }
