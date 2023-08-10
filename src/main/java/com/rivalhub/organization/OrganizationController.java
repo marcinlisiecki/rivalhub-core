@@ -33,9 +33,10 @@ public class OrganizationController {
     }
 
     @PatchMapping("/{id}")
-    ResponseEntity<?> updateOrganization(@PathVariable Long id, @RequestBody JsonMergePatch patch)
+    ResponseEntity<?> updateOrganization(@PathVariable Long id, @RequestBody JsonMergePatch patch,
+                                         @AuthenticationPrincipal UserDetails userDetails)
             throws JsonPatchException, JsonProcessingException {
-        organizationService.updateOrganization(id, patch);
+        organizationService.updateOrganization(id, patch, userDetails.getUsername());
         return ResponseEntity.noContent().build();
     }
 

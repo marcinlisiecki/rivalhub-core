@@ -32,8 +32,7 @@ public class AutoMapper {
     }
 
     public UserDetailsDto mapToUserDetails(UserData userData){
-        UserDetailsDto userDetailsDto = modelMapper.map(userData,UserDetailsDto.class);
-        return userDetailsDto;
+        return modelMapper.map(userData,UserDetailsDto.class);
     }
 
     public Station mapToStation(StationDTO stationDTO){

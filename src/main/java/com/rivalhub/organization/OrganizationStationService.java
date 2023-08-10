@@ -27,14 +27,15 @@ public class OrganizationStationService {
     private final OrganizationStationValidator validator;
 
     StationDTO addStation(StationDTO stationDTO, Long id, String email) {
-        Organization organization = repositoryManager.findOrganizationById(id);
-
         UserData user = repositoryManager.findUserByEmail(email);
         List<Organization> organizationList = user.getOrganizationList();
-        organizationList
+
+        Organization organization = organizationList
                 .stream().filter(org -> org.getId().equals(id))
                 .findFirst()
                 .orElseThrow(OrganizationNotFoundException::new);
+
+        OrganizationSettingsValidator.checkIfUserIsAdmin(user, organization);
 
         Station station = autoMapper.mapToStation(stationDTO);
         UserOrganizationService.addStation(station, organization);
@@ -100,17 +101,14 @@ public class OrganizationStationService {
         StationDTO station = findStation(stationId);
         StationDTO stationPatched = stationMergePatcher.patch(patch, station, StationDTO.class);
         stationPatched.setId(stationId);
-        updateStation(stationPatched);
-    }
 
-    void updateStation(StationDTO stationDTO){
-        Station station = autoMapper.mapToStation(stationDTO);
-        repositoryManager.save(station);
+        repositoryManager.save(autoMapper.mapToStation(stationPatched));
     }
 
     @Transactional
-    public void deleteStation(Long stationId, Long organizationId) {
+    public void deleteStation(Long stationId, Long organizationId, String email) {
         Organization organization = repositoryManager.findOrganizationById(organizationId);
+        OrganizationSettingsValidator.checkIfUserIsAdmin(repositoryManager.findUserByEmail(email), organization);
         UserOrganizationService.removeStation(repositoryManager.findStationById(stationId), organization);
     }
 

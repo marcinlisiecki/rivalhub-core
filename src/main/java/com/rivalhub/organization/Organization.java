@@ -53,23 +53,23 @@ public class Organization {
 
     @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     @JoinTable(
-            name = "ORGANIZATION_STATION_LIST",
+            name = "organization_station_list",
             joinColumns = @JoinColumn(
-                    name = "ORGANIZATION_ID",
+                    name = "organization_id",
                     referencedColumnName = "organization_id"
             ),
             inverseJoinColumns = @JoinColumn(
-                    name = "STATION_LIST_ID",
+                    name = "station_list_id",
                     referencedColumnName = "id"
             )
     )
-    private List<Station> stationList;
+    private List<Station> stationList =  new ArrayList<>();
 
     @ElementCollection(targetClass = EventType.class)
     @Enumerated(EnumType.STRING)
     @CollectionTable
     private Set<EventType> eventTypeInOrganization = new HashSet<>();
 
-    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<UserData> adminUsers = new HashSet<>();
 }

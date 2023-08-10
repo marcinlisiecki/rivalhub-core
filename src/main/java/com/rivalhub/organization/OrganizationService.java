@@ -37,7 +37,6 @@ public class OrganizationService {
 
         Organization save = organizationRepository.save(savedOrganization);
 
-
         return autoMapper.mapToOrganizationDto(save);
     }
 
@@ -48,15 +47,12 @@ public class OrganizationService {
                 .orElseThrow(OrganizationNotFoundException::new);
     }
 
-    void updateOrganization(OrganizationDTO organizationDTO){
-        Organization organization = autoMapper.mapToOrganization(organizationDTO);
-        organizationRepository.save(organization);
-    }
-
     void deleteOrganization(Long id) {
         organizationRepository.deleteById(id);
     }
 
+    //TODO tylko admin może stworzyć link
+    //TODO tylko admin może widzieć link chyba że jest inaczej w ustawieniach organizacji
     String createInvitationHash(Long id) {
         Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
 
@@ -68,10 +64,16 @@ public class OrganizationService {
         return invitationHelper.createInvitationLink(autoMapper.mapToOrganizationDto(organization));
     }
 
-    void updateOrganization(Long id, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
+    void updateOrganization(Long id, JsonMergePatch patch, String email) throws JsonPatchException, JsonProcessingException {
+        UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+
+        OrganizationSettingsValidator.checkIfUserIsAdmin(user, organization);
+
         OrganizationDTO organizationDTO = findOrganization(id);
         OrganizationDTO patchedOrganizationDto = organizationMergePatcher.patch(patch, organizationDTO, OrganizationDTO.class);
         patchedOrganizationDto.setId(id);
-        updateOrganization(patchedOrganizationDto);
+
+        organizationRepository.save(OrganizationMapper.map(patchedOrganizationDto, organization));
     }
 }

@@ -31,6 +31,6 @@ public class OrganizationStationValidator {
     public void checkIfUpdateStationIsPossible(Long organizationId, UserData user) {
         Organization organization = organizationExists(organizationId);
         userIsInOrganization(organization, user);
-        //TODO sprawdzanie czy user to admin
+        OrganizationSettingsValidator.checkIfUserIsAdmin(user, organization);
     }
 }
