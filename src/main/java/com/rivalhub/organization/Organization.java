@@ -1,6 +1,8 @@
 package com.rivalhub.organization;
 
+import com.rivalhub.event.EventType;
 import com.rivalhub.reservation.Reservation;
+import com.rivalhub.settings.Settings;
 import com.rivalhub.station.Station;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.common.ErrorMessages;
@@ -16,6 +18,7 @@ import org.hibernate.engine.internal.Cascade;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @AllArgsConstructor
@@ -64,12 +67,6 @@ public class Organization {
     )
     private List<Station> stationList;
 
-    @Override
-    public String toString() {
-        return "Organization{" +
-                "name='" + name + '\'' +
-                ", invitationLink='" + invitationHash + '\'' +
-                ", imageUrl='" + imageUrl + '\'' +
-                '}';
-    }
+    @OneToOne
+    private Settings settings;
 }

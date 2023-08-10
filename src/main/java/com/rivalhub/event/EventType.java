@@ -1,6 +1,15 @@
 package com.rivalhub.event;
 
-public enum EventType {
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import lombok.Data;
+import lombok.Setter;
+import java.io.Serializable;
 
-    PING_PONG
+public enum EventType {
+    PING_PONG,
+    BILARD,
+    PILKARZYKI,
+    RZUTKI,
+    PODCIAGANIE;
 }
