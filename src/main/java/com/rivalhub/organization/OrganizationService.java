@@ -33,8 +33,10 @@ public class OrganizationService {
 
         UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
 
-        UserOrganizationService.addUser(user, savedOrganization);
+        UserOrganizationService.addAdminUser(user, savedOrganization);
+
         Organization save = organizationRepository.save(savedOrganization);
+
 
         return autoMapper.mapToOrganizationDto(save);
     }

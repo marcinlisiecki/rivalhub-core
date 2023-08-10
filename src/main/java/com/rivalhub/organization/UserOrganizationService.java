@@ -3,6 +3,7 @@ package com.rivalhub.organization;
 
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
+import org.aspectj.weaver.ast.Or;
 
 public class UserOrganizationService {
 
@@ -10,6 +11,12 @@ public class UserOrganizationService {
     public static void addUser(UserData userData, Organization organization){
         userData.getOrganizationList().add(organization);
         organization.getUserList().add(userData);
+    }
+
+    public static void addAdminUser(UserData userData, Organization organization){
+        userData.getOrganizationList().add(organization);
+        organization.getUserList().add(userData);
+        organization.getAdminUsers().add(userData);
     }
 
     public static void addStation(Station station, Organization organization){

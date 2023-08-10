@@ -11,8 +11,6 @@ import com.rivalhub.reservation.AddReservationDTO;
 import com.rivalhub.reservation.ReservationValidator;
 import com.rivalhub.station.*;
 import com.rivalhub.user.UserData;
-import com.rivalhub.user.UserNotFoundException;
-import com.rivalhub.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,9 +27,9 @@ public class OrganizationStationService {
     private final OrganizationStationValidator validator;
 
     StationDTO addStation(StationDTO stationDTO, Long id, String email) {
-        Organization organization = repositoryManager.findOrganization(id);
+        Organization organization = repositoryManager.findOrganizationById(id);
 
-        UserData user = repositoryManager.findUser(email);
+        UserData user = repositoryManager.findUserByEmail(email);
         List<Organization> organizationList = user.getOrganizationList();
         organizationList
                 .stream().filter(org -> org.getId().equals(id))
@@ -49,7 +47,7 @@ public class OrganizationStationService {
 
     List<Station> viewStations(Long organizationId, String start, String end, EventType type,
                                boolean onlyAvailable, String email, boolean showInactive) {
-        UserData user = repositoryManager.findUser(email);
+        UserData user = repositoryManager.findUserByEmail(email);
 
         Organization organization = validator.checkIfViewStationIsPossible(organizationId, user);
 
@@ -95,7 +93,7 @@ public class OrganizationStationService {
     }
 
     public void updateStation(Long organizationId, Long stationId, String email, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
-        UserData user = repositoryManager.findUser(email);
+        UserData user = repositoryManager.findUserByEmail(email);
 
         validator.checkIfUpdateStationIsPossible(organizationId, user);
 

@@ -1,10 +1,8 @@
 package com.rivalhub.common;
 
 import com.rivalhub.common.dto.ErrorMessageDto;
-import com.rivalhub.organization.exception.AlreadyInOrganizationException;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
-import com.rivalhub.organization.exception.ReservationIsNotPossible;
-import com.rivalhub.organization.exception.WrongInvitationException;
+import com.rivalhub.email.EmailNotSentException;
+import com.rivalhub.organization.exception.*;
 import com.rivalhub.station.StationNotFoundException;
 import com.rivalhub.user.UserAlreadyExistsException;
 import com.rivalhub.user.UserNotFoundException;
@@ -24,7 +22,9 @@ public class ResourceNotFoundHandler {
 
             ReservationIsNotPossible.class,
             AlreadyInOrganizationException.class,
-            UserAlreadyExistsException.class
+            UserAlreadyExistsException.class,
+            InsufficientPermissionsException.class,
+            EmailNotSentException.class,
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessageDto handleResourceNotFound(Exception e) {

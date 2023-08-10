@@ -1,8 +1,6 @@
 package com.rivalhub.organization;
 
 import com.rivalhub.event.EventType;
-import com.rivalhub.reservation.Reservation;
-import com.rivalhub.settings.Settings;
 import com.rivalhub.station.Station;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.common.ErrorMessages;
@@ -13,10 +11,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.engine.internal.Cascade;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -70,8 +68,8 @@ public class Organization {
     @ElementCollection(targetClass = EventType.class)
     @Enumerated(EnumType.STRING)
     @CollectionTable
-    private Set<EventType> eventTypeInOrganization;
+    private Set<EventType> eventTypeInOrganization = new HashSet<>();
 
-    @OneToMany
-    private Set<UserData> adminUsers;
+    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    private Set<UserData> adminUsers = new HashSet<>();
 }
