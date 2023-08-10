@@ -28,9 +28,7 @@ public class Config {
                         EventDto::setHost));
         modelMapper.typeMap(PingPongEvent.class, EventDto.class).addMappings(mapper ->
                 mapper.map(PingPongEvent::getStationId,EventDto::setStationList));
-//        modelMapper.typeMap(PingPongEvent.class, EventDto.class).addMappings(mapper ->
-//                mapper.map(src -> src.getOrganization().getId(),
-//                        EventDto::setOrganization));
+
         modelMapper.getConfiguration().setSkipNullEnabled(true);
 
         modelMapper.typeMap(EventDto.class, PingPongEvent.class).addMappings(mapper ->
