@@ -67,6 +67,11 @@ public class Organization {
     )
     private List<Station> stationList;
 
-    @OneToOne
-    private Settings settings;
+    @ElementCollection(targetClass = EventType.class)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable
+    private Set<EventType> eventTypeInOrganization;
+
+    @OneToMany
+    private Set<UserData> adminUsers;
 }
