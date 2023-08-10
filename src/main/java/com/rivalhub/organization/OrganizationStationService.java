@@ -4,25 +4,30 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.common.AutoMapper;
+import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.common.MergePatcher;
 import com.rivalhub.event.EventType;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
-import com.rivalhub.reservation.AddReservationDTO;
-import com.rivalhub.reservation.ReservationValidator;
-import com.rivalhub.station.*;
+import com.rivalhub.station.EventTypeStationsDto;
+import com.rivalhub.station.Station;
+import com.rivalhub.station.StationAvailabilityFinder;
+import com.rivalhub.station.StationDTO;
 import com.rivalhub.user.UserData;
-import com.rivalhub.user.UserNotFoundException;
-import com.rivalhub.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class OrganizationStationService {
+
     private final RepositoryManager repositoryManager;
     private final AutoMapper autoMapper;
     private final MergePatcher<StationDTO> stationMergePatcher;
@@ -39,6 +44,7 @@ public class OrganizationStationService {
                 .orElseThrow(OrganizationNotFoundException::new);
 
         Station station = autoMapper.mapToStation(stationDTO);
+        station.setActive(true);
         UserOrganizationService.addStation(station, organization);
 
         station = repositoryManager.save(station);
@@ -57,40 +63,54 @@ public class OrganizationStationService {
         if (!showInactive) stationList = filterForActiveStations(stationList);
 
         if (onlyAvailable && start != null && end != null)
-            return getAvailableStations(organization, start, end, type, user, stationList);
+            return StationAvailabilityFinder
+                    .getAvailableStations(organization, start, end, type, user, stationList);
 
         return stationList;
     }
 
-    public List<Station> getAvailableStations(Organization organization, String startTime,
-                                              String endTime, EventType type, UserData user, List<Station> stationList) {
-        List<Station> availableStations = new ArrayList<>();
+    List<EventTypeStationsDto> getEventStations(Long organizationId, String start, String end, EventType type) {
+        UserData userData = repositoryManager
+                .findUser(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        stationList.forEach(station -> {
-            AddReservationDTO reservationDTO = new AddReservationDTO();
-            reservationDTO.setStartTime(startTime);
-            reservationDTO.setEndTime(endTime);
-            reservationDTO.setStationsIdList(List.of(station.getId()));
+        Organization organization = repositoryManager.findOrganization(organizationId);
+        List<Station> availableStations = StationAvailabilityFinder
+                .getAvailableStations(organization, start, end, type, userData, organization.getStationList());
+        availableStations = filterForActiveStations(availableStations);
 
-            if (type != null && !station.getType().equals(type)) {
-                return;
-            }
+        LocalDateTime startTime = LocalDateTime.parse(start, FormatterHelper.formatter());
+        LocalDateTime endTime = LocalDateTime.parse(end, FormatterHelper.formatter());
 
-            if (ReservationValidator.checkIfReservationIsPossible(
-                    reservationDTO,
-                    organization,
-                    user,
-                    organization.getId(),
-                    List.of(station))) {
+        List<EventTypeStationsDto> eventStations = new ArrayList<>();
+        Duration timeNeeded = Duration.ofSeconds(ChronoUnit.SECONDS.between(startTime, endTime));
 
-                availableStations.add(station);
-            }
-        });
+        if (type != null) {
+            eventStations.add(getEventTypeStation(type, availableStations, organization, timeNeeded));
+            return eventStations;
+        }
 
-        return availableStations;
+        for (EventType eventType : EventType.values()) {
+            eventStations.add(getEventTypeStation(eventType, availableStations, organization, timeNeeded));
+        }
+
+        return eventStations;
     }
 
-    StationDTO findStation(Long stationId){
+    private EventTypeStationsDto getEventTypeStation(EventType eventType,
+                                                     List<Station> availableStations,
+                                                     Organization organization,
+                                                     Duration timeNeeded) {
+
+        EventTypeStationsDto eventStation = new EventTypeStationsDto();
+        eventStation.setType(eventType);
+        eventStation.setStations(availableStations.stream().map(autoMapper::mapToNewStationDto).toList());
+        eventStation.setFirstAvailable(StationAvailabilityFinder
+                        .getFirstDateAvailableForDuration(organization.getStationList(), timeNeeded));
+
+        return eventStation;
+    }
+
+    StationDTO findStation(Long stationId) {
         return autoMapper.mapToNewStationDto(repositoryManager.findStationById(stationId));
     }
 
@@ -105,7 +125,7 @@ public class OrganizationStationService {
         updateStation(stationPatched);
     }
 
-    void updateStation(StationDTO stationDTO){
+    void updateStation(StationDTO stationDTO) {
         Station station = autoMapper.mapToStation(stationDTO);
         repositoryManager.save(station);
     }
@@ -116,7 +136,7 @@ public class OrganizationStationService {
         UserOrganizationService.removeStation(repositoryManager.findStationById(stationId), organization);
     }
 
-    private List<Station> filterForActiveStations(List<Station> stationList){
+    private List<Station> filterForActiveStations(List<Station> stationList) {
         return stationList
                 .stream().filter(Station::isActive)
                 .toList();
