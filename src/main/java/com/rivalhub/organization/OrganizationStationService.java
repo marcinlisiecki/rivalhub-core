@@ -8,12 +8,9 @@ import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.common.MergePatcher;
 import com.rivalhub.event.EventType;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
-import com.rivalhub.reservation.AddReservationDTO;
-import com.rivalhub.reservation.Reservation;
-import com.rivalhub.reservation.ReservationUtils;
-import com.rivalhub.reservation.ReservationValidator;
 import com.rivalhub.station.EventTypeStationsDto;
 import com.rivalhub.station.Station;
+import com.rivalhub.station.StationAvailabilityFinder;
 import com.rivalhub.station.StationDTO;
 import com.rivalhub.user.UserData;
 import jakarta.transaction.Transactional;
@@ -35,7 +32,6 @@ public class OrganizationStationService {
     private final AutoMapper autoMapper;
     private final MergePatcher<StationDTO> stationMergePatcher;
     private final OrganizationStationValidator validator;
-    private final ReservationUtils reservationUtils;
 
     StationDTO addStation(StationDTO stationDTO, Long id, String email) {
         Organization organization = repositoryManager.findOrganization(id);
@@ -67,7 +63,8 @@ public class OrganizationStationService {
         if (!showInactive) stationList = filterForActiveStations(stationList);
 
         if (onlyAvailable && start != null && end != null)
-            return getAvailableStations(organization, start, end, type, user, stationList);
+            return StationAvailabilityFinder
+                    .getAvailableStations(organization, start, end, type, user, stationList);
 
         return stationList;
     }
@@ -77,7 +74,8 @@ public class OrganizationStationService {
                 .findUser(SecurityContextHolder.getContext().getAuthentication().getName());
 
         Organization organization = repositoryManager.findOrganization(organizationId);
-        List<Station> availableStations = getAvailableStations(organization, start, end, type, userData, organization.getStationList());
+        List<Station> availableStations = StationAvailabilityFinder
+                .getAvailableStations(organization, start, end, type, userData, organization.getStationList());
         availableStations = filterForActiveStations(availableStations);
 
         LocalDateTime startTime = LocalDateTime.parse(start, FormatterHelper.formatter());
@@ -106,73 +104,10 @@ public class OrganizationStationService {
         EventTypeStationsDto eventStation = new EventTypeStationsDto();
         eventStation.setType(eventType);
         eventStation.setStations(availableStations.stream().map(autoMapper::mapToNewStationDto).toList());
-        eventStation.setFirstAvailable(getFirstDateAvailableForDuration(organization, timeNeeded));
+        eventStation.setFirstAvailable(StationAvailabilityFinder
+                        .getFirstDateAvailableForDuration(organization.getStationList(), timeNeeded));
 
         return eventStation;
-    }
-
-    private LocalDateTime getFirstDateAvailableForDuration(Organization organization, Duration timeWindow) {
-        LocalDateTime firstAvailable = null;
-        List<Station> stations = organization.getStationList();
-
-        for (Station station : stations) {
-            LocalDateTime currentStationFirstAvailable = LocalDateTime.now();
-            List<Reservation> reservations = reservationUtils.getSortedReservations(station.getReservationList());
-
-            for (int i = 0; i < reservations.size(); i++) {
-                Reservation currentReservation = reservations.get(i);
-
-                if (i + 1 >= reservations.size()) {
-                    currentStationFirstAvailable = currentReservation.getEndTime().plusSeconds(1);
-                    break;
-                }
-
-                Reservation nextReservation = reservations.get(i + 1);
-
-                if (ChronoUnit.SECONDS.between(
-                        currentReservation.getEndTime().plusSeconds(1),
-                        nextReservation.getStartTime().minusSeconds(1)) >= timeWindow.getSeconds()) {
-
-                    currentStationFirstAvailable = currentReservation.getEndTime().plusSeconds(1);
-                    break;
-                }
-            }
-
-            if (firstAvailable == null || currentStationFirstAvailable.isBefore(firstAvailable)) {
-                firstAvailable = currentStationFirstAvailable;
-            }
-        }
-
-        return firstAvailable;
-    }
-
-    public List<Station> getAvailableStations(Organization organization, String startTime,
-                                              String endTime, EventType type, UserData user, List<Station> stationList) {
-
-        List<Station> availableStations = new ArrayList<>();
-
-        stationList.forEach(station -> {
-            AddReservationDTO reservationDTO = new AddReservationDTO();
-            reservationDTO.setStartTime(startTime);
-            reservationDTO.setEndTime(endTime);
-            reservationDTO.setStationsIdList(List.of(station.getId()));
-
-            if (type != null && !station.getType().equals(type)) {
-                return;
-            }
-
-            if (ReservationValidator.checkIfReservationIsPossible(
-                    reservationDTO,
-                    organization,
-                    user,
-                    organization.getId(),
-                    List.of(station))) {
-
-                availableStations.add(station);
-            }
-        });
-
-        return availableStations;
     }
 
     StationDTO findStation(Long stationId) {
