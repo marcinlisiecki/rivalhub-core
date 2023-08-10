@@ -34,6 +34,7 @@ public class OrganizationService {
         UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
 
         UserOrganizationService.addAdminUser(user, savedOrganization);
+        UserOrganizationService.addAllEventTypes(savedOrganization);
 
         Organization save = organizationRepository.save(savedOrganization);
 

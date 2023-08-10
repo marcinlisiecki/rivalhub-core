@@ -1,9 +1,16 @@
 package com.rivalhub.organization;
 
 
+import com.rivalhub.event.EventType;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import org.aspectj.weaver.ast.Or;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class UserOrganizationService {
 
@@ -26,4 +33,15 @@ public class UserOrganizationService {
     public static void removeStation(Station station, Organization organization){
         organization.getStationList().remove(station);
     }
+
+    public static void addAllEventTypes(Organization organization) {
+        Set<EventType> eventTypes = Arrays.stream(EventType.values()).collect(Collectors.toSet());
+        organization.setEventTypeInOrganization(eventTypes);
+    }
+
+    public static void removeEventType(Organization organization, EventType eventType) {
+        organization.getEventTypeInOrganization().remove(eventType);
+    }
+
+
 }
