@@ -2,16 +2,12 @@ package com.rivalhub.user;
 
 import com.rivalhub.organization.OrganizationDTO;
 import com.rivalhub.auth.JwtTokenDto;
-import com.rivalhub.common.dto.ErrorMessageDto;
-import com.rivalhub.organization.OrganizationCreateDTO;
-import com.rivalhub.email.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.List;
 
 @RestController
