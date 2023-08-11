@@ -24,6 +24,11 @@ public class UserController {
         return ResponseEntity.ok(details);
     }
 
+    @GetMapping("/users/me")
+    private ResponseEntity<UserDetailsDto> getMe(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(userService.getMe(userDetails));
+    }
+
     @PostMapping("/register")
     private ResponseEntity<?> register(@RequestBody UserDto userDto){
         UserDto savedUser = userService.register(userDto);
