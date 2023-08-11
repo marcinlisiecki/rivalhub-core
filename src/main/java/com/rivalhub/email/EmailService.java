@@ -31,6 +31,8 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String sender;
 
+    @Value("${app.frontUrl}")
+    private String frontUrl;
 
 
     public void sendSimpleMessage(String receiver,String subject,String message){
@@ -49,8 +51,8 @@ public class EmailService {
         ServletUriComponentsBuilder uri = ServletUriComponentsBuilder.fromCurrentRequest();
         uri.replacePath("");
         StringBuilder builder = new StringBuilder();
-        builder.append(uri.toUriString())
-                .append("/confirm/")
+        builder.append(frontUrl)
+                .append("/users/confirm/")
                 .append(user.getActivationHash());
         context.setVariable("activationLink",builder.toString());
         String message = templateEngine.process("welcome.html", context);

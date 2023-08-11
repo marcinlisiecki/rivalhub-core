@@ -46,7 +46,7 @@ public class UserController {
     @GetMapping("/confirm/{hash}")
     private ResponseEntity<?> confirmUserEmail(@PathVariable String hash){
         userService.confirmUserEmail(hash);
-        return ResponseEntity.ok("Confirmed");
+        return ResponseEntity.ok(null);
     }
 
 }
