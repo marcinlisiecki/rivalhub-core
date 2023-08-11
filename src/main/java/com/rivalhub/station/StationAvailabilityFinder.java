@@ -16,12 +16,31 @@ import java.util.List;
 
 public class StationAvailabilityFinder {
 
-    public static LocalDateTime getFirstDateAvailableForDuration(List<Station> stations, Duration timeWindow) {
+    public static LocalDateTime getFirstDateAvailableForDuration(List<Station> stations, Duration timeWindow, EventType type) {
         LocalDateTime firstAvailable = null;
 
         for (Station station : stations) {
+            if (station.getType() != type) {
+                break;
+            }
+
             LocalDateTime currentStationFirstAvailable = LocalDateTime.now();
             List<Reservation> reservations = ReservationUtils.getSortedReservations(station.getReservationList());
+
+            if (!reservations.isEmpty()) {
+                if (ChronoUnit.SECONDS.between(currentStationFirstAvailable,
+                        reservations.get(0).getStartTime().plusSeconds(1)) >= timeWindow.getSeconds()) {
+
+                    if (firstAvailable == null || currentStationFirstAvailable.isBefore(firstAvailable)) {
+                        firstAvailable = currentStationFirstAvailable;
+                    }
+
+                    break;
+                }
+            } else {
+                firstAvailable = currentStationFirstAvailable;
+                break;
+            }
 
             for (int i = 0; i < reservations.size(); i++) {
                 Reservation currentReservation = reservations.get(i);
@@ -50,8 +69,9 @@ public class StationAvailabilityFinder {
         return firstAvailable;
     }
 
+
     public static List<Station> getAvailableStations(Organization organization, String startTime,
-                                              String endTime, EventType type, UserData user, List<Station> stationList) {
+                                                     String endTime, EventType type, UserData user, List<Station> stationList) {
 
         List<Station> availableStations = new ArrayList<>();
 
