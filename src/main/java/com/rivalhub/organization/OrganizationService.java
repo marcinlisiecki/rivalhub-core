@@ -29,11 +29,14 @@ public class OrganizationService {
 
         Organization savedOrganization = organizationRepository.save(organizationToSave);
 
-        createInvitationHash(savedOrganization.getId());
-
         UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
 
-        UserOrganizationService.addUser(user, savedOrganization);
+        UserOrganizationService.addAdminUser(user, savedOrganization);
+        UserOrganizationService.addAllEventTypes(savedOrganization);
+
+        createInvitationHash(savedOrganization.getId(), user);
+
+
         Organization save = organizationRepository.save(savedOrganization);
 
         return autoMapper.mapToOrganizationDto(save);
@@ -46,17 +49,14 @@ public class OrganizationService {
                 .orElseThrow(OrganizationNotFoundException::new);
     }
 
-    void updateOrganization(OrganizationDTO organizationDTO){
-        Organization organization = autoMapper.mapToOrganization(organizationDTO);
-        organizationRepository.save(organization);
-    }
-
     void deleteOrganization(Long id) {
         organizationRepository.deleteById(id);
     }
 
-    String createInvitationHash(Long id) {
+    //TODO tylko admin może widzieć link chyba że jest inaczej w ustawieniach organizacji
+    String createInvitationHash(Long id, UserData loggedUser) {
         Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        OrganizationSettingsValidator.checkIfUserIsAdmin(loggedUser, organization);
 
         String valueToHash = organization.getName() + organization.getId() + LocalDateTime.now();
         String hash = String.valueOf(valueToHash.hashCode() & 0x7fffffff);
@@ -66,10 +66,21 @@ public class OrganizationService {
         return invitationHelper.createInvitationLink(autoMapper.mapToOrganizationDto(organization));
     }
 
-    void updateOrganization(Long id, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
+    void updateOrganization(Long id, JsonMergePatch patch, String email) throws JsonPatchException, JsonProcessingException {
+        UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+
+        OrganizationSettingsValidator.checkIfUserIsAdmin(user, organization);
+
         OrganizationDTO organizationDTO = findOrganization(id);
         OrganizationDTO patchedOrganizationDto = organizationMergePatcher.patch(patch, organizationDTO, OrganizationDTO.class);
         patchedOrganizationDto.setId(id);
-        updateOrganization(patchedOrganizationDto);
+
+        organizationRepository.save(OrganizationMapper.map(patchedOrganizationDto, organization));
+    }
+
+    String createInvitation(Long id, String email) {
+        UserData loggedUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        return createInvitationHash(id, loggedUser);
     }
 }

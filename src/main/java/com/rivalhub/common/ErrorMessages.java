@@ -44,4 +44,5 @@ public class ErrorMessages {
     public static final String EVENT_NOT_FOUND = "Nie znaleziono wydarzenia";
 
     public static final String INVALID_PATH_PARAM_EXCEPTION = "Podano zły parametr";
+    public static final String INSUFFICIENT_PERMISSIONS = "Nie masz wymaganych uprawnien.";
 }

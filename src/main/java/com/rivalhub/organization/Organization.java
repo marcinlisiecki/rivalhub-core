@@ -1,5 +1,6 @@
 package com.rivalhub.organization;
 
+import com.rivalhub.event.EventType;
 import com.rivalhub.station.Station;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.common.ErrorMessages;
@@ -13,7 +14,9 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @AllArgsConstructor
@@ -50,24 +53,23 @@ public class Organization {
 
     @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     @JoinTable(
-            name = "ORGANIZATION_STATION_LIST",
+            name = "organization_station_list",
             joinColumns = @JoinColumn(
-                    name = "ORGANIZATION_ID",
+                    name = "organization_id",
                     referencedColumnName = "organization_id"
             ),
             inverseJoinColumns = @JoinColumn(
-                    name = "STATION_LIST_ID",
+                    name = "station_list_id",
                     referencedColumnName = "id"
             )
     )
-    private List<Station> stationList;
+    private List<Station> stationList =  new ArrayList<>();
 
-    @Override
-    public String toString() {
-        return "Organization{" +
-                "name='" + name + '\'' +
-                ", invitationLink='" + invitationHash + '\'' +
-                ", imageUrl='" + imageUrl + '\'' +
-                '}';
-    }
+    @ElementCollection(targetClass = EventType.class)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable
+    private Set<EventType> eventTypeInOrganization = new HashSet<>();
+
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    private Set<UserData> adminUsers = new HashSet<>();
 }

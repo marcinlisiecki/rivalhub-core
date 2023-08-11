@@ -34,14 +34,15 @@ public class OrganizationStationService {
     private final OrganizationStationValidator validator;
 
     StationDTO addStation(StationDTO stationDTO, Long id, String email) {
-        Organization organization = repositoryManager.findOrganization(id);
-
-        UserData user = repositoryManager.findUser(email);
+        UserData user = repositoryManager.findUserByEmail(email);
         List<Organization> organizationList = user.getOrganizationList();
-        organizationList
+
+        Organization organization = organizationList
                 .stream().filter(org -> org.getId().equals(id))
                 .findFirst()
                 .orElseThrow(OrganizationNotFoundException::new);
+
+        OrganizationSettingsValidator.checkIfUserIsAdmin(user, organization);
 
         Station station = autoMapper.mapToStation(stationDTO);
         UserOrganizationService.addStation(station, organization);
@@ -54,7 +55,7 @@ public class OrganizationStationService {
 
     List<Station> viewStations(Long organizationId, String start, String end, EventType type,
                                boolean onlyAvailable, String email, boolean showInactive) {
-        UserData user = repositoryManager.findUser(email);
+        UserData user = repositoryManager.findUserByEmail(email);
 
         Organization organization = validator.checkIfViewStationIsPossible(organizationId, user);
 
@@ -70,9 +71,9 @@ public class OrganizationStationService {
 
     List<EventTypeStationsDto> getEventStations(Long organizationId, String start, String end, EventType type) {
         UserData userData = repositoryManager
-                .findUser(SecurityContextHolder.getContext().getAuthentication().getName());
+                .findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        Organization organization = repositoryManager.findOrganization(organizationId);
+        Organization organization = repositoryManager.findOrganizationById(organizationId);
         List<Station> availableStations = StationAvailabilityFinder
                 .getAvailableStations(organization, start, end, type, userData, organization.getStationList());
         availableStations = filterForActiveStations(availableStations);
@@ -104,7 +105,7 @@ public class OrganizationStationService {
         eventStation.setType(eventType);
         eventStation.setStations(availableStations.stream().map(autoMapper::mapToNewStationDto).toList());
         eventStation.setFirstAvailable(StationAvailabilityFinder
-                        .getFirstDateAvailableForDuration(organization.getStationList(), timeNeeded));
+                .getFirstDateAvailableForDuration(organization.getStationList(), timeNeeded));
 
         return eventStation;
     }
@@ -114,24 +115,21 @@ public class OrganizationStationService {
     }
 
     public void updateStation(Long organizationId, Long stationId, String email, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
-        UserData user = repositoryManager.findUser(email);
+        UserData user = repositoryManager.findUserByEmail(email);
 
         validator.checkIfUpdateStationIsPossible(organizationId, user);
 
         StationDTO station = findStation(stationId);
         StationDTO stationPatched = stationMergePatcher.patch(patch, station, StationDTO.class);
         stationPatched.setId(stationId);
-        updateStation(stationPatched);
-    }
 
-    void updateStation(StationDTO stationDTO) {
-        Station station = autoMapper.mapToStation(stationDTO);
-        repositoryManager.save(station);
+        repositoryManager.save(autoMapper.mapToStation(stationPatched));
     }
 
     @Transactional
-    public void deleteStation(Long stationId, Long organizationId) {
+    public void deleteStation(Long stationId, Long organizationId, String email) {
         Organization organization = repositoryManager.findOrganizationById(organizationId);
+        OrganizationSettingsValidator.checkIfUserIsAdmin(repositoryManager.findUserByEmail(email), organization);
         UserOrganizationService.removeStation(repositoryManager.findStationById(stationId), organization);
     }
 

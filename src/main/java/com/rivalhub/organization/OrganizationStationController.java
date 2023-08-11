@@ -68,8 +68,9 @@ public class OrganizationStationController {
 
     @DeleteMapping("{organizationId}/stations/{stationId}")
     ResponseEntity<?> deleteStation(@PathVariable Long stationId,
-                                    @PathVariable Long organizationId) {
-        organizationStationService.deleteStation(stationId, organizationId);
+                                    @PathVariable Long organizationId,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        organizationStationService.deleteStation(stationId, organizationId, userDetails.getUsername());
         return ResponseEntity.noContent().build();
     }
 
