@@ -16,14 +16,15 @@ import java.net.URI;
 public class EventController {
 
     public final EventService eventService;
+
     @GetMapping("/events/{eventId}")
-    public ResponseEntity<?> findEvent(@PathVariable Long eventId, @PathParam("type") String type){
-        return ResponseEntity.ok(eventService.findEvent(eventId,type));
+    ResponseEntity<?> findEvent(@PathVariable Long eventId, @RequestParam(name = "type") String type) {
+        return ResponseEntity.ok(eventService.findEvent(eventId, type));
     }
 
     @PostMapping("/{id}/events")
-    public ResponseEntity<?> addEvent(@PathVariable Long id, @RequestBody EventDto eventDto, @PathParam("type") String type){
-        EventDto savedEvent = eventService.addEvent(id,eventDto,type);
+    ResponseEntity<?> addEvent(@PathVariable Long id, @RequestBody EventDto eventDto, @RequestParam(name = "type") String type) {
+        EventDto savedEvent = eventService.addEvent(id, eventDto, type);
         URI savedEventUri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/events/{eventId}")
                 .queryParam("type", type)
@@ -33,8 +34,8 @@ public class EventController {
     }
 
     @GetMapping("/{id}/events")
-    public ResponseEntity<?> findAllEvents(@PathVariable Long id,@PathParam("type") String type){
-        return ResponseEntity.ok(eventService.findAllEvents(id,type));
+    ResponseEntity<?> findAllEvents(@PathVariable Long id, @RequestParam(name = "type") String type) {
+        return ResponseEntity.ok(eventService.findAllEvents(id, type));
     }
 
 
