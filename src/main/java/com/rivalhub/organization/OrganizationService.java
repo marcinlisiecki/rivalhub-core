@@ -30,10 +30,12 @@ public class OrganizationService {
         Organization savedOrganization = organizationRepository.save(organizationToSave);
 
         UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-        createInvitationHash(savedOrganization.getId(), user);
 
         UserOrganizationService.addAdminUser(user, savedOrganization);
         UserOrganizationService.addAllEventTypes(savedOrganization);
+
+        createInvitationHash(savedOrganization.getId(), user);
+
 
         Organization save = organizationRepository.save(savedOrganization);
 

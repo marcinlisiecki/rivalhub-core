@@ -71,9 +71,9 @@ public class OrganizationStationService {
 
     List<EventTypeStationsDto> getEventStations(Long organizationId, String start, String end, EventType type) {
         UserData userData = repositoryManager
-                .findUser(SecurityContextHolder.getContext().getAuthentication().getName());
+                .findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        Organization organization = repositoryManager.findOrganization(organizationId);
+        Organization organization = repositoryManager.findOrganizationById(organizationId);
         List<Station> availableStations = StationAvailabilityFinder
                 .getAvailableStations(organization, start, end, type, userData, organization.getStationList());
         availableStations = filterForActiveStations(availableStations);
@@ -105,7 +105,7 @@ public class OrganizationStationService {
         eventStation.setType(eventType);
         eventStation.setStations(availableStations.stream().map(autoMapper::mapToNewStationDto).toList());
         eventStation.setFirstAvailable(StationAvailabilityFinder
-                        .getFirstDateAvailableForDuration(organization.getStationList(), timeNeeded));
+                .getFirstDateAvailableForDuration(organization.getStationList(), timeNeeded));
 
         return eventStation;
     }
@@ -123,9 +123,6 @@ public class OrganizationStationService {
         StationDTO stationPatched = stationMergePatcher.patch(patch, station, StationDTO.class);
         stationPatched.setId(stationId);
 
-    void updateStation(StationDTO stationDTO) {
-        Station station = autoMapper.mapToStation(stationDTO);
-        repositoryManager.save(station);
         repositoryManager.save(autoMapper.mapToStation(stationPatched));
     }
 
