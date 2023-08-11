@@ -42,9 +42,9 @@ public class UserData implements UserDetails {
 
     private LocalDateTime activationTime;
 
-    private String activationHash;
-
     private String profilePictureUrl;
+
+    private String activationHash;
 
     //@Length(min=8,message = ErrorMessages.PASSWORD_IS_TOO_SHORT)
     private String password;
@@ -90,14 +90,5 @@ public class UserData implements UserDetails {
 
     public UserData(String name) {
         this.name = name;
-    }
-
-    @Override
-    public String toString() {
-        return "UserData{" +
-                "name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", profilePictureUrl='" + profilePictureUrl + '\'' +
-                '}';
     }
 }

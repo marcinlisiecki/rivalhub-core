@@ -20,9 +20,6 @@ public class OrganizationStationValidator {
             .orElseThrow(OrganizationNotFoundException::new);
     }
 
-
-
-
     public void checkIfUpdateStationIsPossible(Long organizationId, UserData user) {
         Organization organization = organizationExists(organizationId);
         OrganizationSettingsValidator.userIsInOrganization(organization, user);
