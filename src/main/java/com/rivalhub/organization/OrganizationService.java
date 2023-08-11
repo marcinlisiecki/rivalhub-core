@@ -29,9 +29,8 @@ public class OrganizationService {
 
         Organization savedOrganization = organizationRepository.save(organizationToSave);
 
-        createInvitationHash(savedOrganization.getId());
-
         UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        createInvitationHash(savedOrganization.getId(), user);
 
         UserOrganizationService.addAdminUser(user, savedOrganization);
         UserOrganizationService.addAllEventTypes(savedOrganization);
@@ -52,10 +51,10 @@ public class OrganizationService {
         organizationRepository.deleteById(id);
     }
 
-    //TODO tylko admin może stworzyć link
     //TODO tylko admin może widzieć link chyba że jest inaczej w ustawieniach organizacji
-    String createInvitationHash(Long id) {
+    String createInvitationHash(Long id, UserData loggedUser) {
         Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        OrganizationSettingsValidator.checkIfUserIsAdmin(loggedUser, organization);
 
         String valueToHash = organization.getName() + organization.getId() + LocalDateTime.now();
         String hash = String.valueOf(valueToHash.hashCode() & 0x7fffffff);
@@ -76,5 +75,10 @@ public class OrganizationService {
         patchedOrganizationDto.setId(id);
 
         organizationRepository.save(OrganizationMapper.map(patchedOrganizationDto, organization));
+    }
+
+    String createInvitation(Long id, String email) {
+        UserData loggedUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        return createInvitationHash(id, loggedUser);
     }
 }

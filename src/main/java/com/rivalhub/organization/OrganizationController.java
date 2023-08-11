@@ -47,7 +47,7 @@ public class OrganizationController {
     }
 
     @GetMapping("/{id}/invitation")
-    public ResponseEntity<?> createInvitation(@PathVariable Long id){
-        return ResponseEntity.ok(organizationService.createInvitationHash(id));
+    public ResponseEntity<?> createInvitation(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
+        return ResponseEntity.ok(organizationService.createInvitation(id, userDetails.getUsername()));
     }
 }
