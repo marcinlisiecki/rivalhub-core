@@ -38,12 +38,6 @@ public class Config {
                 mapper.skip(PingPongEvent::setOrganization));
         modelMapper.typeMap(EventDto.class, PingPongEvent.class).addMappings(mapper ->
                 mapper.skip(PingPongEvent::setHost));
-        modelMapper.typeMap(EventDto.class, PingPongEvent.class).addMappings(mapper ->
-                mapper.skip(PingPongEvent::setReservation));
-        modelMapper.typeMap(EventDto.class, PingPongEvent.class).addMappings(mapper ->
-                mapper.skip(PingPongEvent::setStartTime));
-        modelMapper.typeMap(EventDto.class, PingPongEvent.class).addMappings(mapper ->
-                mapper.skip(PingPongEvent::setEndTime));
 
         modelMapper.typeMap(OrganizationDTO.class, Organization.class).addMappings(mapper ->
                 mapper.skip(Organization::setAdminUsers));

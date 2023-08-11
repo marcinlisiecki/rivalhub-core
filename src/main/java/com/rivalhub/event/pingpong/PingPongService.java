@@ -55,6 +55,8 @@ public class PingPongService implements EventServiceInterface {
         addReservationDTO.setStationsIdList(eventDto.getStationList());
         ReservationDTO reservationDTO = reservationService.addReservation(addReservationDTO,organizationId,pingPongEvent.getHost().getEmail());
 
+        pingPongEvent.setStartTime(LocalDateTime.parse(eventDto.getStartTime(), FormatterHelper.formatter()));
+        pingPongEvent.setEndTime(LocalDateTime.parse(eventDto.getEndTime(), FormatterHelper.formatter()));
 
         pingPongEvent.setReservation(reservationRepository.findById(reservationDTO.getId()).orElseThrow(ReservationNotFoundException::new));
         PingPongEvent savedEvent = pingPongEventRepository.save(pingPongEvent);

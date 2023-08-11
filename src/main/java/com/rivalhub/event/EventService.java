@@ -13,14 +13,14 @@ import java.util.List;
 public class EventService {
 
     final PingPongService pingPongService;
-    public EventDto findEvent(long eventId, String type) {
+    public EventDto findEvent(Long eventId, String type) {
         if(type.equals(EventType.PING_PONG.name()))
             return pingPongService.findEvent(eventId);
 
         throw new InvalidPathParamException();
     }
 
-    public EventDto addEvent(long id, EventDto eventDto, String type) {
+    public EventDto addEvent(Long id, EventDto eventDto, String type) {
 
         if(type.equals(EventType.PING_PONG.name())) {
             EventDto savedEvent = pingPongService.addEvent(id, eventDto);
@@ -29,7 +29,7 @@ public class EventService {
         throw new InvalidPathParamException();
     }
 
-    public List<EventDto> findAllEvents(long id, String type) {
+    public List<EventDto> findAllEvents(Long id, String type) {
         List<EventDto> eventDtoList = new ArrayList<>();
         if(type.equals(EventType.ALL.name())) {
             eventDtoList.addAll(pingPongService.findAllEvents(id));

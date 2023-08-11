@@ -12,16 +12,17 @@ import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/organizations")
 public class EventController {
 
     public final EventService eventService;
     @GetMapping("/events/{eventId}")
-    public ResponseEntity<?> findEvent(@PathVariable long eventId, @PathParam("type") String type){
+    public ResponseEntity<?> findEvent(@PathVariable Long eventId, @PathParam("type") String type){
         return ResponseEntity.ok(eventService.findEvent(eventId,type));
     }
 
     @PostMapping("/{id}/events")
-    public ResponseEntity<?> addEvent(@PathVariable long id, @RequestBody EventDto eventDto, @PathParam("type") String type){
+    public ResponseEntity<?> addEvent(@PathVariable Long id, @RequestBody EventDto eventDto, @PathParam("type") String type){
         EventDto savedEvent = eventService.addEvent(id,eventDto,type);
         URI savedEventUri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/events/{eventId}")
@@ -32,7 +33,7 @@ public class EventController {
     }
 
     @GetMapping("/{id}/events")
-    public ResponseEntity<?> findAllEvents(@PathVariable long id,@PathParam("type") String type){
+    public ResponseEntity<?> findAllEvents(@PathVariable Long id,@PathParam("type") String type){
         return ResponseEntity.ok(eventService.findAllEvents(id,type));
     }
 
