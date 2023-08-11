@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class OrganizationService {
     private final OrganizationRepository organizationRepository;
+    private final RepositoryManager repositoryManager;
     private final AutoMapper autoMapper;
     private final UserRepository userRepository;
     private final MergePatcher<OrganizationDTO> organizationMergePatcher;
@@ -53,7 +54,6 @@ public class OrganizationService {
         organizationRepository.deleteById(id);
     }
 
-    //TODO tylko admin może widzieć link chyba że jest inaczej w ustawieniach organizacji
     String createInvitationHash(Long id, UserData loggedUser) {
         Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
         OrganizationSettingsValidator.checkIfUserIsAdmin(loggedUser, organization);
@@ -63,7 +63,8 @@ public class OrganizationService {
 
         organization.setInvitationHash(hash);
         organizationRepository.save(organization);
-        return invitationHelper.createInvitationLink(autoMapper.mapToOrganizationDto(organization));
+
+        return invitationHelper.createInvitationLink(organization);
     }
 
     void updateOrganization(Long id, JsonMergePatch patch, String email) throws JsonPatchException, JsonProcessingException {
@@ -80,7 +81,20 @@ public class OrganizationService {
     }
 
     String createInvitation(Long id, String email) {
-        UserData loggedUser = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        UserData loggedUser = repositoryManager.findUserByEmail(email);
+
         return createInvitationHash(id, loggedUser);
+    }
+
+    String viewInvitationLink(Long organizationId, String email) {
+        UserData loggedUser = repositoryManager.findUserByEmail(email);
+        Organization organization = repositoryManager.findOrganizationById(organizationId);
+
+        OrganizationSettingsValidator.userIsInOrganization(organization, loggedUser);
+
+        if (!organization.getOnlyAdminCanSeeInvitationLink()) return invitationHelper.createInvitationLink(organization);
+
+        OrganizationSettingsValidator.checkIfUserIsAdmin(loggedUser, organization);
+        return invitationHelper.createInvitationLink(organization);
     }
 }

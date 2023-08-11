@@ -69,7 +69,19 @@ public class OrganizationSettingsService {
         return eventType;
     }
 
-    public Set<EventType> allEventTypeInApp() {
+    Set<EventType> allEventTypeInApp() {
         return Arrays.stream(EventType.values()).collect(Collectors.toSet());
+    }
+
+    boolean setOnlyAdminCanSeeInvitationLink(String email, Long organizationId, boolean onlyAdminCanSeeInvitationLink) {
+        UserData loggedUser = repositoryManager.findUserByEmail(email);
+        Organization organization = repositoryManager.findOrganizationById(organizationId);
+
+        OrganizationSettingsValidator.checkIfUserIsAdmin(loggedUser, organization);
+
+        organization.setOnlyAdminCanSeeInvitationLink(onlyAdminCanSeeInvitationLink);
+        repositoryManager.save(organization);
+
+        return onlyAdminCanSeeInvitationLink;
     }
 }
