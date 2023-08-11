@@ -15,7 +15,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
-@Component
 @RequiredArgsConstructor
 public class ReservationValidator {
     public static boolean checkForTimeCollision(List<Station> stationList, Reservation reservation){

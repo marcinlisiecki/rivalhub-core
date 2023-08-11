@@ -1,16 +1,13 @@
 package com.rivalhub.organization;
 
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
-import com.rivalhub.reservation.Reservation;
 import com.rivalhub.station.Station;
 import com.rivalhub.station.StationNotFoundException;
 import com.rivalhub.station.StationRepository;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,15 +17,12 @@ public class RepositoryManager {
     private final OrganizationRepository organizationRepository;
     private final StationRepository stationRepository;
 
-    Organization findOrganization(Long id){
-        return organizationRepository.findById(id)
-                .orElseThrow(OrganizationNotFoundException::new);
-    }
-
-    UserData findUser(String email){
+    UserData findUserByEmail(String email){
         return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
     }
-
+    UserData findUserById(Long id){
+        return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+    }
 
     Organization save(Organization organization){
         return organizationRepository.save(organization);
@@ -40,7 +34,8 @@ public class RepositoryManager {
     }
 
     Organization findOrganizationById(Long id){
-        return organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        return organizationRepository.findById(id)
+                .orElseThrow(OrganizationNotFoundException::new);
     }
 
     Station findStationById(Long id){

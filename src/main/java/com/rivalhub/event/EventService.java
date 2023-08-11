@@ -1,14 +1,10 @@
 package com.rivalhub.event;
 
 import com.rivalhub.common.exception.InvalidPathParamException;
-import com.rivalhub.email.EmailService;
 import com.rivalhub.event.pingpong.PingPongService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
