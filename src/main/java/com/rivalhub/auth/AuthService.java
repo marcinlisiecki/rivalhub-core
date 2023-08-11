@@ -41,6 +41,12 @@ public class AuthService {
         extraClaims.put("id", userData.getId());
         extraClaims.put("name", userData.getName());
 
+        if (userData.getActivationTime() == null) {
+            extraClaims.put("activationTime", null);
+        } else {
+            extraClaims.put("activationTime", userData.getActivationTime().toString());
+        }
+
         String jwtToken = jwtService.generateToken(userData, extraClaims);
         return new LoginResponseDto(jwtToken);
     }

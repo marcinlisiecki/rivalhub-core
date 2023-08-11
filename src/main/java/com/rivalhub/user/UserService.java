@@ -7,6 +7,7 @@ import com.rivalhub.organization.OrganizationCreateDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -26,7 +27,9 @@ public class UserService {
 
 
     UserDto register(UserDto userDto) {
-        userRepository.findByEmail(userDto.getEmail()).ifPresent(userData -> {throw new UserAlreadyExistsException();});
+        userRepository.findByEmail(userDto.getEmail()).ifPresent(userData -> {
+            throw new UserAlreadyExistsException();
+        });
 
         UserData user = autoMapper.mapToUserData(userDto);
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
@@ -42,6 +45,12 @@ public class UserService {
 
     public UserDetailsDto findUserById(Long id) {
         return autoMapper.mapToUserDetails(userRepository.findById(id).orElseThrow(UserNotFoundException::new));
+    }
+
+    public UserDetailsDto getMe(UserDetails userDetails) {
+        return autoMapper.mapToUserDetails(userRepository
+                .findByEmail(userDetails.getUsername())
+                .orElseThrow(UserNotFoundException::new));
     }
 
     List<OrganizationCreateDTO> findOrganizationsByUser(String email) {
@@ -74,7 +83,7 @@ public class UserService {
                 .path("/users/{id}")
                 .buildAndExpand(savedUser.getId())
                 .toUri();
-        emailService.sendThymeleafInvitation(savedUser,"Activate your account");
+        emailService.sendThymeleafInvitation(savedUser, "Activate your account");
         return savedUserUri;
     }
 }
