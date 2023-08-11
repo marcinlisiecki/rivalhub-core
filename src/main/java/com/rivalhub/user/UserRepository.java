@@ -1,5 +1,6 @@
 package com.rivalhub.user;
 
+import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.util.Optional;
+import java.util.Set;
 
 public interface UserRepository extends CrudRepository<UserData, Long>, PagingAndSortingRepository<UserData, Long> {
 
@@ -17,4 +19,10 @@ public interface UserRepository extends CrudRepository<UserData, Long>, PagingAn
     @Transactional
     @Query(value = "DELETE FROM USER_DATA WHERE ACTIVATION_TIME IS NULL AND JOIN_TIME < ?1", nativeQuery = true)
     void deleteInactiveUsers(LocalDateTime time);
+
+
+    @Query(value = "SELECT USER_DATA.USER_ID, NAME, EMAIL, PROFILE_PICTURE_URL, ACTIVATION_TIME FROM USER_DATA \n" +
+            "   JOIN ORGANIZATION_USERS ON USER_DATA.USER_ID=ORGANIZATION_USERS.USER_ID\n" +
+            "   WHERE ORGANIZATION_ID=?1", nativeQuery = true)
+    Set<Tuple> getAllUsersByOrganizationId(Long id);
 }

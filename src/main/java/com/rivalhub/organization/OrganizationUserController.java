@@ -31,4 +31,9 @@ public class OrganizationUserController {
         return ResponseEntity.ok(organizationUserService.addUserThroughEmail(id, email));
     }
 
+    @GetMapping("/{id}/users/all")
+    ResponseEntity<?> viewAllUsers(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
+        return ResponseEntity.ok(organizationUserService.viewAllUsers(id, userDetails.getUsername()));
+    }
+
 }

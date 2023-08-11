@@ -1,9 +1,7 @@
 package com.rivalhub.user;
 
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -16,4 +14,12 @@ public class UserDetailsDto {
     private String email;
     private String profilePictureUrl;
     private LocalDateTime activationTime;
+
+    public UserDetailsDto(Long id, String name, String email, String profilePictureUrl, LocalDateTime activationTime) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.profilePictureUrl = profilePictureUrl;
+        this.activationTime = activationTime;
+    }
 }

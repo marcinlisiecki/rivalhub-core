@@ -7,6 +7,7 @@ import com.rivalhub.email.EmailService;
 import com.rivalhub.organization.exception.AlreadyInOrganizationException;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.exception.WrongInvitationException;
+import com.rivalhub.user.UserAlreadyExistsException;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
 import com.rivalhub.user.UserRepository;
@@ -14,7 +15,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -65,5 +69,18 @@ public class OrganizationUserService {
         return organizationDTO;
     }
 
+    Set<UserDetailsDto> viewAllUsers(Long id, String email) {
+        UserData user = userRepository.findByEmail(email).orElseThrow(UserAlreadyExistsException::new);
+        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
 
+        OrganizationSettingsValidator.userIsInOrganization(organization, user);
+
+        return userRepository.getAllUsersByOrganizationId(id)
+                .stream().map(u -> new UserDetailsDto(u.get(0, Long.class),
+                                                      u.get(1, String.class),
+                                                      u.get(2, String.class),
+                                                      u.get(3, String.class),
+                                                      u.get(4, LocalDateTime.class)
+                        )).collect(Collectors.toSet());
+    }
 }
