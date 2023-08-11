@@ -6,14 +6,11 @@ import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 public class ReservationValidator {

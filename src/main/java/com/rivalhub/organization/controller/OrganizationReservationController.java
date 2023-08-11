@@ -1,5 +1,6 @@
-package com.rivalhub.organization;
+package com.rivalhub.organization.controller;
 
+import com.rivalhub.organization.service.OrganizationReservationService;
 import com.rivalhub.reservation.AddReservationDTO;
 import com.rivalhub.reservation.ReservationDTO;
 import lombok.RequiredArgsConstructor;

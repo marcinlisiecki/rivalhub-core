@@ -1,5 +1,7 @@
-package com.rivalhub.organization;
+package com.rivalhub.organization.controller;
 
+import com.rivalhub.organization.OrganizationDTO;
+import com.rivalhub.organization.service.OrganizationUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -15,24 +17,24 @@ public class OrganizationUserController {
     private final OrganizationUserService organizationUserService;
 
     @GetMapping("{id}/users")
-    ResponseEntity<Page<?>> viewUsers(@PathVariable Long id,
+    private ResponseEntity<Page<?>> viewUsers(@PathVariable Long id,
                                       @RequestParam(defaultValue = "0") int page,
                                       @RequestParam(defaultValue = "10") int size){
         return ResponseEntity.ok(organizationUserService.findUsersByOrganization(id, page, size));
     }
 
     @GetMapping("/{id}/invitation/{hash}")
-    public ResponseEntity<?> addUser(@PathVariable Long id, @PathVariable String hash, @AuthenticationPrincipal UserDetails userDetails){
+    private ResponseEntity<?> addUser(@PathVariable Long id, @PathVariable String hash, @AuthenticationPrincipal UserDetails userDetails){
         return ResponseEntity.ok(organizationUserService.addUser(id, hash, userDetails.getUsername()));
     }
 
     @GetMapping("/{id}/invite/{email}")
-    public ResponseEntity<OrganizationDTO> addUserThroughEmail(@PathVariable Long id, @PathVariable String email){
+    private ResponseEntity<OrganizationDTO> addUserThroughEmail(@PathVariable Long id, @PathVariable String email){
         return ResponseEntity.ok(organizationUserService.addUserThroughEmail(id, email));
     }
 
     @GetMapping("/{id}/users/all")
-    ResponseEntity<?> viewAllUsers(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
+    private ResponseEntity<?> viewAllUsers(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
         return ResponseEntity.ok(organizationUserService.viewAllUsers(id, userDetails.getUsername()));
     }
 

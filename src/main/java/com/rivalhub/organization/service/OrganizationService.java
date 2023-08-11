@@ -1,4 +1,4 @@
-package com.rivalhub.organization;
+package com.rivalhub.organization.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatchException;
@@ -6,11 +6,10 @@ import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.InvitationHelper;
 import com.rivalhub.common.MergePatcher;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.organization.*;
+import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import lombok.RequiredArgsConstructor;
 import com.rivalhub.user.UserData;
-import com.rivalhub.user.UserNotFoundException;
-import com.rivalhub.user.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,58 +17,51 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class OrganizationService {
-    private final OrganizationRepository organizationRepository;
     private final RepositoryManager repositoryManager;
     private final AutoMapper autoMapper;
-    private final UserRepository userRepository;
     private final MergePatcher<OrganizationDTO> organizationMergePatcher;
     private final InvitationHelper invitationHelper;
 
-    OrganizationDTO saveOrganization(OrganizationCreateDTO organizationCreateDTO, String email){
-        Organization organizationToSave = autoMapper.mapToOrganization(organizationCreateDTO);
-
-        Organization savedOrganization = organizationRepository.save(organizationToSave);
-
-        UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+    public OrganizationDTO saveOrganization(OrganizationDTO organizationDTO, String email){
+        Organization organizationToSave = autoMapper.mapToOrganization(organizationDTO);
+        Organization savedOrganization = repositoryManager.save(organizationToSave);
+        UserData user = repositoryManager.findUserByEmail(email);
 
         UserOrganizationService.addAdminUser(user, savedOrganization);
         UserOrganizationService.addAllEventTypes(savedOrganization);
 
-        createInvitationHash(savedOrganization.getId(), user);
-
-
-        Organization save = organizationRepository.save(savedOrganization);
+        createInvitation(savedOrganization.getId(), email);
+        Organization save = repositoryManager.save(savedOrganization);
 
         return autoMapper.mapToOrganizationDto(save);
     }
 
-    OrganizationDTO findOrganization(Long id){
-        return organizationRepository
-                .findById(id)
-                .map(autoMapper::mapToOrganizationDto)
-                .orElseThrow(OrganizationNotFoundException::new);
+     public OrganizationDTO findOrganization(Long id){
+        return autoMapper.mapToOrganizationDto(repositoryManager.findOrganizationById(id));
     }
 
-    void deleteOrganization(Long id) {
-        organizationRepository.deleteById(id);
+    public void deleteOrganization(Long id, String email) {
+        OrganizationSettingsValidator.checkIfUserIsAdmin(repositoryManager.findUserByEmail(email), repositoryManager.findOrganizationById(id));
+        repositoryManager.deleteOrganizationById(id);
     }
 
-    String createInvitationHash(Long id, UserData loggedUser) {
-        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+    public String createInvitation(Long id, String email) {
+        UserData loggedUser = repositoryManager.findUserByEmail(email);
+        Organization organization = repositoryManager.findOrganizationById(id);
         OrganizationSettingsValidator.checkIfUserIsAdmin(loggedUser, organization);
 
         String valueToHash = organization.getName() + organization.getId() + LocalDateTime.now();
         String hash = String.valueOf(valueToHash.hashCode() & 0x7fffffff);
 
         organization.setInvitationHash(hash);
-        organizationRepository.save(organization);
+        repositoryManager.save(organization);
 
         return invitationHelper.createInvitationLink(organization);
     }
 
-    void updateOrganization(Long id, JsonMergePatch patch, String email) throws JsonPatchException, JsonProcessingException {
-        UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+    public void updateOrganization(Long id, JsonMergePatch patch, String email) throws JsonPatchException, JsonProcessingException {
+        UserData user = repositoryManager.findUserByEmail(email);
+        Organization organization = repositoryManager.findOrganizationById(id);
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(user, organization);
 
@@ -77,16 +69,10 @@ public class OrganizationService {
         OrganizationDTO patchedOrganizationDto = organizationMergePatcher.patch(patch, organizationDTO, OrganizationDTO.class);
         patchedOrganizationDto.setId(id);
 
-        organizationRepository.save(OrganizationMapper.map(patchedOrganizationDto, organization));
+        repositoryManager.save(OrganizationMapper.map(patchedOrganizationDto, organization));
     }
 
-    String createInvitation(Long id, String email) {
-        UserData loggedUser = repositoryManager.findUserByEmail(email);
-
-        return createInvitationHash(id, loggedUser);
-    }
-
-    String viewInvitationLink(Long organizationId, String email) {
+    public String viewInvitationLink(Long organizationId, String email) {
         UserData loggedUser = repositoryManager.findUserByEmail(email);
         Organization organization = repositoryManager.findOrganizationById(organizationId);
 

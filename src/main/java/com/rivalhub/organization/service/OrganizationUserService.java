@@ -1,18 +1,18 @@
-package com.rivalhub.organization;
+package com.rivalhub.organization.service;
 
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.InvitationHelper;
 import com.rivalhub.common.PaginationHelper;
 import com.rivalhub.email.EmailService;
+import com.rivalhub.organization.Organization;
+import com.rivalhub.organization.OrganizationDTO;
+import com.rivalhub.organization.RepositoryManager;
+import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.organization.exception.AlreadyInOrganizationException;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.exception.WrongInvitationException;
-import com.rivalhub.user.UserAlreadyExistsException;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
-import com.rivalhub.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -24,30 +24,27 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OrganizationUserService {
-    private final OrganizationRepository organizationRepository;
+    private final RepositoryManager repositoryManager;
     private final AutoMapper autoMapper;
-    private final UserRepository userRepository;
     private final EmailService emailService;
     private final InvitationHelper invitationHelper;
 
-    Page<?> findUsersByOrganization(Long id, int page, int size) {
-        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+    public Page<?> findUsersByOrganization(Long id, int page, int size) {
+        Organization organization = repositoryManager.findOrganizationById(id);
 
         List<UserDetailsDto> allUsers = organization.getUserList()
                 .stream().map(autoMapper::mapToUserDisplayDTO).toList();
         return PaginationHelper.toPage(page, size, allUsers);
     }
 
-    OrganizationDTO addUser(Long id, String hash, String email) {
-        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+    public OrganizationDTO addUser(Long id, String hash, String email) {
+        Organization organization = repositoryManager.findOrganizationById(id);
         if (!organization.getInvitationHash().equals(hash)) throw new WrongInvitationException();
 
-        UserData user = userRepository.findByEmail(email)
-                .map(userData -> checkIfUserIsInOrganization(userData, organization))
-                .orElseThrow(AlreadyInOrganizationException::new);
+        UserData user = checkIfUserIsInOrganization(repositoryManager.findUserByEmail(email), organization);
 
         UserOrganizationService.addUser(user, organization);
-        Organization save = organizationRepository.save(organization);
+        Organization save = repositoryManager.save(organization);
 
         return autoMapper.mapToOrganizationDto(save);
     }
@@ -57,10 +54,8 @@ public class OrganizationUserService {
         return user;
     }
 
-    OrganizationDTO addUserThroughEmail(Long id, String email) {
-        Organization organization = organizationRepository
-                .findById(id)
-                .orElseThrow(OrganizationNotFoundException::new);
+    public OrganizationDTO addUserThroughEmail(Long id, String email) {
+        Organization organization = repositoryManager.findOrganizationById(id);
         String subject = "Invitation to " + organization.getName();
 
         String body = invitationHelper.createInvitationLink(organization);
@@ -69,18 +64,18 @@ public class OrganizationUserService {
         return autoMapper.mapToOrganizationDto(organization);
     }
 
-    Set<UserDetailsDto> viewAllUsers(Long id, String email) {
-        UserData user = userRepository.findByEmail(email).orElseThrow(UserAlreadyExistsException::new);
-        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+    public Set<UserDetailsDto> viewAllUsers(Long id, String email) {
+        UserData user = repositoryManager.findUserByEmail(email);
+        Organization organization = repositoryManager.findOrganizationById(id);
 
         OrganizationSettingsValidator.userIsInOrganization(organization, user);
 
-        return userRepository.getAllUsersByOrganizationId(id)
+        return repositoryManager.getAllUsersByOrganizationId(id)
                 .stream().map(u -> new UserDetailsDto(u.get(0, Long.class),
                                                       u.get(1, String.class),
                                                       u.get(2, String.class),
                                                       u.get(3, String.class),
-                                                      u.get(4, LocalDateTime.class)
-                        )).collect(Collectors.toSet());
+                                                      u.get(4, LocalDateTime.class)))
+                .collect(Collectors.toSet());
     }
 }

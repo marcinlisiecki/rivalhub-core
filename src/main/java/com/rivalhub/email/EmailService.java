@@ -1,13 +1,9 @@
 package com.rivalhub.email;
 
-import com.rivalhub.common.ErrorMessages;
 import com.rivalhub.user.UserDto;
 
-import jakarta.mail.BodyPart;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.internet.MimeMultipart;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;

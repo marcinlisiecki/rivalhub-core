@@ -1,4 +1,4 @@
-package com.rivalhub.organization;
+package com.rivalhub.organization.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatchException;
@@ -7,6 +7,10 @@ import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.common.MergePatcher;
 import com.rivalhub.event.EventType;
+import com.rivalhub.organization.Organization;
+import com.rivalhub.organization.validator.OrganizationSettingsValidator;
+import com.rivalhub.organization.validator.OrganizationStationValidator;
+import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.station.EventTypeStationsDto;
 import com.rivalhub.station.Station;
@@ -33,7 +37,7 @@ public class OrganizationStationService {
     private final MergePatcher<StationDTO> stationMergePatcher;
     private final OrganizationStationValidator validator;
 
-    StationDTO addStation(StationDTO stationDTO, Long id, String email) {
+    public StationDTO addStation(StationDTO stationDTO, Long id, String email) {
         UserData user = repositoryManager.findUserByEmail(email);
         List<Organization> organizationList = user.getOrganizationList();
 
@@ -53,7 +57,7 @@ public class OrganizationStationService {
     }
 
 
-    List<Station> viewStations(Long organizationId, String start, String end, EventType type,
+    public List<Station> viewStations(Long organizationId, String start, String end, EventType type,
                                boolean onlyAvailable, String email, boolean showInactive) {
         UserData user = repositoryManager.findUserByEmail(email);
 
@@ -69,7 +73,7 @@ public class OrganizationStationService {
         return stationList;
     }
 
-    List<EventTypeStationsDto> getEventStations(Long organizationId, String start, String end, EventType type) {
+    public List<EventTypeStationsDto> getEventStations(Long organizationId, String start, String end, EventType type) {
         UserData userData = repositoryManager
                 .findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
