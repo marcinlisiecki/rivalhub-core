@@ -1,5 +1,6 @@
 package com.rivalhub.user;
 
+import com.rivalhub.auth.JwtTokenDto;
 import com.rivalhub.common.dto.ErrorMessageDto;
 import com.rivalhub.organization.OrganizationCreateDTO;
 import com.rivalhub.email.EmailService;
@@ -30,11 +31,9 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    private ResponseEntity<?> register(@RequestBody UserDto userDto){
-        UserDto savedUser = userService.register(userDto);
-        URI savedUserUri = userService.sendEmail(savedUser);
-
-        return ResponseEntity.created(savedUserUri).body(savedUser);
+    private ResponseEntity<JwtTokenDto> register(@RequestBody RegisterRequestDto registerRequestDto){
+        JwtTokenDto token = userService.register(registerRequestDto);
+        return ResponseEntity.ok(token);
     }
 
     @GetMapping("/users/organizations")

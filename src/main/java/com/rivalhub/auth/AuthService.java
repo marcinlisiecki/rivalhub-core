@@ -22,7 +22,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
-    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
+    public JwtTokenDto login(LoginRequestDto loginRequestDto) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -48,6 +48,6 @@ public class AuthService {
         }
 
         String jwtToken = jwtService.generateToken(userData, extraClaims);
-        return new LoginResponseDto(jwtToken);
+        return new JwtTokenDto(jwtToken);
     }
 }
