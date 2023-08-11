@@ -72,4 +72,6 @@ public class Organization {
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<UserData> adminUsers = new HashSet<>();
+
+    private Boolean onlyAdminCanSeeInvitationLink = true;
 }

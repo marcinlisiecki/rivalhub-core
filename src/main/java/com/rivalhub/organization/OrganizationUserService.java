@@ -12,6 +12,7 @@ import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
 import com.rivalhub.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -57,16 +58,15 @@ public class OrganizationUserService {
     }
 
     OrganizationDTO addUserThroughEmail(Long id, String email) {
-        OrganizationDTO organizationDTO = organizationRepository
+        Organization organization = organizationRepository
                 .findById(id)
-                .map(autoMapper::mapToOrganizationDto)
                 .orElseThrow(OrganizationNotFoundException::new);
-        String subject = "Invitation to " + organizationDTO.getName();
+        String subject = "Invitation to " + organization.getName();
 
-        String body = invitationHelper.createInvitationLink(organizationDTO);
+        String body = invitationHelper.createInvitationLink(organization);
         emailService.sendSimpleMessage(email, subject, body);
 
-        return organizationDTO;
+        return autoMapper.mapToOrganizationDto(organization);
     }
 
     Set<UserDetailsDto> viewAllUsers(Long id, String email) {

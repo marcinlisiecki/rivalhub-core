@@ -46,8 +46,14 @@ public class OrganizationController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/invitation")
+    @PostMapping("/{id}/invitation")
     public ResponseEntity<?> createInvitation(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
         return ResponseEntity.ok(organizationService.createInvitation(id, userDetails.getUsername()));
     }
+
+    @GetMapping("/{id}/invitation")
+    public ResponseEntity<?> viewInvitation(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
+        return ResponseEntity.ok(organizationService.viewInvitationLink(id, userDetails.getUsername()));
+    }
+
 }

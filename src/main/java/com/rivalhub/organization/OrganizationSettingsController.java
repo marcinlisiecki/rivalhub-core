@@ -23,6 +23,14 @@ public class OrganizationSettingsController {
         return ResponseEntity.ok(organizationSettingsService.setAdmin(userDetails.getUsername(), organizationId, userId));
     }
 
+    @GetMapping("{organizationId}/admin")
+    ResponseEntity<?> changeInvitationLinkVisibility(@PathVariable Long organizationId,
+                                                     @AuthenticationPrincipal UserDetails userDetails,
+                                                     @RequestParam(name = "onlyAdminCanSeeInvitationLink", defaultValue = "true")
+                                                     boolean onlyAdminCanSeeInvitationLink){
+        return ResponseEntity.ok(organizationSettingsService.setOnlyAdminCanSeeInvitationLink(userDetails.getUsername(), organizationId,  onlyAdminCanSeeInvitationLink));
+    }
+
     @DeleteMapping("{organizationId}/admin/events")
     ResponseEntity<?> removeEventType(@AuthenticationPrincipal UserDetails userDetails,
                                       @PathVariable Long organizationId,
