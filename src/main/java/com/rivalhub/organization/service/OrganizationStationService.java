@@ -109,7 +109,7 @@ public class OrganizationStationService {
         eventStation.setType(eventType);
         eventStation.setStations(availableStations.stream().map(autoMapper::mapToNewStationDto).toList());
         eventStation.setFirstAvailable(StationAvailabilityFinder
-                .getFirstDateAvailableForDuration(organization.getStationList(), timeNeeded));
+                .getFirstDateAvailableForDuration(organization.getStationList(), timeNeeded, eventType));
 
         return eventStation;
     }
