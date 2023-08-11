@@ -16,10 +16,10 @@ import java.util.List;
 @NoArgsConstructor
 public class EventDto {
     Long eventId;
-    ReservationDTO reservation;
-    LocalDateTime startTime;
-    LocalDateTime endTime;
-    UserDto host;
+    List<Long> stationList;
+    String startTime;
+    String endTime;
+    Long host;
     List<Long> participants;
-    OrganizationDTO organization;
+    //OrganizationDTO organization;
 }

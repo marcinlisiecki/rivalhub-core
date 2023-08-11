@@ -6,6 +6,7 @@ import com.rivalhub.reservation.Reservation;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,16 +18,24 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long eventId;
-    @OneToOne(cascade = CascadeType.ALL)
+
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JsonManagedReference
     @JoinColumn(name = "reservation_id")
     Reservation reservation;
+
+    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm")
     LocalDateTime startTime;
+
+    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm")
     LocalDateTime endTime;
+
     @ManyToOne
     UserData host;
+
     @OneToMany
     List<UserData> participants;
+
     @ManyToOne
     Organization organization;
 
