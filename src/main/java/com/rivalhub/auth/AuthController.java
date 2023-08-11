@@ -16,7 +16,7 @@ public class AuthController {
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
-    public LoginResponseDto login(@Valid @RequestBody LoginRequestDto loginRequestDto) {
+    public JwtTokenDto login(@Valid @RequestBody LoginRequestDto loginRequestDto) {
         return authService.login(loginRequestDto);
     }
 

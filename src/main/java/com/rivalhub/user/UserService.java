@@ -1,5 +1,8 @@
 package com.rivalhub.user;
 
+import com.rivalhub.auth.AuthService;
+import com.rivalhub.auth.JwtTokenDto;
+import com.rivalhub.auth.LoginRequestDto;
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.email.EmailService;
 import com.rivalhub.organization.Organization;
@@ -12,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.security.auth.login.LoginContext;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,23 +28,27 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AutoMapper autoMapper;
     private final EmailService emailService;
+    private final AuthService authService;
 
 
-    UserDto register(UserDto userDto) {
-        userRepository.findByEmail(userDto.getEmail()).ifPresent(userData -> {
+    JwtTokenDto register(RegisterRequestDto registerRequestDto) {
+        userRepository.findByEmail(registerRequestDto.getEmail()).ifPresent(userData -> {
             throw new UserAlreadyExistsException();
         });
 
-        UserData user = autoMapper.mapToUserData(userDto);
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        UserData user = autoMapper.mapToUserData(registerRequestDto);
+        user.setPassword(passwordEncoder.encode(registerRequestDto.getPassword()));
         user.setJoinTime(LocalDateTime.now());
-        user.setActivationHash(passwordEncoder.encode(userDto.getEmail())
+        user.setActivationHash(passwordEncoder.encode(registerRequestDto.getEmail())
                 .replace("/", "")
                 .replace("$", "")
                 .replace(".", "")
         );
         user = userRepository.save(user);
-        return autoMapper.mapToUserDto(user);
+        sendEmail(autoMapper.mapToUserDto(user));
+
+        LoginRequestDto loginRequestDto = autoMapper.mapToLoginRequest(registerRequestDto);
+        return authService.login(loginRequestDto);
     }
 
     public UserDetailsDto findUserById(Long id) {

@@ -1,5 +1,6 @@
 package com.rivalhub.common;
 
+import com.rivalhub.auth.LoginRequestDto;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.organization.Organization;
@@ -9,6 +10,7 @@ import com.rivalhub.reservation.Reservation;
 import com.rivalhub.reservation.ReservationDTO;
 import com.rivalhub.station.StationDTO;
 import com.rivalhub.station.Station;
+import com.rivalhub.user.RegisterRequestDto;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
 import com.rivalhub.user.UserDto;
@@ -31,6 +33,14 @@ public class AutoMapper {
 
     public UserData mapToUserData(UserDetails userDetailsDto){
         return modelMapper.map(userDetailsDto, UserData.class);
+    }
+
+    public LoginRequestDto mapToLoginRequest(RegisterRequestDto registerRequestDto) {
+        return modelMapper.map(registerRequestDto, LoginRequestDto.class);
+    }
+
+    public UserData mapToUserData(RegisterRequestDto registerRequestDto) {
+        return modelMapper.map(registerRequestDto, UserData.class);
     }
 
     public UserDetailsDto mapToUserDetails(UserData userData){
