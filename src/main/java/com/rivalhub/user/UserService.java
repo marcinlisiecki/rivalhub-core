@@ -40,7 +40,7 @@ public class UserService {
         return autoMapper.mapToUserDto(user);
     }
 
-    UserDetailsDto findUserById(Long id) {
+    public UserDetailsDto findUserById(Long id) {
         return autoMapper.mapToUserDetails(userRepository.findById(id).orElseThrow(UserNotFoundException::new));
     }
 
