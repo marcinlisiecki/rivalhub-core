@@ -1,8 +1,10 @@
-package com.rivalhub.organization;
+package com.rivalhub.organization.service;
 
 import com.rivalhub.common.AutoMapper;
-import com.rivalhub.event.Event;
 import com.rivalhub.event.EventType;
+import com.rivalhub.organization.Organization;
+import com.rivalhub.organization.validator.OrganizationSettingsValidator;
+import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
@@ -19,7 +21,7 @@ public class OrganizationSettingsService {
     private final RepositoryManager repositoryManager;
     private final AutoMapper autoMapper;
 
-    UserDetailsDto setAdmin(String username, Long organizationId, Long userId) {
+    public UserDetailsDto setAdmin(String username, Long organizationId, Long userId) {
         UserData loggedUser = repositoryManager.findUserByEmail(username);
         Organization organization = repositoryManager.findOrganizationById(organizationId);
 
@@ -39,7 +41,7 @@ public class OrganizationSettingsService {
     }
 
 
-    EventType removeEventType(String username, Long organizationId, EventType eventType) {
+    public EventType removeEventType(String username, Long organizationId, EventType eventType) {
         UserData loggedUser = repositoryManager.findUserByEmail(username);
         Organization organization = repositoryManager.findOrganizationById(organizationId);
 
@@ -50,7 +52,7 @@ public class OrganizationSettingsService {
         return eventType;
     }
 
-    Set<EventType> getEventTypesInOrganization(String email, Long organizationId) {
+    public Set<EventType> getEventTypesInOrganization(String email, Long organizationId) {
         Organization organization = repositoryManager.findOrganizationById(organizationId);
         UserData user = repositoryManager.findUserByEmail(email);
         OrganizationSettingsValidator.userIsInOrganization(organization, user);
@@ -58,7 +60,7 @@ public class OrganizationSettingsService {
         return organization.getEventTypeInOrganization();
     }
 
-    EventType addEventType(String username, Long organizationId, EventType eventType) {
+    public EventType addEventType(String username, Long organizationId, EventType eventType) {
         UserData loggedUser = repositoryManager.findUserByEmail(username);
         Organization organization = repositoryManager.findOrganizationById(organizationId);
 
@@ -69,11 +71,11 @@ public class OrganizationSettingsService {
         return eventType;
     }
 
-    Set<EventType> allEventTypeInApp() {
+    public Set<EventType> allEventTypeInApp() {
         return Arrays.stream(EventType.values()).collect(Collectors.toSet());
     }
 
-    boolean setOnlyAdminCanSeeInvitationLink(String email, Long organizationId, boolean onlyAdminCanSeeInvitationLink) {
+    public boolean setOnlyAdminCanSeeInvitationLink(String email, Long organizationId, boolean onlyAdminCanSeeInvitationLink) {
         UserData loggedUser = repositoryManager.findUserByEmail(email);
         Organization organization = repositoryManager.findOrganizationById(organizationId);
 

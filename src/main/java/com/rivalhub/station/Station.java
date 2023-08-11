@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.rivalhub.reservation.Reservation;
 import com.rivalhub.common.ErrorMessages;
 import com.rivalhub.event.EventType;
-import com.rivalhub.organization.Organization;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 

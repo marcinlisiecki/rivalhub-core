@@ -1,20 +1,16 @@
-package com.rivalhub.organization;
+package com.rivalhub.organization.service;
 
 
 import com.rivalhub.event.EventType;
+import com.rivalhub.organization.Organization;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
-import org.aspectj.weaver.ast.Or;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class UserOrganizationService {
-
-
     public static void addUser(UserData userData, Organization organization){
         userData.getOrganizationList().add(organization);
         organization.getUserList().add(userData);

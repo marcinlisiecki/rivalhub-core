@@ -1,6 +1,7 @@
-package com.rivalhub.organization;
+package com.rivalhub.organization.validator;
 
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.organization.Organization;
+import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class OrganizationStationValidator {
-    private final OrganizationRepository organizationRepository;
+    private final RepositoryManager repositoryManager;
 
     public Organization checkIfViewStationIsPossible(Long organizationId, UserData user){
         Organization organization = organizationExists(organizationId);
@@ -16,8 +17,7 @@ public class OrganizationStationValidator {
     }
 
     private Organization organizationExists(Long id) {
-        return organizationRepository.findById(id)
-            .orElseThrow(OrganizationNotFoundException::new);
+        return repositoryManager.findOrganizationById(id);
     }
 
     public void checkIfUpdateStationIsPossible(Long organizationId, UserData user) {

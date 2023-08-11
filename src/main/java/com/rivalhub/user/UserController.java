@@ -1,18 +1,14 @@
 package com.rivalhub.user;
 
-import com.rivalhub.common.dto.ErrorMessageDto;
-import com.rivalhub.organization.OrganizationCreateDTO;
-import com.rivalhub.email.EmailService;
+import com.rivalhub.organization.OrganizationDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,7 +35,7 @@ public class UserController {
 
     @GetMapping("/users/organizations")
     private ResponseEntity<?> listAllOrganizationsByUser(@AuthenticationPrincipal UserDetails userDetails){
-        List<OrganizationCreateDTO> userOrganizations = userService.findOrganizationsByUser(userDetails.getUsername());
+        List<OrganizationDTO> userOrganizations = userService.findOrganizationsByUser(userDetails.getUsername());
         return ResponseEntity.ok(userOrganizations);
     }
 

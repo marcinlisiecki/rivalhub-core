@@ -3,7 +3,7 @@ package com.rivalhub.user;
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.email.EmailService;
 import com.rivalhub.organization.Organization;
-import com.rivalhub.organization.OrganizationCreateDTO;
+import com.rivalhub.organization.OrganizationDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -53,11 +53,11 @@ public class UserService {
                 .orElseThrow(UserNotFoundException::new));
     }
 
-    List<OrganizationCreateDTO> findOrganizationsByUser(String email) {
+    List<OrganizationDTO> findOrganizationsByUser(String email) {
         UserData user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
 
         List<Organization> organizationList = user.getOrganizationList();
-        List<OrganizationCreateDTO> userOrganizationDTO = organizationList.stream().map(organization -> new OrganizationCreateDTO(organization.getId(),
+        List<OrganizationDTO> userOrganizationDTO = organizationList.stream().map(organization -> new OrganizationDTO(organization.getId(),
                         organization.getName(), organization.getImageUrl()))
                 .collect(Collectors.toList());
 

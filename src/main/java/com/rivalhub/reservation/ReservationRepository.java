@@ -1,19 +1,10 @@
 package com.rivalhub.reservation;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.rivalhub.station.Station;
-import com.rivalhub.user.UserData;
-import jakarta.persistence.*;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 
