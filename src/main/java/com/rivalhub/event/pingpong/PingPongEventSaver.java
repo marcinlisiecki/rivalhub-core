@@ -40,8 +40,7 @@ public class PingPongEventSaver {
         pingPongEvent.setEndTime(LocalDateTime.parse(eventDto.getEndTime(), FormatterHelper.formatter()));
 
         pingPongEvent.setReservation(repositoryManager.findReservationById(reservationDTO.getId()));
-        PingPongEvent savedEvent = pingPongEventRepository.save(pingPongEvent);
 
-        return savedEvent;
+        return pingPongEventRepository.save(pingPongEvent);
     }
 }

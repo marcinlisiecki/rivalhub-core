@@ -2,9 +2,7 @@ package com.rivalhub.event.pingpong;
 
 
 import com.rivalhub.user.UserData;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.List;
@@ -13,13 +11,14 @@ import java.util.List;
 @Data
 public class PingPongMatch {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToMany
+    @ManyToMany
     List<UserData> team1;
-    @OneToMany
+    @ManyToMany
     List<UserData> team2;
     int team1Score;
     int team2Score;
-
-
+    boolean team1Approval;
+    boolean team2Approval;
 }

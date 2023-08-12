@@ -3,15 +3,18 @@ package com.rivalhub.event.pingpong;
 import com.rivalhub.event.Event;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Data
 public class PingPongEvent extends Event {
-    @OneToMany
+    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     List<PingPongMatch> pingPongMatchList;
 
     public List<Long> getParticipantsId(){
@@ -28,5 +31,9 @@ public class PingPongEvent extends Event {
             stationId.add(station.getId());
         }
         return stationId;
+    }
+
+    public void addPingPongMatch(PingPongMatch pingPongMatch){
+        this.pingPongMatchList.add(pingPongMatch);
     }
 }
