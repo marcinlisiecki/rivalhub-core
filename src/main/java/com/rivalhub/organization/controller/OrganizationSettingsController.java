@@ -32,27 +32,27 @@ public class OrganizationSettingsController {
         return ResponseEntity.ok(organizationSettingsService.setOnlyAdminCanSeeInvitationLink(userDetails.getUsername(), organizationId,  onlyAdminCanSeeInvitationLink));
     }
 
-    @DeleteMapping("{organizationId}/admin/events")
+    @DeleteMapping("{organizationId}/admin/event-types")
     private ResponseEntity<?> removeEventType(@AuthenticationPrincipal UserDetails userDetails,
                                       @PathVariable Long organizationId,
                                       @RequestParam("type") EventType eventType){
         return ResponseEntity.ok(organizationSettingsService.removeEventType(userDetails.getUsername(), organizationId, eventType));
     }
 
-    @GetMapping("{organizationId}/events")
+    @GetMapping("{organizationId}/event-types")
     private ResponseEntity<?> getEventTypesInOrganization(@AuthenticationPrincipal UserDetails userDetails,
                                                   @PathVariable Long organizationId){
         return ResponseEntity.ok(organizationSettingsService.getEventTypesInOrganization(userDetails.getUsername(), organizationId));
     }
 
-    @PostMapping("{organizationId}/admin/events")
+    @PostMapping("{organizationId}/admin/event-types")
     private ResponseEntity<?> addEventType(@AuthenticationPrincipal UserDetails userDetails,
                                    @PathVariable Long organizationId,
                                    @RequestParam("type") EventType eventType){
         return ResponseEntity.ok(organizationSettingsService.addEventType(userDetails.getUsername(), organizationId, eventType));
     }
 
-    @GetMapping("/events")
+    @GetMapping("/event-types")
     private ResponseEntity<?> allEventTypeInApp(){
         return ResponseEntity.ok(organizationSettingsService.allEventTypeInApp());
     }
