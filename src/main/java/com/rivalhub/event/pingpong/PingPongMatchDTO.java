@@ -12,4 +12,6 @@ public class PingPongMatchDTO {
     private List<UserDetailsDto> team2;
     private int team1Score;
     private int team2Score;
+    boolean team1Approval;
+    boolean team2Approval;
 }

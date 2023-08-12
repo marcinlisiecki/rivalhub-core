@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 public class PingPongEvent extends Event {
     @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    List<PingPongMatch> pingPongMatchList;
+    private List<PingPongMatch> pingPongMatchList;
 
     public List<Long> getParticipantsId(){
         List<Long> participantsId = new ArrayList<>();

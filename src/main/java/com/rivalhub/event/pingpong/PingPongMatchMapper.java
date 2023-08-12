@@ -4,6 +4,7 @@ package com.rivalhub.event.pingpong;
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.user.UserData;
+import com.rivalhub.user.UserDetailsDto;
 import com.rivalhub.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,7 @@ public class PingPongMatchMapper {
     private final AutoMapper autoMapper;
     private final RepositoryManager repositoryManager;
 
-    public PingPongMatch map(PingPongMatchDTO pingPongMatchDTO){
+    PingPongMatch map(PingPongMatchDTO pingPongMatchDTO){
         PingPongMatch pingPongMatch = new PingPongMatch();
 
         List<UserData> team1 = pingPongMatchDTO.getTeam1().stream().map(userDetailsDto -> repositoryManager.findUserByEmail(userDetailsDto.getEmail())).toList();
@@ -30,4 +31,22 @@ public class PingPongMatchMapper {
 
         return pingPongMatch;
     }
+
+    PingPongMatchDTO map(PingPongMatch pingPongMatch){
+        PingPongMatchDTO pingPongMatchDTO = new PingPongMatchDTO();
+
+        List<UserDetailsDto> team1 = pingPongMatch.getTeam1().stream().map(autoMapper::mapToUserDetails).toList();
+        List<UserDetailsDto> team2 = pingPongMatch.getTeam2().stream().map(autoMapper::mapToUserDetails).toList();
+
+        pingPongMatchDTO.setId(pingPongMatch.getId());
+        pingPongMatchDTO.setTeam1(team1);
+        pingPongMatchDTO.setTeam2(team2);
+        pingPongMatchDTO.setTeam1Score(pingPongMatch.getTeam1Score());
+        pingPongMatchDTO.setTeam2Score(pingPongMatch.getTeam2Score());
+        pingPongMatchDTO.setTeam1Approval(pingPongMatch.isTeam1Approval());
+        pingPongMatchDTO.setTeam2Approval(pingPongMatch.isTeam2Approval());
+
+        return pingPongMatchDTO;
+    }
+
 }
