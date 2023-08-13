@@ -49,7 +49,4 @@ public class PingPongService implements EventServiceInterface {
                 .map(autoMapper::mapToEventDto)
                 .orElseThrow(EventNotFoundException::new);
     }
-
-
-
 }

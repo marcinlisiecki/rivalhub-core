@@ -5,13 +5,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 public interface PingPongEventRepository extends CrudRepository<PingPongEvent,Long> {
     List<PingPongEvent> findAllByOrganization(Organization organization);
-
-
 
     @Query(value = "SELECT * FROM PING_PONG_EVENT \n" +
             "JOIN PING_PONG_EVENT_PARTICIPANTS ON PING_PONG_EVENT_EVENT_ID = EVENT_ID\n" +

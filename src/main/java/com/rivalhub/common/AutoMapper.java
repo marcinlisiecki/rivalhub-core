@@ -3,8 +3,6 @@ package com.rivalhub.common;
 import com.rivalhub.auth.LoginRequestDto;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.event.pingpong.PingPongEvent;
-import com.rivalhub.event.pingpong.PingPongMatch;
-import com.rivalhub.event.pingpong.PingPongMatchDTO;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationDTO;
 import com.rivalhub.reservation.AddReservationDTO;
@@ -20,8 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor

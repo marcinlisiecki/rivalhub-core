@@ -1,5 +1,7 @@
 package com.rivalhub.event.pingpong;
 
+import com.rivalhub.event.pingpong.match.PingPongMatchDTO;
+import com.rivalhub.event.pingpong.match.PingPongMatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

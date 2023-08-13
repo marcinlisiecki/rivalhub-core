@@ -1,6 +1,7 @@
 package com.rivalhub.event.pingpong;
 
 import com.rivalhub.event.Event;
+import com.rivalhub.event.pingpong.match.PingPongMatch;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.CascadeType;
@@ -17,6 +18,7 @@ public class PingPongEvent extends Event {
     @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private List<PingPongMatch> pingPongMatchList;
 
+    //TODO wywalić te metody do innej klasy jeżeli to możliwe
     public List<Long> getParticipantsId(){
         List<Long> participantsId = new ArrayList<>();
         for (UserData userData:this.getParticipants()) {
@@ -33,7 +35,5 @@ public class PingPongEvent extends Event {
         return stationId;
     }
 
-    public void addPingPongMatch(PingPongMatch pingPongMatch){
-        this.pingPongMatchList.add(pingPongMatch);
-    }
+
 }

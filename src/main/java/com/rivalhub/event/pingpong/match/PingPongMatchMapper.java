@@ -1,11 +1,10 @@
-package com.rivalhub.event.pingpong;
+package com.rivalhub.event.pingpong.match;
 
 
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
-import com.rivalhub.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
