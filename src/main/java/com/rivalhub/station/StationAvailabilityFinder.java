@@ -21,7 +21,7 @@ public class StationAvailabilityFinder {
 
         for (Station station : stations) {
             if (station.getType() != type) {
-                break;
+                continue;
             }
 
             LocalDateTime currentStationFirstAvailable = LocalDateTime.now();
