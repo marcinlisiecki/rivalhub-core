@@ -33,7 +33,7 @@ public class Station {
     @Size(min = 2, max = 256, message = ErrorMessages.NAME_SIZE)
     private String name;
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, mappedBy = "stationList")
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "stationList")
     @JsonBackReference("reservation-stations")
     private List<Reservation> reservationList = new ArrayList<>();
 
