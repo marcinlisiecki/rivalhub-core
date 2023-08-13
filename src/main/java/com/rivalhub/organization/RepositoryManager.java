@@ -1,12 +1,13 @@
 package com.rivalhub.organization;
 
+import com.rivalhub.event.pingpong.PingPongEvent;
+import com.rivalhub.event.pingpong.PingPongEventRepository;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.reservation.*;
 import com.rivalhub.station.Station;
 import com.rivalhub.station.StationNotFoundException;
 import com.rivalhub.station.StationRepository;
 import com.rivalhub.user.UserData;
-import com.rivalhub.user.UserDetailsDto;
 import com.rivalhub.user.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
 import jakarta.persistence.Tuple;
@@ -25,6 +26,7 @@ public class RepositoryManager {
     private final OrganizationRepository organizationRepository;
     private final StationRepository stationRepository;
     private final ReservationRepository reservationRepository;
+    private final PingPongEventRepository pingPongEventRepository;
 
     public UserData findUserByEmail(String email){
         return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
@@ -91,5 +93,9 @@ public class RepositoryManager {
 
     public Set<Reservation> reservationsByOrganizationIdAndUserId(Long organizationId, Long userId){
         return reservationRepository.reservationsByOrganizationIdAndUserId(organizationId, userId);
+    }
+
+    public Set<PingPongEvent> eventsByOrganizationIdAndUserId(Long organizationId, Long userId) {
+        return pingPongEventRepository.findAllByOrganizationIdAndUserId(organizationId, userId);
     }
 }

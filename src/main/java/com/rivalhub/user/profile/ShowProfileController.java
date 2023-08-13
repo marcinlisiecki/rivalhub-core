@@ -18,4 +18,10 @@ public class ShowProfileController {
                                                              @AuthenticationPrincipal UserDetails userDetails){
         return ResponseEntity.ok(profileService.getSharedOrganizationReservations(id, userDetails.getUsername()));
     }
+
+    @GetMapping("/users/{id}/events")
+    private ResponseEntity<?> sharedOrganizationEvents(@PathVariable Long id,
+                                                             @AuthenticationPrincipal UserDetails userDetails){
+        return ResponseEntity.ok(profileService.getSharedOrganizationEvents(id, userDetails.getUsername()));
+    }
 }
