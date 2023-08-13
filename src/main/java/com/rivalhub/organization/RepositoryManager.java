@@ -6,12 +6,14 @@ import com.rivalhub.station.Station;
 import com.rivalhub.station.StationNotFoundException;
 import com.rivalhub.station.StationRepository;
 import com.rivalhub.user.UserData;
+import com.rivalhub.user.UserDetailsDto;
 import com.rivalhub.user.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
 import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -38,6 +40,9 @@ public class RepositoryManager {
 
     public Station save(Station station){
         return stationRepository.save(station);
+    }
+    public UserData save(UserData userData){
+        return userRepository.save(userData);
     }
 
     public Organization findOrganizationById(Long id){
@@ -70,5 +75,21 @@ public class RepositoryManager {
 
     public Set<Tuple> getAllUsersByOrganizationId(Long id){
         return userRepository.getAllUsersByOrganizationId(id);
+    }
+
+    public UserData findByActivationHash(String hash) {
+        return userRepository.findByActivationHash(hash).orElseThrow(UserNotFoundException::new);
+    }
+
+    public void deleteInactiveUsers(LocalDateTime deleteTime) {
+        userRepository.deleteInactiveUsers(deleteTime);
+    }
+
+    public Optional<UserData> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public Set<Reservation> reservationsByOrganizationIdAndUserId(Long organizationId, Long userId){
+        return reservationRepository.reservationsByOrganizationIdAndUserId(organizationId, userId);
     }
 }
