@@ -20,7 +20,7 @@ public class EventController {
         return ResponseEntity.ok(eventService.findEvent(eventId, type));
     }
 
-    @PostMapping("/{id}/eventsS")
+    @PostMapping("/{id}/events")
     private ResponseEntity<?> addEvent(@PathVariable Long id, @RequestBody EventDto eventDto,
                                        @RequestParam(name = "type") String type) {
         EventDto savedEvent = eventService.addEvent(id, eventDto, type);
