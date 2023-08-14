@@ -1,12 +1,12 @@
 package com.rivalhub.email;
 
 import com.rivalhub.user.UserDto;
-
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -15,8 +15,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.io.File;
-
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +22,8 @@ public class EmailService {
 
     private final TemplateEngine templateEngine;
     private final JavaMailSender javaMailSender;
+    private final ResourceLoader resourceLoader;
+
     @Value("${spring.mail.username}")
     private String sender;
 
@@ -59,8 +59,9 @@ public class EmailService {
             helper.setFrom(sender);
             helper.setSubject(subject);
             helper.setText(message,true);
-            FileSystemResource res = new FileSystemResource(new File("src/main/resources/templates/logo.png"));
-            helper.addInline("identifier1234", res);
+
+            Resource resource = resourceLoader.getResource("classpath:/templates/logo.png");
+            helper.addInline("identifier1234", resource);
         } catch (MessagingException exception){
             throw new EmailNotSentException();
         }
