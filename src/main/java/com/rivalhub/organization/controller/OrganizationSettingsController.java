@@ -39,7 +39,7 @@ public class OrganizationSettingsController {
         return ResponseEntity.ok(organizationSettingsService.removeEventType(userDetails.getUsername(), organizationId, eventType));
     }
 
-    @GetMapping("{organizationId}/events")
+    @GetMapping("{organizationId}/event-types")
     private ResponseEntity<?> getEventTypesInOrganization(@AuthenticationPrincipal UserDetails userDetails,
                                                   @PathVariable Long organizationId){
         return ResponseEntity.ok(organizationSettingsService.getEventTypesInOrganization(userDetails.getUsername(), organizationId));

@@ -78,9 +78,7 @@ public class OrganizationStationService {
                 .findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
 
         Organization organization = repositoryManager.findOrganizationById(organizationId);
-        List<Station> availableStations = StationAvailabilityFinder
-                .getAvailableStations(organization, start, end, type, userData, organization.getStationList());
-        availableStations = filterForActiveStations(availableStations);
+
 
         LocalDateTime startTime = LocalDateTime.parse(start, FormatterHelper.formatter());
         LocalDateTime endTime = LocalDateTime.parse(end, FormatterHelper.formatter());
@@ -89,11 +87,17 @@ public class OrganizationStationService {
         Duration timeNeeded = Duration.ofSeconds(ChronoUnit.SECONDS.between(startTime, endTime));
 
         if (type != null) {
+            List<Station> availableStations = StationAvailabilityFinder
+                    .getAvailableStations(organization, start, end, type, userData, organization.getStationList());
+            availableStations = filterForActiveStations(availableStations);
             eventStations.add(getEventTypeStation(type, availableStations, organization, timeNeeded));
             return eventStations;
         }
 
         for (EventType eventType : EventType.values()) {
+            List<Station> availableStations = StationAvailabilityFinder
+                    .getAvailableStations(organization, start, end, eventType, userData, organization.getStationList());
+            availableStations = filterForActiveStations(availableStations);
             eventStations.add(getEventTypeStation(eventType, availableStations, organization, timeNeeded));
         }
 

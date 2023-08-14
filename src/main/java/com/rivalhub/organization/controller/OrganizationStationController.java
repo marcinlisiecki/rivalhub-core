@@ -52,7 +52,7 @@ public class OrganizationStationController {
     private ResponseEntity<List<EventTypeStationsDto>> viewEventStations(@PathVariable Long id,
                                                                  @RequestParam String start,
                                                                  @RequestParam String end,
-                                                                 @RequestParam EventType type) {
+                                                                 @RequestParam (required = false) EventType type) {
         return ResponseEntity.ok(organizationStationService.getEventStations(id, start, end, type));
     }
 
