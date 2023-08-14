@@ -21,6 +21,7 @@ import java.util.function.Predicate;
 @Service
 public class OrganizationReservationService {
     private final AutoMapper autoMapper;
+    //OrganizationReservationService ma zależności od organization repo i reservation repo (jak nazwa wskazuje) czy to nie piękne?
     private final OrganizationRepository organizationRepository;
     private final ReservationRepository reservationRepository;
 
