@@ -13,5 +13,7 @@ public class PingPongSet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private int setNr;
-    private int score;
+    private int team1Score;
+    private int team2Score;
+
 }

@@ -32,8 +32,8 @@ public class PingPongMatchHelper {
         addPingPongMatch(pingPongEvent, pingPongMatch);
 
         PingPongMatch savedMatch = pingPongMatchRepository.save(pingPongMatch);
-        pingPongEventRepository.save(pingPongEvent);
 
+        pingPongEventRepository.save(pingPongEvent);
 
         return pingPongMatchMapper.map(savedMatch);
     }
