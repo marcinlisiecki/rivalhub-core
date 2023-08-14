@@ -24,7 +24,7 @@ public class ExceptionHandler {
             UserAlreadyExistsException.class,
             InsufficientPermissionsException.class,
             EmailNotSentException.class,
-            UserNotFoundException.class
+            UserNotFoundException.class,
             MatchNotFoundException.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
