@@ -1,48 +1,73 @@
 package com.rivalhub.organization.service;
 
 import com.rivalhub.common.AutoMapper;
+import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.organization.Organization;
+import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
-import com.rivalhub.organization.exception.ReservationIsNotPossible;
 import com.rivalhub.reservation.*;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.function.Predicate;
 
 @RequiredArgsConstructor
 @Service
 public class OrganizationReservationService {
-    private final RepositoryManager repositoryManager;
     private final AutoMapper autoMapper;
-    private final ReservationSaver reservationSaver;
+    private final OrganizationRepository organizationRepository;
+    private final ReservationRepository reservationRepository;
 
 
-    public ReservationDTO addReservation(AddReservationDTO reservationDTO,
-                                         Long id, String email) {
-        Organization organization = repositoryManager.findOrganizationById(id);
-        UserData user = repositoryManager.findUserByEmail(email);
-
-        List<Station> stationList = repositoryManager.findStations(reservationDTO);
-
-        boolean checkIfReservationIsPossible = ReservationValidator.checkIfReservationIsPossible(reservationDTO, organization, user, id, stationList);
-        if (!checkIfReservationIsPossible) throw new ReservationIsNotPossible();
-
-        return reservationSaver.saveReservation(user, stationList, reservationDTO);
-    }
-
-    public List<ReservationDTO> viewReservations(Long id, String email) {
-        Organization organization = repositoryManager.findOrganizationById(id);
-        UserData user = repositoryManager.findUserByEmail(email);
-
-        user.getOrganizationList()
-                .stream().filter(org -> org.getId().equals(id)).findFirst()
+    public ReservationDTO addReservation(AddReservationDTO addReservationDTO) {
+        final var organization = organizationRepository.findById(addReservationDTO.getOrganizationId())
                 .orElseThrow(OrganizationNotFoundException::new);
 
-        return repositoryManager.findReservationsByOrganization(organization)
+        List<Station> stationsForReservation = getExistingStationsForReservation(organization, addReservationDTO);
+
+        ReservationValidator.checkIfReservationIsPossible(addReservationDTO, stationsForReservation);
+
+        var savedReservation = saveReservation(addReservationDTO, stationsForReservation);
+        return autoMapper.mapToReservationDto(savedReservation);
+    }
+
+    private List<Station> getExistingStationsForReservation(Organization organization, AddReservationDTO addReservationDTO) {
+        return organization.getStationList().stream()
+                .filter(stationsExistsInOrganisation(addReservationDTO))
+                .toList();
+    }
+
+    private Predicate<Station> stationsExistsInOrganisation(AddReservationDTO addReservationDTO) {
+        return station -> addReservationDTO.getStationsIdList().contains(station.getId());
+    }
+
+    private Reservation saveReservation(AddReservationDTO addReservationDTO, List<Station> reservationStations) {
+        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var newReservation = Reservation.builder()
+                .userData(requestUser)
+                .startTime(LocalDateTime.parse(addReservationDTO.getStartTime(), FormatterHelper.formatter()))
+                .endTime(LocalDateTime.parse(addReservationDTO.getEndTime(), FormatterHelper.formatter()))
+                .stationList(reservationStations)
+                .build();
+        return reservationRepository.save(newReservation);
+    }
+
+
+    /*
+    Tutaj była logika sprwadzania czy user jest w danej organizacji (chyba) to generuje dużo zbędnego kodu w róznych miejscach.
+    Podejście
+        a) ufamy, że skoro user przeszedł autentykacje to może wykonać dane działanie
+        b) robimy jakąś klasę która wystawia metodę sprawdzania tego czy dany user jest w organizacji i wołamy ją w różnych miejscach
+        c) robimy własną anotację i piszemy do niej metodę która będzie to sprawdzać, po czym oznaczamy anotacją wybrane metody
+     */
+    public List<ReservationDTO> viewReservations(Long organizationId) {
+        return reservationRepository.reservationsByOrganization(organizationId)
                 .stream().map(autoMapper::mapToReservationDto).toList();
     }
 }
