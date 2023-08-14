@@ -3,6 +3,7 @@ package com.rivalhub.user;
 import com.rivalhub.organization.OrganizationDTO;
 import com.rivalhub.auth.JwtTokenDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,8 +39,8 @@ public class UserController {
     }
 
     @GetMapping("/confirm/{hash}")
-    private ResponseEntity<?> confirmUserEmail(@PathVariable String hash){
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void confirmUserEmail(@PathVariable String hash){
         userService.confirmUserEmail(hash);
-        return ResponseEntity.ok(null);
     }
 }

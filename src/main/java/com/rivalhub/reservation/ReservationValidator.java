@@ -34,9 +34,9 @@ public class ReservationValidator {
 
         long reservationStartTime =  reservation.getStartTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         long reservationEndTime =  reservation.getEndTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        boolean tmp;
+        boolean collision;
         for(int i = 0; i < instantsStartTime.size(); i++){
-            tmp = false;
+            collision = true;
             long timeStart = instantsStartTime.get(i).toEpochMilli();
             long timeEnd = instantsEndTime.get(i).toEpochMilli();
 
@@ -48,11 +48,11 @@ public class ReservationValidator {
 
 
             if (timeStartReservationStartControl > 0 && timeStartReservationEndControl > 0
-                    && timeEndReservationStartControl > 0 && timeEndReservationEndControl > 0) tmp = true;
+                    && timeEndReservationStartControl > 0 && timeEndReservationEndControl > 0) collision = false;
             if (timeStartReservationStartControl < 0 && timeStartReservationEndControl < 0
-                    && timeEndReservationStartControl < 0 && timeEndReservationEndControl < 0) tmp = true;
+                    && timeEndReservationStartControl < 0 && timeEndReservationEndControl < 0) collision = false;
 
-            if (tmp) continue;
+            if (!collision) continue;
             return true;
         }
         return false;

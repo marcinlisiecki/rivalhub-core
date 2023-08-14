@@ -26,6 +26,8 @@ public class OrganizationReservationService {
         Organization organization = repositoryManager.findOrganizationById(id);
         UserData user = repositoryManager.findUserByEmail(email);
 
+
+//        List<Station> stationList = organization.getStationList();
         List<Station> stationList = repositoryManager.findStations(reservationDTO);
 
         boolean checkIfReservationIsPossible = ReservationValidator.checkIfReservationIsPossible(reservationDTO, organization, user, id, stationList);
