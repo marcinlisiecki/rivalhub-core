@@ -53,7 +53,7 @@ public class AuthService {
                 .build();
     }
 
-    public JwtTokenDto refreshToken(HttpServletRequest request, HttpServletResponse response) {
+    JwtTokenDto refreshToken(HttpServletRequest request, HttpServletResponse response) {
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
