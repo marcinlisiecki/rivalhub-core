@@ -16,12 +16,15 @@ public class PingPongMatchMapper {
     private final AutoMapper autoMapper;
     private final RepositoryManager repositoryManager;
 
-    PingPongMatch map(PingPongMatchDTO pingPongMatchDTO){
+    PingPongMatch map(AddPingPongMatchDTO pingPongMatchDTO){
         PingPongMatch pingPongMatch = new PingPongMatch();
 
-        List<UserData> team1 = pingPongMatchDTO.getTeam1().stream().map(userDetailsDto -> repositoryManager.findUserByEmail(userDetailsDto.getEmail())).toList();
-        List<UserData> team2 = pingPongMatchDTO.getTeam2().stream().map(userDetailsDto -> repositoryManager.findUserByEmail(userDetailsDto.getEmail())).toList();
 
+        List<UserData> team1 = pingPongMatchDTO.getTeam1Ids().stream()
+                .map(repositoryManager::findUserById).toList();
+
+        List<UserData> team2 = pingPongMatchDTO.getTeam2Ids().stream()
+                .map(repositoryManager::findUserById).toList();
 
         pingPongMatch.setTeam1(team1);
         pingPongMatch.setTeam2(team2);
@@ -31,8 +34,8 @@ public class PingPongMatchMapper {
         return pingPongMatch;
     }
 
-    PingPongMatchDTO map(PingPongMatch pingPongMatch){
-        PingPongMatchDTO pingPongMatchDTO = new PingPongMatchDTO();
+    ViewPingPongMatchDTO map(PingPongMatch pingPongMatch){
+        ViewPingPongMatchDTO pingPongMatchDTO = new ViewPingPongMatchDTO();
 
         List<UserDetailsDto> team1 = pingPongMatch.getTeam1().stream().map(autoMapper::mapToUserDetails).toList();
         List<UserDetailsDto> team2 = pingPongMatch.getTeam2().stream().map(autoMapper::mapToUserDetails).toList();

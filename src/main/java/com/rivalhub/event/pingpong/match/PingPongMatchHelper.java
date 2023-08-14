@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component;
 public class PingPongMatchHelper {
     private final PingPongEventRepository pingPongEventRepository;
     private final PingPongMatchRepository pingPongMatchRepository;
-
-    PingPongMatch save(Organization organization, UserData loggedUser, PingPongEvent pingPongEvent,
-                       PingPongMatch pingPongMatch){
+    private final PingPongMatchMapper pingPongMatchMapper;
+    ViewPingPongMatchDTO save(Organization organization, UserData loggedUser, PingPongEvent pingPongEvent,
+                              PingPongMatch pingPongMatch){
         OrganizationSettingsValidator.userIsInOrganization(organization, loggedUser);
 
         boolean present = pingPongMatch.getTeam1()
@@ -30,9 +30,12 @@ public class PingPongMatchHelper {
         if (present) pingPongMatch.setTeam2Approval(true);
 
         addPingPongMatch(pingPongEvent, pingPongMatch);
+
+        PingPongMatch savedMatch = pingPongMatchRepository.save(pingPongMatch);
         pingPongEventRepository.save(pingPongEvent);
 
-        return pingPongMatch;
+
+        return pingPongMatchMapper.map(savedMatch);
     }
 
     private void addPingPongMatch(PingPongEvent pingPongEvent,PingPongMatch pingPongMatch){

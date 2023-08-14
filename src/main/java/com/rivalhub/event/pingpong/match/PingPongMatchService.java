@@ -18,7 +18,7 @@ public class PingPongMatchService {
     private final PingPongMatchMapper pingPongMatchMapper;
     private final PingPongMatchHelper pingPongMatchHelper;
 
-    public PingPongMatch createPingPongMatch(Long organizationId, Long eventId, String email, PingPongMatchDTO pingPongMatchDTO) {
+    public ViewPingPongMatchDTO createPingPongMatch(Long organizationId, Long eventId, String email, AddPingPongMatchDTO pingPongMatchDTO) {
         Organization organization = repositoryManager.findOrganizationById(organizationId);
         UserData loggedUser = repositoryManager.findUserByEmail(email);
 
@@ -36,7 +36,7 @@ public class PingPongMatchService {
         return pingPongMatchHelper.setResultApproval(loggedUser, pingPongEvent, matchId, approve);
     }
 
-    public PingPongMatchDTO findPingPongMatch(Long organizationId, Long eventId, Long matchId, String email) {
+    public ViewPingPongMatchDTO findPingPongMatch(Long organizationId, Long eventId, Long matchId, String email) {
         Organization organization = repositoryManager.findOrganizationById(organizationId);
         UserData loggedUser = repositoryManager.findUserByEmail(email);
 

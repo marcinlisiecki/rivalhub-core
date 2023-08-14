@@ -1,6 +1,6 @@
 package com.rivalhub.event.pingpong;
 
-import com.rivalhub.event.pingpong.match.PingPongMatchDTO;
+import com.rivalhub.event.pingpong.match.AddPingPongMatchDTO;
 import com.rivalhub.event.pingpong.match.PingPongMatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,7 @@ public class PingPongController {
     @PostMapping("")
     private ResponseEntity<?> createPingPongMatch(@PathVariable Long organizationId,
                                           @PathVariable Long eventId,
-                                          @RequestBody PingPongMatchDTO pingPongMatchDTO,
+                                          @RequestBody AddPingPongMatchDTO pingPongMatchDTO,
                                           @AuthenticationPrincipal UserDetails userDetails){
         return ResponseEntity.ok(pingPongMatchService.createPingPongMatch(organizationId, eventId, userDetails.getUsername(), pingPongMatchDTO));
     }

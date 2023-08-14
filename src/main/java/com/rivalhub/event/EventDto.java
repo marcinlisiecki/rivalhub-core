@@ -3,9 +3,7 @@ package com.rivalhub.event;
 
 import com.rivalhub.organization.OrganizationDTO;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.List;
 
@@ -19,4 +17,5 @@ public class EventDto {
     Long host;
     List<Long> participants;
     OrganizationDTO organization;
+    EventType eventType;
 }
