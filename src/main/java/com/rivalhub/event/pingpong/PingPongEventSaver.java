@@ -24,7 +24,7 @@ public class PingPongEventSaver {
 
     public PingPongEvent saveEvent(PingPongEvent pingPongEvent, Organization organization, EventDto eventDto) {
         pingPongEvent.setOrganization(organization);
-        pingPongEvent.setParticipants(new ArrayList<>());
+
         for (Long id : eventDto.getParticipants()) {
             pingPongEvent.getParticipants().add(repositoryManager.findUserById(id));
         }

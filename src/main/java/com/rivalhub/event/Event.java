@@ -9,6 +9,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -33,11 +34,9 @@ public class Event {
     @ManyToOne
     UserData host;
 
-    @OneToMany
-    List<UserData> participants;
+    @ManyToMany
+    List<UserData> participants = new ArrayList<>();
 
     @ManyToOne
     Organization organization;
-
-
 }

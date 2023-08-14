@@ -1,11 +1,13 @@
 package com.rivalhub.event.pingpong;
 
 import com.rivalhub.event.Event;
+import com.rivalhub.event.EventType;
 import com.rivalhub.event.pingpong.match.PingPongMatch;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.OneToMany;
 import lombok.Data;
 
@@ -15,8 +17,10 @@ import java.util.List;
 @Entity
 @Data
 public class PingPongEvent extends Event {
-    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    private List<PingPongMatch> pingPongMatchList;
+    @OneToMany
+    private List<PingPongMatch> pingPongMatchList = new ArrayList<>();
+
+    private EventType eventType = EventType.PING_PONG;
 
     //TODO wywalić te metody do innej klasy jeżeli to możliwe
     public List<Long> getParticipantsId(){
