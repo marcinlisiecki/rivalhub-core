@@ -17,14 +17,14 @@ public class OrganizationSettingsController {
     private final OrganizationSettingsService organizationSettingsService;
 
 
-    @GetMapping("{organizationId}/admin/{userId}")
+    @PostMapping("{organizationId}/admin/{userId}")
     private ResponseEntity<?> addAdmin(@AuthenticationPrincipal UserDetails userDetails,
                                       @PathVariable Long organizationId,
                                       @PathVariable Long userId){
         return ResponseEntity.ok(organizationSettingsService.setAdmin(userDetails.getUsername(), organizationId, userId));
     }
 
-    @GetMapping("{organizationId}/admin")
+    @PostMapping("{organizationId}/admin")
     private ResponseEntity<?> changeInvitationLinkVisibility(@PathVariable Long organizationId,
                                                      @AuthenticationPrincipal UserDetails userDetails,
                                                      @RequestParam(name = "onlyAdminCanSeeInvitationLink", defaultValue = "true")
