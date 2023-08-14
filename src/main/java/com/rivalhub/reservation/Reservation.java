@@ -23,7 +23,7 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne
     @JsonManagedReference("user-reservations")
     @JoinTable(name = "user_reservations",
             joinColumns = @JoinColumn(name = "reservation_id", referencedColumnName = "id"),

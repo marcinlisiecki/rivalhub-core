@@ -34,7 +34,7 @@ public class PingPongEventSaver {
         addReservationDTO.setEndTime(eventDto.getEndTime());
         addReservationDTO.setStartTime(eventDto.getStartTime());
         addReservationDTO.setStationsIdList(eventDto.getStationList());
-        ReservationDTO reservationDTO = reservationService.addReservation(addReservationDTO, organization.getId(), pingPongEvent.getHost().getEmail());
+        ReservationDTO reservationDTO = reservationService.addReservation(addReservationDTO);
 
         pingPongEvent.setStartTime(LocalDateTime.parse(eventDto.getStartTime(), FormatterHelper.formatter()));
         pingPongEvent.setEndTime(LocalDateTime.parse(eventDto.getEndTime(), FormatterHelper.formatter()));

@@ -20,6 +20,4 @@ public class OrganizationSettingsValidator {
                 .findFirst()
                 .orElseThrow(OrganizationNotFoundException::new);
     }
-
-
 }

@@ -43,7 +43,7 @@ public class Organization {
     @CreationTimestamp
     private LocalDateTime addedDate;
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany
     @JsonManagedReference("user-organizations")
     @JoinTable(name = "organization_users",
             joinColumns = @JoinColumn(name = "organization_id", referencedColumnName = "organization_id"),
@@ -70,7 +70,7 @@ public class Organization {
     @CollectionTable
     private Set<EventType> eventTypeInOrganization = new HashSet<>();
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany
     private Set<UserData> adminUsers = new HashSet<>();
 
     private Boolean onlyAdminCanSeeInvitationLink = true;

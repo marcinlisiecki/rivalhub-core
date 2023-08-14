@@ -98,4 +98,8 @@ public class RepositoryManager {
     public Set<PingPongEvent> eventsByOrganizationIdAndUserId(Long organizationId, Long userId) {
         return pingPongEventRepository.findAllByOrganizationIdAndUserId(organizationId, userId);
     }
+
+    public void deleteOrganization(Organization organization) {
+        organizationRepository.delete(organization);
+    }
 }
