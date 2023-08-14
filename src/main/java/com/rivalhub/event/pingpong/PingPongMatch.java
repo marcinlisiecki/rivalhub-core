@@ -20,6 +20,4 @@ public class PingPongMatch {
     List<UserData> team2;
     int team1Score;
     int team2Score;
-
-
 }
