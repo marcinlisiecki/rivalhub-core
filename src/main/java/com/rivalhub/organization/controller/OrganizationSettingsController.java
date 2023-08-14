@@ -57,4 +57,13 @@ public class OrganizationSettingsController {
         return ResponseEntity.ok(organizationSettingsService.allEventTypeInApp());
     }
 
+    @GetMapping("/{id}/invitation")
+    private ResponseEntity<?> viewInvitation(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
+        return ResponseEntity.ok(organizationSettingsService.viewInvitationLink(id, userDetails.getUsername()));
+    }
+
+    @GetMapping("/{id}/settings")
+    private ResponseEntity<?> showSettings(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
+        return ResponseEntity.ok(organizationSettingsService.showSettings(id, userDetails.getUsername()));
+    }
 }

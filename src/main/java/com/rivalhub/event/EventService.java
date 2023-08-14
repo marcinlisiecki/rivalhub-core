@@ -12,7 +12,7 @@ import java.util.List;
 @Service
 public class EventService {
 
-    final PingPongService pingPongService;
+    private final PingPongService pingPongService;
 
     EventDto findEvent(Long eventId, String type) {
         if (type.equals(EventType.PING_PONG.name()))

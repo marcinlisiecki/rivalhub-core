@@ -10,12 +10,12 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class EventDto {
-    Long eventId;
-    List<Long> stationList;
-    String startTime;
-    String endTime;
-    Long host;
-    List<Long> participants;
-    OrganizationDTO organization;
-    EventType eventType;
+    private Long eventId;
+    private List<Long> stationList;
+    private String startTime;
+    private String endTime;
+    private Long host;
+    private List<Long> participants;
+    private OrganizationDTO organization;
+    private EventType eventType;
 }

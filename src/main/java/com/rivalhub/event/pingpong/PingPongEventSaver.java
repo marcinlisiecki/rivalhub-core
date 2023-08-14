@@ -22,7 +22,7 @@ public class PingPongEventSaver {
     private final OrganizationReservationService reservationService;
     private final PingPongEventRepository pingPongEventRepository;
 
-    public PingPongEvent saveEvent(PingPongEvent pingPongEvent, Organization organization, EventDto eventDto) {
+    PingPongEvent saveEvent(PingPongEvent pingPongEvent, Organization organization, EventDto eventDto) {
         pingPongEvent.setOrganization(organization);
 
         for (Long id : eventDto.getParticipants()) {

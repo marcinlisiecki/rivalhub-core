@@ -72,15 +72,4 @@ public class OrganizationService {
         repositoryManager.save(OrganizationMapper.map(patchedOrganizationDto, organization));
     }
 
-    public String viewInvitationLink(Long organizationId, String email) {
-        UserData loggedUser = repositoryManager.findUserByEmail(email);
-        Organization organization = repositoryManager.findOrganizationById(organizationId);
-
-        OrganizationSettingsValidator.userIsInOrganization(organization, loggedUser);
-
-        if (!organization.getOnlyAdminCanSeeInvitationLink()) return invitationHelper.createInvitationLink(organization);
-
-        OrganizationSettingsValidator.checkIfUserIsAdmin(loggedUser, organization);
-        return invitationHelper.createInvitationLink(organization);
-    }
 }
