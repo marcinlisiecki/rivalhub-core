@@ -42,5 +42,4 @@ public class UserController {
         userService.confirmUserEmail(hash);
         return ResponseEntity.ok(null);
     }
-
 }

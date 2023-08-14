@@ -1,14 +1,13 @@
 package com.rivalhub.event;
 
 
-import lombok.Getter;
+import com.rivalhub.organization.OrganizationDTO;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 public class EventDto {
     Long eventId;
@@ -17,5 +16,6 @@ public class EventDto {
     String endTime;
     Long host;
     List<Long> participants;
-    //OrganizationDTO organization;
+    OrganizationDTO organization;
+    EventType eventType;
 }

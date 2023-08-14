@@ -24,7 +24,7 @@ public class PingPongEventSaver {
 
     public PingPongEvent saveEvent(PingPongEvent pingPongEvent, Organization organization, EventDto eventDto) {
         pingPongEvent.setOrganization(organization);
-        pingPongEvent.setParticipants(new ArrayList<>());
+
         for (Long id : eventDto.getParticipants()) {
             pingPongEvent.getParticipants().add(repositoryManager.findUserById(id));
         }
@@ -40,8 +40,7 @@ public class PingPongEventSaver {
         pingPongEvent.setEndTime(LocalDateTime.parse(eventDto.getEndTime(), FormatterHelper.formatter()));
 
         pingPongEvent.setReservation(repositoryManager.findReservationById(reservationDTO.getId()));
-        PingPongEvent savedEvent = pingPongEventRepository.save(pingPongEvent);
 
-        return savedEvent;
+        return pingPongEventRepository.save(pingPongEvent);
     }
 }

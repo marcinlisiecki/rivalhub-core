@@ -24,9 +24,8 @@ public class PingPongService implements EventServiceInterface {
     private final PingPongEventSaver pingPongEventSaver;
 
     @Override
-    @Transactional
     public EventDto addEvent(Long organizationId, EventDto eventDto) {
-        PingPongEvent pingPongEvent = autoMapper.mapToPingPongEvent(eventDto);
+        PingPongEvent pingPongEvent = new PingPongEvent();
         Organization organization = repositoryManager.findOrganizationById(organizationId);
 
         PingPongEvent savedEvent = pingPongEventSaver.saveEvent(pingPongEvent, organization, eventDto);

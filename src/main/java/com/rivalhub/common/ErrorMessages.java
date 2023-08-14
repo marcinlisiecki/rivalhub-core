@@ -2,6 +2,7 @@ package com.rivalhub.common;
 
 public class ErrorMessages {
 
+
     private ErrorMessages() {}
 
     public static final String DEFAULT_ERROR = "Wystąpił błąd";
@@ -47,4 +48,6 @@ public class ErrorMessages {
 
     public static final String RESERVATION_NOT_FOUND = "Nie znaleziono rezerwacji";
     public static final String INSUFFICIENT_PERMISSIONS = "Nie masz wymaganych uprawnien.";
+    public static final String MATCH_NOT_FOUND = "Nie znaleziono meczu";
+
 }

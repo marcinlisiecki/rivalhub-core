@@ -88,4 +88,8 @@ public class AutoMapper {
     public EventDto mapToEventDto(PingPongEvent pingPongEvent){
         return modelMapper.map(pingPongEvent,EventDto.class);
     }
+
+    public UserData mapToUserData(UserDetailsDto userDetailsDto) {
+        return modelMapper.map(userDetailsDto, UserData.class);
+    }
 }

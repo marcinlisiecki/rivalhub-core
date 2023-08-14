@@ -2,6 +2,7 @@ package com.rivalhub.common;
 
 import com.rivalhub.common.dto.ErrorMessageDto;
 import com.rivalhub.email.EmailNotSentException;
+import com.rivalhub.event.MatchNotFoundException;
 import com.rivalhub.organization.exception.*;
 import com.rivalhub.station.StationNotFoundException;
 import com.rivalhub.user.UserAlreadyExistsException;
@@ -23,7 +24,8 @@ public class ExceptionHandler {
             UserAlreadyExistsException.class,
             InsufficientPermissionsException.class,
             EmailNotSentException.class,
-            UserNotFoundException.class
+            UserNotFoundException.class,
+            MatchNotFoundException.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessageDto handleExceptions(Exception e) {

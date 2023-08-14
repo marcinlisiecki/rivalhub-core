@@ -1,5 +1,7 @@
 package com.rivalhub.organization;
 
+import com.rivalhub.event.pingpong.PingPongEvent;
+import com.rivalhub.event.pingpong.PingPongEventRepository;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.reservation.*;
 import com.rivalhub.station.Station;
@@ -12,6 +14,7 @@ import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -23,6 +26,7 @@ public class RepositoryManager {
     private final OrganizationRepository organizationRepository;
     private final StationRepository stationRepository;
     private final ReservationRepository reservationRepository;
+    private final PingPongEventRepository pingPongEventRepository;
 
     public UserData findUserByEmail(String email){
         return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
@@ -38,6 +42,9 @@ public class RepositoryManager {
 
     public Station save(Station station){
         return stationRepository.save(station);
+    }
+    public UserData save(UserData userData){
+        return userRepository.save(userData);
     }
 
     public Organization findOrganizationById(Long id){
@@ -70,5 +77,25 @@ public class RepositoryManager {
 
     public Set<Tuple> getAllUsersByOrganizationId(Long id){
         return userRepository.getAllUsersByOrganizationId(id);
+    }
+
+    public UserData findByActivationHash(String hash) {
+        return userRepository.findByActivationHash(hash).orElseThrow(UserNotFoundException::new);
+    }
+
+    public void deleteInactiveUsers(LocalDateTime deleteTime) {
+        userRepository.deleteInactiveUsers(deleteTime);
+    }
+
+    public Optional<UserData> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public Set<Reservation> reservationsByOrganizationIdAndUserId(Long organizationId, Long userId){
+        return reservationRepository.reservationsByOrganizationIdAndUserId(organizationId, userId);
+    }
+
+    public Set<PingPongEvent> eventsByOrganizationIdAndUserId(Long organizationId, Long userId) {
+        return pingPongEventRepository.findAllByOrganizationIdAndUserId(organizationId, userId);
     }
 }
