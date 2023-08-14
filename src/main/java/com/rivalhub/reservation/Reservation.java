@@ -15,6 +15,8 @@ import java.util.List;
 @Setter
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Reservation {
 
     @Id

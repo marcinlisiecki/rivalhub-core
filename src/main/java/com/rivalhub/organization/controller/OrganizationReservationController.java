@@ -17,16 +17,14 @@ public class OrganizationReservationController {
     private final OrganizationReservationService organizationReservationService;
 
     @PostMapping("{id}/reservations")
-    private ResponseEntity<?> addReservations(@RequestBody AddReservationDTO reservationDTO,
-                                      @AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id){
-        ReservationDTO reservation = organizationReservationService.addReservation(reservationDTO, id, userDetails.getUsername());
+    private ResponseEntity<?> addReservations(@RequestBody AddReservationDTO reservationDTO, @PathVariable Long organisationId){
+        ReservationDTO reservation = organizationReservationService.addReservation(reservationDTO);
         return ResponseEntity.ok(reservation);
     }
 
     @GetMapping("{id}/reservations")
-    private ResponseEntity<?> viewReservations(@PathVariable Long id,
-                                              @AuthenticationPrincipal UserDetails userDetails){
-        return ResponseEntity.ok(organizationReservationService.viewReservations(id, userDetails.getUsername()));
+    private ResponseEntity<?> viewReservations(@PathVariable Long organizationId){
+        return ResponseEntity.ok(organizationReservationService.viewReservations(organizationId));
     }
 
 }

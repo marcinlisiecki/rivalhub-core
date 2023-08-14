@@ -3,6 +3,7 @@ package com.rivalhub.reservation;
 import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.organization.exception.ReservationIsNotPossible;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,32 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class ReservationValidator {
-    public static boolean checkForTimeCollision(List<Station> stationList, Reservation reservation){
+
+    public static boolean checkIfStationsAreInOrganization(List<Station> stationList, Organization organization){
+        return stationList.stream().allMatch(organization.getStationList()::contains);
+    }
+
+    public static boolean checkIfReservationIsPossible(AddReservationDTO reservationDTO, Organization organization,
+                                                UserData user, Long id, List<Station> stationList) {
+
+        user.getOrganizationList().stream().filter(org -> org.getId().equals(id))
+                .findFirst().orElseThrow(OrganizationNotFoundException::new);
+
+        if (!ReservationValidator.checkIfStationsAreInOrganization(stationList, organization)) return false;
+        if (ReservationValidator.checkForTimeCollision(stationList, reservationDTO.getStartTime(), reservationDTO.getEndTime())) return false;
+
+        return true;
+    }
+
+
+    public static void checkIfReservationIsPossible(AddReservationDTO addReservationDTO, List<Station> stations) {
+        //nie jestem pewny z kodu czy jak checkForTimeCollision is true to znaczy że mogę zarezerwować czy nie :D
+        if (checkForTimeCollision(stations, addReservationDTO.getStartTime(), addReservationDTO.getEndTime())) {
+            throw new ReservationIsNotPossible();
+        }
+    }
+
+    private static boolean checkForTimeCollision(List<Station> stationList, String startTime, String endTime){
         List<List<LocalDateTime>> listsOfStartTime = stationList.stream().map(station
                 -> station.getReservationList().stream().map(Reservation::getStartTime).toList()).toList();
         List<List<LocalDateTime>> listsOfEndTime = stationList.stream().map(station
@@ -31,10 +57,12 @@ public class ReservationValidator {
         List<Instant> instantsStartTime = listOfStartTime.stream().map(localDateTime -> localDateTime.atZone(ZoneId.systemDefault()).toInstant()).toList();
         List<Instant> instantsEndTime = listOfEndTime.stream().map(localDateTime -> localDateTime.atZone(ZoneId.systemDefault()).toInstant()).toList();
 
+        final var startTimeFormatted = LocalDateTime.parse(startTime, FormatterHelper.formatter());
+        final var endTimeFormatted = LocalDateTime.parse(endTime, FormatterHelper.formatter());
 
-        long reservationStartTime =  reservation.getStartTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        long reservationEndTime =  reservation.getEndTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        boolean collision;
+        long reservationStartTime =  startTimeFormatted.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        long reservationEndTime =  endTimeFormatted.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        boolean tmp;
         for(int i = 0; i < instantsStartTime.size(); i++){
             collision = true;
             long timeStart = instantsStartTime.get(i).toEpochMilli();
@@ -56,26 +84,6 @@ public class ReservationValidator {
             return true;
         }
         return false;
-    }
-
-    public static boolean checkIfStationsAreInOrganization(List<Station> stationList, Organization organization){
-        return stationList.stream().allMatch(organization.getStationList()::contains);
-    }
-
-    public static boolean checkIfReservationIsPossible(AddReservationDTO reservationDTO, Organization organization,
-                                                UserData user, Long id, List<Station> stationList) {
-
-        user.getOrganizationList().stream().filter(org -> org.getId().equals(id))
-                .findFirst().orElseThrow(OrganizationNotFoundException::new);
-
-        if (!ReservationValidator.checkIfStationsAreInOrganization(stationList, organization)) return false;
-
-        Reservation reservation = new Reservation(user, stationList,
-                LocalDateTime.parse(reservationDTO.getStartTime(), FormatterHelper.formatter()),
-                LocalDateTime.parse(reservationDTO.getEndTime(), FormatterHelper.formatter()));
-        if (ReservationValidator.checkForTimeCollision(stationList, reservation)) return false;
-
-        return true;
     }
 
 }
