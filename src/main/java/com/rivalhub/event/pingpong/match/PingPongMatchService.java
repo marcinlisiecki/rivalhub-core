@@ -8,13 +8,18 @@ import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class PingPongMatchService {
     private final RepositoryManager repositoryManager;
     private final PingPongEventRepository pingPongEventRepository;
+    private final PingPongMatchRepository pingPongMatchRepository;
     private final PingPongMatchMapper pingPongMatchMapper;
     private final PingPongMatchHelper pingPongMatchHelper;
 
@@ -51,4 +56,17 @@ public class PingPongMatchService {
     }
 
 
+    public List<PingPongSet> addResult(Long organizationId, Long eventId, Long matchId, String email, List<PingPongSet> sets) {
+        Organization organization = repositoryManager.findOrganizationById(organizationId);
+        UserData loggedUser = repositoryManager.findUserByEmail(email);
+        OrganizationSettingsValidator.userIsInOrganization(organization, loggedUser);
+
+        PingPongEvent pingPongEvent = pingPongEventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
+        PingPongMatch pingPongMatch = pingPongMatchHelper.findMatchInEvent(pingPongEvent, matchId);
+
+        pingPongMatch.getSets().addAll(sets);
+        PingPongMatch savedMatch = pingPongMatchRepository.save(pingPongMatch);
+
+        return savedMatch.getSets();
+    }
 }

@@ -10,8 +10,7 @@ public class ViewPingPongMatchDTO {
     private Long id;
     private List<UserDetailsDto> team1;
     private List<UserDetailsDto> team2;
-    private int team1Score;
-    private int team2Score;
-    private boolean team1Approval;
-    private boolean team2Approval;
+    private List<PingPongSet> sets;
+    boolean team1Approval;
+    boolean team2Approval;
 }

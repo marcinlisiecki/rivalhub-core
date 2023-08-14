@@ -28,8 +28,6 @@ public class PingPongMatchMapper {
 
         pingPongMatch.setTeam1(team1);
         pingPongMatch.setTeam2(team2);
-        pingPongMatch.setTeam1Score(pingPongMatchDTO.getTeam1Score());
-        pingPongMatch.setTeam2Score(pingPongMatchDTO.getTeam2Score());
 
         return pingPongMatch;
     }
@@ -43,8 +41,7 @@ public class PingPongMatchMapper {
         pingPongMatchDTO.setId(pingPongMatch.getId());
         pingPongMatchDTO.setTeam1(team1);
         pingPongMatchDTO.setTeam2(team2);
-        pingPongMatchDTO.setTeam1Score(pingPongMatch.getTeam1Score());
-        pingPongMatchDTO.setTeam2Score(pingPongMatch.getTeam2Score());
+        pingPongMatchDTO.setSets(pingPongMatch.getSets());
         pingPongMatchDTO.setTeam1Approval(pingPongMatch.isTeam1Approval());
         pingPongMatchDTO.setTeam2Approval(pingPongMatch.isTeam2Approval());
 
