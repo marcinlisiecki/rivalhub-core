@@ -14,11 +14,11 @@ public class PingPongMatch {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToMany
-    List<UserData> team1;
+    private List<UserData> team1;
     @ManyToMany
-    List<UserData> team2;
-    int team1Score;
-    int team2Score;
-    boolean team1Approval;
-    boolean team2Approval;
+    private List<UserData> team2;
+    private int team1Score;
+    private int team2Score;
+    private boolean team1Approval;
+    private boolean team2Approval;
 }

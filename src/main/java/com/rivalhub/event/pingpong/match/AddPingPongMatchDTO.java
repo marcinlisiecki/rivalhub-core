@@ -11,6 +11,6 @@ public class AddPingPongMatchDTO {
     private List<Long> team2Ids;
     private int team1Score;
     private int team2Score;
-    boolean team1Approval;
-    boolean team2Approval;
+    private boolean team1Approval;
+    private boolean team2Approval;
 }

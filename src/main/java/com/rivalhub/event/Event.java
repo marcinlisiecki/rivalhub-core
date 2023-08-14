@@ -18,25 +18,25 @@ import java.util.List;
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long eventId;
+    private Long eventId;
 
     @OneToOne(cascade = CascadeType.REMOVE)
     @JsonManagedReference
     @JoinColumn(name = "reservation_id")
-    Reservation reservation;
+    private Reservation reservation;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm")
-    LocalDateTime startTime;
+    private LocalDateTime startTime;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm")
-    LocalDateTime endTime;
+    private LocalDateTime endTime;
 
     @ManyToOne
-    UserData host;
+    private UserData host;
 
     @ManyToMany
-    List<UserData> participants = new ArrayList<>();
+    private List<UserData> participants = new ArrayList<>();
 
     @ManyToOne
-    Organization organization;
+    private Organization organization;
 }
