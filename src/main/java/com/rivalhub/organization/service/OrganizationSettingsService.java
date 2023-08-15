@@ -7,7 +7,6 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.OrganizationSettingsDTO;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
-import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
@@ -41,7 +40,7 @@ public class OrganizationSettingsService {
     }
 
 
-    public EventType removeEventType(Long organizationId, EventType eventType) {
+    public void removeEventType(Long organizationId, EventType eventType) {
         var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         final var organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
@@ -50,7 +49,6 @@ public class OrganizationSettingsService {
         UserOrganizationService.removeEventType(organization, eventType);
 
         organizationRepository.save(organization);
-        return eventType;
     }
 
     public Set<EventType> getEventTypesInOrganization(Long organizationId) {
@@ -92,11 +90,7 @@ public class OrganizationSettingsService {
         final var organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
-        if (!organization.getOnlyAdminCanSeeInvitationLink())
-            return invitationHelper.createInvitationLink(organization);
-
-        OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
-        return invitationHelper.createInvitationLink(organization);
+        return getInvitation(organization, requestUser);
     }
     public OrganizationSettingsDTO showSettings(Long id) {
         final var organization = organizationRepository.findById(id)
@@ -109,5 +103,13 @@ public class OrganizationSettingsService {
                 .stream().filter(userData -> userData.getId().equals(id))
                 .findFirst()
                 .orElseThrow(UserNotFoundException::new);
+    }
+
+    private String getInvitation(Organization organization, UserData requestUser){
+        if (!organization.getOnlyAdminCanSeeInvitationLink())
+            return invitationHelper.createInvitationLink(organization);
+
+        OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
+        return invitationHelper.createInvitationLink(organization);
     }
 }
