@@ -76,10 +76,11 @@ public class StationAvailabilityFinder {
         List<Station> stationList = filterForActiveStationsAndTypeIn(organization, type);
 
         stationList.forEach(station -> {
-            AddReservationDTO reservationDTO = new AddReservationDTO();
-            reservationDTO.setStartTime(startTime);
-            reservationDTO.setEndTime(endTime);
-            reservationDTO.setStationsIdList(List.of(station.getId()));
+                    AddReservationDTO reservationDTO = AddReservationDTO.builder()
+                            .startTime(startTime)
+                            .endTime(endTime)
+                            .stationsIdList(List.of(station.getId()))
+                            .build();
 
             if (type != null && !station.getType().equals(type)) {
                 return;

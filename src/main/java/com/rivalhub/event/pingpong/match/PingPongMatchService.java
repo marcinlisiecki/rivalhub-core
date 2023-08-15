@@ -8,6 +8,7 @@ import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -23,14 +24,15 @@ public class PingPongMatchService {
     private final PingPongMatchMapper pingPongMatchMapper;
     private final PingPongMatchHelper pingPongMatchHelper;
 
-    public ViewPingPongMatchDTO createPingPongMatch(Long organizationId, Long eventId, String email, AddPingPongMatchDTO pingPongMatchDTO) {
+    public ViewPingPongMatchDTO createPingPongMatch(Long organizationId, Long eventId, AddPingPongMatchDTO pingPongMatchDTO) {
         Organization organization = repositoryManager.findOrganizationById(organizationId);
-        UserData loggedUser = repositoryManager.findUserByEmail(email);
+        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
 
         PingPongEvent pingPongEvent = pingPongEventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
         PingPongMatch pingPongMatch = pingPongMatchMapper.map(pingPongMatchDTO);
 
-        return pingPongMatchHelper.save(organization, loggedUser, pingPongEvent, pingPongMatch);
+        return pingPongMatchHelper.save(organization, requestUser, pingPongEvent, pingPongMatch);
     }
 
     public boolean setResultApproval(Long organizationId, Long eventId, Long matchId, String email, boolean approve) {

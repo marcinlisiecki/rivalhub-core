@@ -1,6 +1,8 @@
 package com.rivalhub.organization;
 
+import com.rivalhub.event.Event;
 import com.rivalhub.event.EventType;
+import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.station.Station;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.common.ErrorMessages;
@@ -18,7 +20,8 @@ import java.util.*;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Setter
+@Getter
 public class Organization {
 
     @Id
@@ -39,7 +42,7 @@ public class Organization {
     @CreationTimestamp
     private LocalDateTime addedDate;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JsonManagedReference("user-organizations")
     @JoinTable(name = "organization_users",
             joinColumns = @JoinColumn(name = "organization_id", referencedColumnName = "organization_id"),
@@ -71,6 +74,9 @@ public class Organization {
     private Set<UserData> adminUsers = new HashSet<>();
 
     private Boolean onlyAdminCanSeeInvitationLink = true;
+
+//    @OneToMany
+//    List<PingPongEvent> pingPongEvents = new ArrayList<>();
 
 
     @Override

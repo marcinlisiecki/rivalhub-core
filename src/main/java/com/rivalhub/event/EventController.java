@@ -36,6 +36,4 @@ public class EventController {
     private ResponseEntity<?> findAllEvents(@PathVariable Long id, @RequestParam(name = "type") String type) {
         return ResponseEntity.ok(eventService.findAllEvents(id, type));
     }
-
-
 }

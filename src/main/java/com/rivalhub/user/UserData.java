@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 @Entity
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

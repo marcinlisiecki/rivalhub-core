@@ -4,7 +4,6 @@ import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
-import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.reservation.*;
 import com.rivalhub.station.Station;
@@ -36,6 +35,15 @@ public class OrganizationReservationService {
 
         var savedReservation = saveReservation(addReservationDTO, stationsForReservation);
         return autoMapper.mapToReservationDto(savedReservation);
+    }
+
+    public Reservation addReservationForEvent(AddReservationDTO addReservationDTO, Organization organization) {
+        List<Station> stationsForReservation = getExistingStationsForReservation(organization, addReservationDTO);
+
+        ReservationValidator.checkIfReservationIsPossible(addReservationDTO, stationsForReservation);
+
+        var savedReservation = saveReservation(addReservationDTO, stationsForReservation);
+        return savedReservation;
     }
 
     private List<Station> getExistingStationsForReservation(Organization organization, AddReservationDTO addReservationDTO) {
@@ -71,4 +79,6 @@ public class OrganizationReservationService {
         return reservationRepository.reservationsByOrganization(organizationId)
                 .stream().map(autoMapper::mapToReservationDto).toList();
     }
+
+
 }

@@ -6,7 +6,9 @@ import com.rivalhub.event.EventDto;
 import com.rivalhub.event.EventNotFoundException;
 import com.rivalhub.event.EventServiceInterface;
 import com.rivalhub.organization.Organization;
+import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.RepositoryManager;
+import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,22 +21,22 @@ import java.util.stream.Collectors;
 public class PingPongService implements EventServiceInterface {
 
     private final AutoMapper autoMapper;
-    private final RepositoryManager repositoryManager;
+    private final OrganizationRepository organizationRepository;
     private final PingPongEventRepository pingPongEventRepository;
     private final PingPongEventSaver pingPongEventSaver;
 
     @Override
     public EventDto addEvent(Long organizationId, EventDto eventDto) {
         PingPongEvent pingPongEvent = new PingPongEvent();
-        Organization organization = repositoryManager.findOrganizationById(organizationId);
+        var organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
 
-        PingPongEvent savedEvent = pingPongEventSaver.saveEvent(pingPongEvent, organization, eventDto);
-        return autoMapper.mapToEventDto(savedEvent);
+        return autoMapper.mapToEventDto(pingPongEventSaver.saveEvent(pingPongEvent, organization, eventDto));
     }
 
     @Override
     public List<EventDto> findAllEvents(long id) {
-        Organization organization = repositoryManager.findOrganizationById(id);
+        var organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
         return pingPongEventRepository.findAllByOrganization(organization)
                 .stream()
                 .map(autoMapper::mapToEventDto)
