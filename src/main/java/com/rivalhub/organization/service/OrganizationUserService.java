@@ -42,13 +42,15 @@ public class OrganizationUserService {
         return PaginationHelper.toPage(page, size, allUsers);
     }
 
-    //TODO nie dodawać user jeżeli już jest w organizacji
     public OrganizationDTO addUser(Long id, String hash) {
         var organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
 
         if (!organization.getInvitationHash().equals(hash)) throw new WrongInvitationException();
 
         var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if(organization.getUserList().stream().anyMatch(requestUser::equals)) throw new AlreadyInOrganizationException();
+
         UserOrganizationService.addUser(requestUser, organization);
         return autoMapper.mapToOrganizationDto(organizationRepository.save(organization));
     }
