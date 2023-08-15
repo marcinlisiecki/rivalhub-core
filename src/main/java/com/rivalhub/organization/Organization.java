@@ -1,8 +1,6 @@
 package com.rivalhub.organization;
 
-import com.rivalhub.event.Event;
 import com.rivalhub.event.EventType;
-import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.station.Station;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.common.ErrorMessages;

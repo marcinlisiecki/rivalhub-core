@@ -1,24 +1,17 @@
 package com.rivalhub.event.pingpong;
 
-import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.organization.Organization;
-import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.organization.service.OrganizationReservationService;
 import com.rivalhub.reservation.AddReservationDTO;
 import com.rivalhub.reservation.Reservation;
-import com.rivalhub.reservation.ReservationDTO;
-import com.rivalhub.station.Station;
 import com.rivalhub.user.UserAlreadyExistsException;
 import com.rivalhub.user.UserData;
-import com.rivalhub.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 

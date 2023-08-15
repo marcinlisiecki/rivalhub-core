@@ -2,7 +2,6 @@ package com.rivalhub.reservation;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 
 import java.util.List;
 

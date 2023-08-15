@@ -2,6 +2,7 @@ package com.rivalhub.event.pingpong.match;
 
 
 import com.rivalhub.common.AutoMapper;
+import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
@@ -9,27 +10,30 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 @RequiredArgsConstructor
 @Component
 public class PingPongMatchMapper {
     private final AutoMapper autoMapper;
-    private final RepositoryManager repositoryManager;
 
-    PingPongMatch map(AddPingPongMatchDTO pingPongMatchDTO){
+    PingPongMatch map(AddPingPongMatchDTO pingPongMatchDTO, Organization organization){
         PingPongMatch pingPongMatch = new PingPongMatch();
 
+        List<UserData> team1 = organization.getUserList().stream()
+                .filter(userExistsInOrganization(pingPongMatchDTO.getTeam1Ids())).toList();
 
-        List<UserData> team1 = pingPongMatchDTO.getTeam1Ids().stream()
-                .map(repositoryManager::findUserById).toList();
-
-        List<UserData> team2 = pingPongMatchDTO.getTeam2Ids().stream()
-                .map(repositoryManager::findUserById).toList();
+        List<UserData> team2 = organization.getUserList().stream()
+                .filter(userExistsInOrganization(pingPongMatchDTO.getTeam2Ids())).toList();
 
         pingPongMatch.setTeam1(team1);
         pingPongMatch.setTeam2(team2);
 
         return pingPongMatch;
+    }
+
+    private Predicate<UserData> userExistsInOrganization(List<Long> pingPongMatchDTO) {
+        return userData -> pingPongMatchDTO.contains(userData.getId());
     }
 
     ViewPingPongMatchDTO map(PingPongMatch pingPongMatch){

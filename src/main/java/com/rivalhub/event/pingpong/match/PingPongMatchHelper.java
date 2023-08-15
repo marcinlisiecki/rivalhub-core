@@ -3,11 +3,13 @@ package com.rivalhub.event.pingpong.match;
 import com.rivalhub.event.MatchNotFoundException;
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.event.pingpong.PingPongEventRepository;
-import com.rivalhub.organization.Organization;
-import com.rivalhub.organization.validator.OrganizationSettingsValidator;
+import com.rivalhub.reservation.AddReservationDTO;
+import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.function.Predicate;
 
 @Component
 @RequiredArgsConstructor
@@ -15,29 +17,29 @@ public class PingPongMatchHelper {
     private final PingPongEventRepository pingPongEventRepository;
     private final PingPongMatchRepository pingPongMatchRepository;
     private final PingPongMatchMapper pingPongMatchMapper;
-    ViewPingPongMatchDTO save(Organization organization, UserData loggedUser, PingPongEvent pingPongEvent,
+    ViewPingPongMatchDTO save(UserData loggedUser, PingPongEvent pingPongEvent,
                               PingPongMatch pingPongMatch){
-        OrganizationSettingsValidator.userIsInOrganization(organization, loggedUser);
-
-        boolean present = pingPongMatch.getTeam1()
+        boolean loggedUserInTeam1 = pingPongMatch.getTeam1()
                 .stream().anyMatch(loggedUser::equals);
 
-        if (present) pingPongMatch.setTeam1Approval(true);
+        if (loggedUserInTeam1) pingPongMatch.setTeam1Approval(true);
 
-        present = pingPongMatch.getTeam2()
+        boolean loggedUserInTeam2 = pingPongMatch.getTeam2()
                 .stream().anyMatch(loggedUser::equals);
 
-        if (present) pingPongMatch.setTeam2Approval(true);
+        if (loggedUserInTeam2) pingPongMatch.setTeam2Approval(true);
 
         addPingPongMatch(pingPongEvent, pingPongMatch);
 
         PingPongMatch savedMatch = pingPongMatchRepository.save(pingPongMatch);
-
         pingPongEventRepository.save(pingPongEvent);
 
         return pingPongMatchMapper.map(savedMatch);
     }
 
+    private Predicate<Station> stationsExistsInOrganisation(AddReservationDTO addReservationDTO) {
+        return station -> addReservationDTO.getStationsIdList().contains(station.getId());
+    }
     private void addPingPongMatch(PingPongEvent pingPongEvent,PingPongMatch pingPongMatch){
         pingPongEvent.getPingPongMatchList().add(pingPongMatch);
     }

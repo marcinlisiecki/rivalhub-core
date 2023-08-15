@@ -5,9 +5,6 @@ import com.rivalhub.event.pingpong.match.PingPongMatchService;
 import com.rivalhub.event.pingpong.match.PingPongSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.parameters.P;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,27 +28,22 @@ public class PingPongController {
     private ResponseEntity<?> addResults(@PathVariable Long organizationId,
                                          @PathVariable Long eventId,
                                          @PathVariable Long matchId,
-                                         @AuthenticationPrincipal UserDetails userDetails,
                                          @RequestBody List<PingPongSet> setList){
-        return ResponseEntity.ok(pingPongMatchService.addResult(organizationId, eventId, matchId, userDetails.getUsername(), setList));
+        return ResponseEntity.ok(pingPongMatchService.addResult(organizationId, eventId, matchId, setList));
     }
 
     @GetMapping("/{matchId}/approve")
     private ResponseEntity<?> setResultApproval(@PathVariable Long organizationId,
                                              @PathVariable Long eventId,
                                              @PathVariable Long matchId,
-                                             @AuthenticationPrincipal UserDetails userDetails,
                                              @RequestParam boolean approve){
-        return ResponseEntity.ok(pingPongMatchService.setResultApproval(organizationId, eventId, matchId, userDetails.getUsername(), approve));
+        return ResponseEntity.ok(pingPongMatchService.setResultApproval(organizationId, eventId, matchId, approve));
     }
 
     @GetMapping("/{matchId}")
     private ResponseEntity<?> getPingPongMatch(@PathVariable Long organizationId,
                                                @PathVariable Long eventId,
-                                               @PathVariable Long matchId,
-                                               @AuthenticationPrincipal UserDetails userDetails){
-        return ResponseEntity.ok(pingPongMatchService.findPingPongMatch(organizationId, eventId, matchId, userDetails.getUsername()));
+                                               @PathVariable Long matchId){
+        return ResponseEntity.ok(pingPongMatchService.findPingPongMatch(organizationId, eventId, matchId));
     }
-
-
 }
