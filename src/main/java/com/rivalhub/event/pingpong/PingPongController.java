@@ -54,5 +54,10 @@ public class PingPongController {
         return ResponseEntity.ok(pingPongMatchService.findPingPongMatch(organizationId, eventId, matchId, userDetails.getUsername()));
     }
 
-
+    @GetMapping("")
+    private ResponseEntity<?> getPingPongMatches(@PathVariable Long organizationId,
+                                               @PathVariable Long eventId,
+                                               @AuthenticationPrincipal UserDetails userDetails){
+        return ResponseEntity.ok(pingPongMatchService.findPingPongMatches(organizationId, eventId, userDetails.getUsername()));
+    }
 }
