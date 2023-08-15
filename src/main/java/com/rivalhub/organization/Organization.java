@@ -51,7 +51,8 @@ public class Organization {
     )
     private List<UserData> userList = new ArrayList<>();
 
-    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
+    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+            orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinTable(
             name = "organization_station_list",
             joinColumns = @JoinColumn(
@@ -70,7 +71,7 @@ public class Organization {
     @CollectionTable
     private Set<EventType> eventTypeInOrganization = new HashSet<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private Set<UserData> adminUsers = new HashSet<>();
 
     private Boolean onlyAdminCanSeeInvitationLink = true;

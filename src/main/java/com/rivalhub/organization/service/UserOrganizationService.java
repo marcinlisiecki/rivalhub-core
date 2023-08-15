@@ -26,10 +26,6 @@ public class UserOrganizationService {
         organization.getStationList().add(station);
     }
 
-    public static void removeStation(Station station, Organization organization){
-        organization.getStationList().remove(station);
-    }
-
     public static void addAllEventTypes(Organization organization) {
         Set<EventType> eventTypes = Arrays.stream(EventType.values()).collect(Collectors.toSet());
         organization.setEventTypeInOrganization(eventTypes);
