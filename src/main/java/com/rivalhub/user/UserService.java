@@ -7,12 +7,10 @@ import com.rivalhub.common.AutoMapper;
 import com.rivalhub.email.EmailService;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationDTO;
-import com.rivalhub.organization.RepositoryManager;
-import com.rivalhub.user.profile.UserProfileHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -25,56 +23,44 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final UserProfileHelper userProfileHelper;
-    private final RepositoryManager repositoryManager;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AutoMapper autoMapper;
     private final EmailService emailService;
     private final AuthService authService;
 
     JwtTokenDto register(RegisterRequestDto registerRequestDto) {
-        repositoryManager.findByEmail(registerRequestDto.getEmail()).ifPresent(userData -> {
+        userRepository.findByEmail(registerRequestDto.getEmail()).ifPresent(userData -> {
             throw new UserAlreadyExistsException();
         });
-
-        UserData user = autoMapper.mapToUserData(registerRequestDto);
-        user.setPassword(passwordEncoder.encode(registerRequestDto.getPassword()));
-        user.setJoinTime(LocalDateTime.now());
-        user.setActivationHash(passwordEncoder.encode(registerRequestDto.getEmail())
-                .replace("/", "")
-                .replace("$", "")
-                .replace(".", "")
-        );
-        user = repositoryManager.save(user);
-        sendEmail(autoMapper.mapToUserDto(user));
+        saveUserAndSandMail(registerRequestDto);
 
         LoginRequestDto loginRequestDto = autoMapper.mapToLoginRequest(registerRequestDto);
         return authService.login(loginRequestDto);
     }
 
     UserDetailsDto findUserById(Long id) {
-        return autoMapper.mapToUserDetails(repositoryManager.findUserById(id));
+        return autoMapper.mapToUserDetails(userRepository.findById(id).orElseThrow(UserNotFoundException::new));
     }
 
-    UserDetailsDto getMe(UserDetails userDetails) {
-        return autoMapper.mapToUserDetails(repositoryManager
-                .findUserByEmail(userDetails.getUsername()));
+    UserDetailsDto getMe() {
+        return autoMapper.mapToUserDetails(
+                (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
     }
 
-    List<OrganizationDTO> findOrganizationsByUser(String email) {
-        UserData user = repositoryManager.findUserByEmail(email);
+    List<OrganizationDTO> findOrganizationsByRequestUser() {
+        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<Organization> organizationList = requestUser.getOrganizationList();
 
-        List<Organization> organizationList = user.getOrganizationList();
-        List<OrganizationDTO> userOrganizationDTO = organizationList.stream().map(organization -> new OrganizationDTO(organization.getId(),
+        return organizationList
+                .stream().map(organization -> new OrganizationDTO(organization.getId(),
                         organization.getName(), organization.getImageUrl()))
                 .collect(Collectors.toList());
-
-        return userOrganizationDTO;
     }
 
     @Transactional
     void confirmUserEmail(String hash) {
-        UserData user = repositoryManager.findByActivationHash(hash);
+        UserData user = userRepository.findByActivationHash(hash).orElseThrow(UserNotFoundException::new);
         user.setActivationTime(LocalDateTime.now());
     }
 
@@ -83,10 +69,10 @@ public class UserService {
     @Transactional
     void deleteInactivatedUsers() {
         LocalDateTime deleteTime = LocalDateTime.now().minusDays(1);
-        repositoryManager.deleteInactiveUsers(deleteTime);
+        userRepository.deleteInactiveUsers(deleteTime);
     }
 
-    URI sendEmail(UserDto savedUser) {
+    private URI sendEmail(UserDto savedUser) {
         URI savedUserUri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/users/{id}")
                 .buildAndExpand(savedUser.getId())
@@ -95,4 +81,16 @@ public class UserService {
         return savedUserUri;
     }
 
+    private void saveUserAndSandMail(RegisterRequestDto registerRequestDto) {
+        UserData user = autoMapper.mapToUserData(registerRequestDto);
+        user.setPassword(passwordEncoder.encode(registerRequestDto.getPassword()));
+        user.setJoinTime(LocalDateTime.now());
+        user.setActivationHash(passwordEncoder.encode(registerRequestDto.getEmail())
+                .replace("/", "")
+                .replace("$", "")
+                .replace(".", "")
+        );
+        user = userRepository.save(user);
+        sendEmail(autoMapper.mapToUserDto(user));
+    }
 }

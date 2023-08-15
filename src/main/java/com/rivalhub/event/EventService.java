@@ -22,7 +22,6 @@ public class EventService {
     }
 
     EventDto addEvent(Long id, EventDto eventDto, String type) {
-
         if (type.equals(EventType.PING_PONG.name())) {
             EventDto savedEvent = pingPongService.addEvent(id, eventDto);
             return savedEvent;

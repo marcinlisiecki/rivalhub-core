@@ -14,14 +14,12 @@ public class ShowProfileController {
     private final ProfileService profileService;
 
     @GetMapping("/users/{id}/reservations")
-    private ResponseEntity<?> sharedOrganizationReservations(@PathVariable Long id,
-                                                             @AuthenticationPrincipal UserDetails userDetails){
-        return ResponseEntity.ok(profileService.getSharedOrganizationReservations(id, userDetails.getUsername()));
+    private ResponseEntity<?> sharedOrganizationReservations(@PathVariable Long id){
+        return ResponseEntity.ok(profileService.getSharedOrganizationReservations(id));
     }
 
     @GetMapping("/users/{id}/events")
-    private ResponseEntity<?> sharedOrganizationEvents(@PathVariable Long id,
-                                                             @AuthenticationPrincipal UserDetails userDetails){
-        return ResponseEntity.ok(profileService.getSharedOrganizationEvents(id, userDetails.getUsername()));
+    private ResponseEntity<?> sharedOrganizationEvents(@PathVariable Long id){
+        return ResponseEntity.ok(profileService.getSharedOrganizationEvents(id));
     }
 }

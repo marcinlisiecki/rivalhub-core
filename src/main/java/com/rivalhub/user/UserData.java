@@ -3,7 +3,6 @@ package com.rivalhub.user;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.rivalhub.common.ErrorMessages;
 import com.rivalhub.organization.Organization;
-import com.rivalhub.reservation.Reservation;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

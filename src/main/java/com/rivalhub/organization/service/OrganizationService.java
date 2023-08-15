@@ -26,7 +26,7 @@ public class OrganizationService {
     private final InvitationHelper invitationHelper;
 
     public OrganizationDTO saveOrganization(OrganizationDTO organizationDTO){
-        Organization savedOrganization = organizationRepository.save(autoMapper.mapToOrganization(organizationDTO));
+        var savedOrganization = organizationRepository.save(autoMapper.mapToOrganization(organizationDTO));
         var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         setOrganizationSettings(requestUser, savedOrganization);
 
@@ -39,7 +39,7 @@ public class OrganizationService {
 
     public void deleteOrganization(Long id) {
         var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Organization organization = organizationRepository.findById(id)
+        var organization = organizationRepository.findById(id)
                 .orElseThrow(OrganizationNotFoundException::new);
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
@@ -47,7 +47,7 @@ public class OrganizationService {
     }
 
     public String createInvitation(Long id) {
-        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        var organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
         var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
@@ -60,7 +60,7 @@ public class OrganizationService {
 
     public void updateOrganization(Long id, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
         var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        var organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
 

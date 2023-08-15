@@ -1,19 +1,17 @@
 package com.rivalhub.event.pingpong;
 
 import com.rivalhub.common.FormatterHelper;
-import com.rivalhub.event.Event;
 import com.rivalhub.event.EventDto;
-import com.rivalhub.event.EventType;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.organization.service.OrganizationReservationService;
 import com.rivalhub.reservation.AddReservationDTO;
 import com.rivalhub.reservation.ReservationDTO;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 @Component
 @RequiredArgsConstructor
@@ -30,10 +28,8 @@ public class PingPongEventSaver {
         }
         pingPongEvent.setHost(repositoryManager.findUserById(eventDto.getHost()));
 
-        AddReservationDTO addReservationDTO = new AddReservationDTO();
-        addReservationDTO.setEndTime(eventDto.getEndTime());
-        addReservationDTO.setStartTime(eventDto.getStartTime());
-        addReservationDTO.setStationsIdList(eventDto.getStationList());
+        AddReservationDTO addReservationDTO = setAddReservationDTO(eventDto, organization);
+
         ReservationDTO reservationDTO = reservationService.addReservation(addReservationDTO);
 
         pingPongEvent.setStartTime(LocalDateTime.parse(eventDto.getStartTime(), FormatterHelper.formatter()));
@@ -42,5 +38,14 @@ public class PingPongEventSaver {
         pingPongEvent.setReservation(repositoryManager.findReservationById(reservationDTO.getId()));
 
         return pingPongEventRepository.save(pingPongEvent);
+    }
+
+    private static AddReservationDTO setAddReservationDTO(EventDto eventDto, Organization organization) {
+        AddReservationDTO addReservationDTO = new AddReservationDTO();
+        addReservationDTO.setEndTime(eventDto.getEndTime());
+        addReservationDTO.setStartTime(eventDto.getStartTime());
+        addReservationDTO.setStationsIdList(eventDto.getStationList());
+        addReservationDTO.setOrganizationId(organization.getId());
+        return addReservationDTO;
     }
 }
