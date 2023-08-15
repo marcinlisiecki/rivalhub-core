@@ -4,6 +4,7 @@ package com.rivalhub.organization.controller;
 import com.rivalhub.event.EventType;
 import com.rivalhub.organization.service.OrganizationSettingsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,38 +19,33 @@ public class OrganizationSettingsController {
 
 
     @PostMapping("{organizationId}/admin/{userId}")
-    private ResponseEntity<?> addAdmin(@AuthenticationPrincipal UserDetails userDetails,
-                                      @PathVariable Long organizationId,
-                                      @PathVariable Long userId){
-        return ResponseEntity.ok(organizationSettingsService.setAdmin(userDetails.getUsername(), organizationId, userId));
+    private ResponseEntity<?> addAdmin(@PathVariable Long organizationId, @PathVariable Long userId){
+        return ResponseEntity.ok(organizationSettingsService.setAdmin(organizationId, userId));
     }
 
     @PostMapping("{organizationId}/admin")
     private ResponseEntity<?> changeInvitationLinkVisibility(@PathVariable Long organizationId,
-                                                     @AuthenticationPrincipal UserDetails userDetails,
                                                      @RequestParam(name = "onlyAdminCanSeeInvitationLink", defaultValue = "true")
                                                      boolean onlyAdminCanSeeInvitationLink){
-        return ResponseEntity.ok(organizationSettingsService.setOnlyAdminCanSeeInvitationLink(userDetails.getUsername(), organizationId,  onlyAdminCanSeeInvitationLink));
+        return ResponseEntity.ok(organizationSettingsService.setOnlyAdminCanSeeInvitationLink(organizationId,  onlyAdminCanSeeInvitationLink));
     }
 
     @DeleteMapping("{organizationId}/admin/event-types")
-    private ResponseEntity<?> removeEventType(@AuthenticationPrincipal UserDetails userDetails,
-                                      @PathVariable Long organizationId,
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void removeEventType(@PathVariable Long organizationId,
                                       @RequestParam("type") EventType eventType){
-        return ResponseEntity.ok(organizationSettingsService.removeEventType(userDetails.getUsername(), organizationId, eventType));
+        organizationSettingsService.removeEventType(organizationId, eventType);
     }
 
     @GetMapping("{organizationId}/event-types")
-    private ResponseEntity<?> getEventTypesInOrganization(@AuthenticationPrincipal UserDetails userDetails,
-                                                  @PathVariable Long organizationId){
-        return ResponseEntity.ok(organizationSettingsService.getEventTypesInOrganization(userDetails.getUsername(), organizationId));
+    private ResponseEntity<?> getEventTypesInOrganization(@PathVariable Long organizationId){
+        return ResponseEntity.ok(organizationSettingsService.getEventTypesInOrganization(organizationId));
     }
 
     @PostMapping("{organizationId}/admin/event-types")
-    private ResponseEntity<?> addEventType(@AuthenticationPrincipal UserDetails userDetails,
-                                   @PathVariable Long organizationId,
+    private ResponseEntity<?> addEventType(@PathVariable Long organizationId,
                                    @RequestParam("type") EventType eventType){
-        return ResponseEntity.ok(organizationSettingsService.addEventType(userDetails.getUsername(), organizationId, eventType));
+        return ResponseEntity.ok(organizationSettingsService.addEventType(organizationId, eventType));
     }
 
     @GetMapping("/event-types")
@@ -58,12 +54,12 @@ public class OrganizationSettingsController {
     }
 
     @GetMapping("/{id}/invitation")
-    private ResponseEntity<?> viewInvitation(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
-        return ResponseEntity.ok(organizationSettingsService.viewInvitationLink(id, userDetails.getUsername()));
+    private ResponseEntity<?> viewInvitation(@PathVariable Long id){
+        return ResponseEntity.ok(organizationSettingsService.viewInvitationLink(id));
     }
 
     @GetMapping("/{id}/settings")
-    private ResponseEntity<?> showSettings(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
-        return ResponseEntity.ok(organizationSettingsService.showSettings(id, userDetails.getUsername()));
+    private ResponseEntity<?> showSettings(@PathVariable Long id){
+        return ResponseEntity.ok(organizationSettingsService.showSettings(id));
     }
 }
