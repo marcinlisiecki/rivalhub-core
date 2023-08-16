@@ -10,6 +10,7 @@ import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.organization.exception.AlreadyInOrganizationException;
 import com.rivalhub.organization.exception.WrongInvitationException;
+import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
 import com.rivalhub.user.UserRepository;
@@ -33,10 +34,12 @@ public class OrganizationUserService {
     private final InvitationHelper invitationHelper;
 
     public Page<?> findUsersByOrganization(Long id, int page, int size) {
-        var organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        var organization = organizationRepository.findById(id)
+                .orElseThrow(OrganizationNotFoundException::new);
 
         List<UserDetailsDto> allUsers = organization.getUserList()
-                .stream().map(autoMapper::mapToUserDisplayDTO).toList();
+                .stream().map(autoMapper::mapToUserDisplayDTO)
+                .toList();
         return PaginationHelper.toPage(page, size, allUsers);
     }
 
@@ -45,7 +48,7 @@ public class OrganizationUserService {
 
         if (!organization.getInvitationHash().equals(hash)) throw new WrongInvitationException();
 
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
 
         if(organization.getUserList().stream().anyMatch(requestUser::equals)) throw new AlreadyInOrganizationException();
 
@@ -55,7 +58,7 @@ public class OrganizationUserService {
 
     public OrganizationDTO addUserThroughEmail(Long id, String email) {
         var organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
 
@@ -67,8 +70,9 @@ public class OrganizationUserService {
     }
 
     public Set<UserDetailsDto> viewAllUsers(Long id) {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        var organization = organizationRepository.findById(id)
+                .orElseThrow(OrganizationNotFoundException::new);
 
         OrganizationSettingsValidator.userIsInOrganization(organization, requestUser);
         return userRepository.getAllUsersByOrganizationId(id)

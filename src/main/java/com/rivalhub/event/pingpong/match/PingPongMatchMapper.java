@@ -3,7 +3,6 @@ package com.rivalhub.event.pingpong.match;
 
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.organization.Organization;
-import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +20,12 @@ public class PingPongMatchMapper {
         PingPongMatch pingPongMatch = new PingPongMatch();
 
         List<UserData> team1 = organization.getUserList().stream()
-                .filter(userExistsInOrganization(pingPongMatchDTO.getTeam1Ids())).toList();
+                .filter(getUserFromOrganization(pingPongMatchDTO.getTeam1Ids()))
+                .toList();
 
         List<UserData> team2 = organization.getUserList().stream()
-                .filter(userExistsInOrganization(pingPongMatchDTO.getTeam2Ids())).toList();
+                .filter(getUserFromOrganization(pingPongMatchDTO.getTeam2Ids()))
+                .toList();
 
         pingPongMatch.setTeam1(team1);
         pingPongMatch.setTeam2(team2);
@@ -32,15 +33,19 @@ public class PingPongMatchMapper {
         return pingPongMatch;
     }
 
-    private Predicate<UserData> userExistsInOrganization(List<Long> pingPongMatchDTO) {
+    private Predicate<UserData> getUserFromOrganization(List<Long> pingPongMatchDTO) {
         return userData -> pingPongMatchDTO.contains(userData.getId());
     }
 
     ViewPingPongMatchDTO map(PingPongMatch pingPongMatch){
         ViewPingPongMatchDTO pingPongMatchDTO = new ViewPingPongMatchDTO();
 
-        List<UserDetailsDto> team1 = pingPongMatch.getTeam1().stream().map(autoMapper::mapToUserDetails).toList();
-        List<UserDetailsDto> team2 = pingPongMatch.getTeam2().stream().map(autoMapper::mapToUserDetails).toList();
+        List<UserDetailsDto> team1 = pingPongMatch.getTeam1()
+                .stream().map(autoMapper::mapToUserDetails)
+                .toList();
+        List<UserDetailsDto> team2 = pingPongMatch.getTeam2()
+                .stream().map(autoMapper::mapToUserDetails)
+                .toList();
 
         pingPongMatchDTO.setId(pingPongMatch.getId());
         pingPongMatchDTO.setTeam1(team1);

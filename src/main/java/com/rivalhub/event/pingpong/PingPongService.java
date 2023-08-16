@@ -35,21 +35,17 @@ public class PingPongService implements EventServiceInterface {
 
     @Override
     public List<EventDto> findAllEvents(long id) {
-        var organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        var organization = organizationRepository.findById(id)
+                .orElseThrow(OrganizationNotFoundException::new);
         return organization.getPingPongEvents()
                 .stream()
-                .map(setEventDTO(organization))
+                .map(pingPongEvent -> {
+                    EventDto eventDto = autoMapper.mapToEventDto(pingPongEvent);
+                    eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
+                    return eventDto;
+                })
                 .collect(Collectors.toList());
     }
-
-    private Function<PingPongEvent, EventDto> setEventDTO(Organization organization) {
-        return pingPongEvent -> {
-            EventDto eventDto = autoMapper.mapToEventDto(pingPongEvent);
-            eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
-            return eventDto;
-        };
-    }
-
 
     public EventDto findEvent(long eventId) {
         return pingPongEventRepository

@@ -32,7 +32,7 @@ public class PingPongEventSaver {
         pingPongEvent.getParticipants().addAll(participants);
         pingPongEvent.setHost(getHost(organization, eventDto.getHost()));
 
-        AddReservationDTO addReservationDTO = setAddReservationDTO(eventDto, organization);
+        AddReservationDTO addReservationDTO = createAddReservationDTO(eventDto, organization);
 
         Reservation reservation = reservationService.addReservationForEvent(addReservationDTO, organization);
 
@@ -40,7 +40,7 @@ public class PingPongEventSaver {
         pingPongEvent.setEndTime(LocalDateTime.parse(eventDto.getEndTime(), FormatterHelper.formatter()));
         pingPongEvent.setReservation(reservation);
 
-        addPingPongMatchTo(organization, pingPongEvent);
+        addPingPongEventTo(organization, pingPongEvent);
         organizationRepository.save(organization);
         return pingPongEvent;
     }
@@ -55,11 +55,11 @@ public class PingPongEventSaver {
                 .findFirst()
                 .orElseThrow(UserAlreadyExistsException::new);
     }
-    private void addPingPongMatchTo(Organization organization, PingPongEvent pingPongEvent) {
+    private void addPingPongEventTo(Organization organization, PingPongEvent pingPongEvent) {
         organization.getPingPongEvents().add(pingPongEvent);
     }
 
-    private AddReservationDTO setAddReservationDTO(EventDto eventDto, Organization organization) {
+    private AddReservationDTO createAddReservationDTO(EventDto eventDto, Organization organization) {
         return AddReservationDTO.builder()
                 .endTime(eventDto.getEndTime())
                 .startTime(eventDto.getStartTime())

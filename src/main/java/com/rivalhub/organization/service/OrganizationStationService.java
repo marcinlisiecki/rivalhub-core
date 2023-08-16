@@ -11,6 +11,7 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.station.*;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public class OrganizationStationService {
     private final MergePatcher<StationDTO> stationMergePatcher;
 
     public StationDTO addStation(StationDTO stationDTO, Long id) {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
         var organizationList = requestUser.getOrganizationList();
 
         var organization = findOrganizationIn(organizationList, id);
@@ -49,7 +50,7 @@ public class OrganizationStationService {
 
     public List<Station> viewStations(Long organizationId, String start, String end, EventType type,
                                boolean onlyAvailable, boolean showInactive) {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
         final var organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
@@ -62,15 +63,17 @@ public class OrganizationStationService {
     }
 
     public List<EventTypeStationsDto> getEventStations(Long organizationId, String start, String end, EventType type) {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        var organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
 
         return getEventTypeStationsByTime(start, end, type, requestUser, organization);
     }
 
     public void updateStation(Long organizationId, Long stationId, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        var organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
 
@@ -82,8 +85,9 @@ public class OrganizationStationService {
     }
 
     public void deleteStation(Long stationId, Long organizationId) {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        var organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
         deleteStationIn(organization, stationId);
@@ -113,7 +117,9 @@ public class OrganizationStationService {
                                                      Organization organization, Duration timeNeeded) {
         EventTypeStationsDto eventStation = new EventTypeStationsDto();
         eventStation.setType(eventType);
-        eventStation.setStations(availableStations.stream().map(autoMapper::mapToNewStationDto).toList());
+        eventStation.setStations(availableStations
+                .stream().map(autoMapper::mapToNewStationDto)
+                .toList());
         List<Station> stationList = StationAvailabilityFinder.filterForActiveStationsAndTypeIn(organization, eventType);
         eventStation.setFirstAvailable(StationAvailabilityFinder
                 .getFirstDateAvailableForDuration(stationList, timeNeeded, eventType));

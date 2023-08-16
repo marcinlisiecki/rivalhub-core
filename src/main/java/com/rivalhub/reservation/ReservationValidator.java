@@ -17,14 +17,17 @@ import java.util.List;
 public class ReservationValidator {
 
     public static boolean checkIfStationsAreInOrganization(List<Station> stationList, Organization organization){
-        return stationList.stream().allMatch(organization.getStationList()::contains);
+        return stationList.stream()
+                .allMatch(organization.getStationList()::contains);
     }
 
     public static boolean checkIfReservationIsPossible(AddReservationDTO reservationDTO, Organization organization,
                                                 UserData user, List<Station> stationList) {
 
-        user.getOrganizationList().stream().filter(org -> org.getId().equals(organization.getId()))
-                .findFirst().orElseThrow(OrganizationNotFoundException::new);
+        user.getOrganizationList()
+                .stream().filter(org -> org.getId().equals(organization.getId()))
+                .findFirst()
+                .orElseThrow(OrganizationNotFoundException::new);
 
         if (!ReservationValidator.checkIfStationsAreInOrganization(stationList, organization)) return false;
         if (ReservationValidator.checkForTimeCollision(stationList, reservationDTO.getStartTime(), reservationDTO.getEndTime())) return false;
@@ -42,9 +45,13 @@ public class ReservationValidator {
 
     private static boolean checkForTimeCollision(List<Station> stationList, String startTime, String endTime){
         List<List<LocalDateTime>> listsOfStartTime = stationList.stream().map(station
-                -> station.getReservationList().stream().map(Reservation::getStartTime).toList()).toList();
+                -> station.getReservationList()
+                .stream().map(Reservation::getStartTime)
+                .toList()).toList();
         List<List<LocalDateTime>> listsOfEndTime = stationList.stream().map(station
-                -> station.getReservationList().stream().map(Reservation::getEndTime).toList()).toList();
+                -> station.getReservationList()
+                .stream().map(Reservation::getEndTime)
+                .toList()).toList();
 
         List<LocalDateTime> listOfStartTime =
                 listsOfStartTime.stream()
@@ -54,8 +61,12 @@ public class ReservationValidator {
                 listsOfEndTime.stream()
                         .flatMap(List::stream).toList();
 
-        List<Instant> instantsStartTime = listOfStartTime.stream().map(localDateTime -> localDateTime.atZone(ZoneId.systemDefault()).toInstant()).toList();
-        List<Instant> instantsEndTime = listOfEndTime.stream().map(localDateTime -> localDateTime.atZone(ZoneId.systemDefault()).toInstant()).toList();
+        List<Instant> instantsStartTime = listOfStartTime
+                .stream().map(localDateTime -> localDateTime.atZone(ZoneId.systemDefault()).toInstant())
+                .toList();
+        List<Instant> instantsEndTime = listOfEndTime
+                .stream().map(localDateTime -> localDateTime.atZone(ZoneId.systemDefault()).toInstant())
+                .toList();
 
         final var startTimeFormatted = LocalDateTime.parse(startTime, FormatterHelper.formatter());
         final var endTimeFormatted = LocalDateTime.parse(endTime, FormatterHelper.formatter());

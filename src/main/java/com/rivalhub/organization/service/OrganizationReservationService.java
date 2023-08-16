@@ -6,6 +6,7 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.reservation.*;
+import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,6 @@ import java.util.function.Predicate;
 @Service
 public class OrganizationReservationService {
     private final AutoMapper autoMapper;
-    //OrganizationReservationService ma zależności od organization repo i reservation repo (jak nazwa wskazuje) czy to nie piękne?
     private final OrganizationRepository organizationRepository;
     private final ReservationRepository reservationRepository;
 
@@ -53,11 +53,12 @@ public class OrganizationReservationService {
     }
 
     private Predicate<Station> stationsExistsInOrganisation(AddReservationDTO addReservationDTO) {
-        return station -> addReservationDTO.getStationsIdList().contains(station.getId());
+        return station -> addReservationDTO.getStationsIdList()
+                .contains(station.getId());
     }
 
     private Reservation saveReservation(AddReservationDTO addReservationDTO, List<Station> reservationStations) {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
         var newReservation = Reservation.builder()
                 .userData(requestUser)
                 .startTime(LocalDateTime.parse(addReservationDTO.getStartTime(), FormatterHelper.formatter()))
@@ -66,19 +67,9 @@ public class OrganizationReservationService {
                 .build();
         return reservationRepository.save(newReservation);
     }
-
-
-    /*
-    Tutaj była logika sprwadzania czy user jest w danej organizacji (chyba) to generuje dużo zbędnego kodu w róznych miejscach.
-    Podejście
-        a) ufamy, że skoro user przeszedł autentykacje to może wykonać dane działanie
-        b) robimy jakąś klasę która wystawia metodę sprawdzania tego czy dany user jest w organizacji i wołamy ją w różnych miejscach
-        c) robimy własną anotację i piszemy do niej metodę która będzie to sprawdzać, po czym oznaczamy anotacją wybrane metody
-     */
     public List<ReservationDTO> viewReservations(Long organizationId) {
         return reservationRepository.reservationsByOrganization(organizationId)
-                .stream().map(autoMapper::mapToReservationDto).toList();
+                .stream().map(autoMapper::mapToReservationDto)
+                .toList();
     }
-
-
 }

@@ -7,6 +7,7 @@ import com.rivalhub.common.AutoMapper;
 import com.rivalhub.email.EmailService;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationDTO;
+import com.rivalhub.security.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -40,16 +41,16 @@ public class UserService {
     }
 
     UserDetailsDto findUserById(Long id) {
-        return autoMapper.mapToUserDetails(userRepository.findById(id).orElseThrow(UserNotFoundException::new));
+        return autoMapper.mapToUserDetails(userRepository.findById(id)
+                .orElseThrow(UserNotFoundException::new));
     }
 
     UserDetailsDto getMe() {
-        return autoMapper.mapToUserDetails(
-                (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        return autoMapper.mapToUserDetails(SecurityUtils.getUserFromSecurityContext());
     }
 
     List<OrganizationDTO> findOrganizationsByRequestUser() {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
         List<Organization> organizationList = requestUser.getOrganizationList();
 
         return organizationList
@@ -60,7 +61,8 @@ public class UserService {
 
     @Transactional
     void confirmUserEmail(String hash) {
-        UserData user = userRepository.findByActivationHash(hash).orElseThrow(UserNotFoundException::new);
+        UserData user = userRepository.findByActivationHash(hash)
+                .orElseThrow(UserNotFoundException::new);
         user.setActivationTime(LocalDateTime.now());
     }
 

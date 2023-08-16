@@ -1,5 +1,6 @@
 package com.rivalhub.user.profile;
 
+import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserAlreadyExistsException;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
@@ -16,15 +17,17 @@ public class ProfileService {
     private final UserProfileHelper userProfileHelper;
 
     Set<ReservationInProfileDTO> getSharedOrganizationReservations(Long id) {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserData viewedUser = userRepository.findById(id).orElseThrow(UserAlreadyExistsException::new);
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        UserData viewedUser = userRepository.findById(id)
+                .orElseThrow(UserAlreadyExistsException::new);
 
         return userProfileHelper.getReservationsInSharedOrganizations(requestUser, viewedUser);
     }
 
     Set<EventProfileDTO> getSharedOrganizationEvents(Long id) {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserData viewedUser = userRepository.findById(id).orElseThrow(UserAlreadyExistsException::new);
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        UserData viewedUser = userRepository.findById(id)
+                .orElseThrow(UserAlreadyExistsException::new);
 
         return userProfileHelper.getEventsInSharedOrganizations(requestUser, viewedUser);
     }

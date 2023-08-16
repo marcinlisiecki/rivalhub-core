@@ -8,6 +8,7 @@ import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.OrganizationSettingsDTO;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
 import com.rivalhub.user.UserNotFoundException;
@@ -29,7 +30,7 @@ public class OrganizationSettingsService {
     public UserDetailsDto setAdmin(Long organizationId, Long userId) {
         final var organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
         UserData user = findUserInOrganization(organization, userId);
@@ -41,7 +42,7 @@ public class OrganizationSettingsService {
 
 
     public void removeEventType(Long organizationId, EventType eventType) {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
         final var organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
@@ -58,7 +59,7 @@ public class OrganizationSettingsService {
     }
 
     public EventType addEventType(Long organizationId, EventType eventType) {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
         final var organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
@@ -74,7 +75,7 @@ public class OrganizationSettingsService {
     }
 
     public boolean setOnlyAdminCanSeeInvitationLink(Long organizationId, boolean onlyAdminCanSeeInvitationLink) {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
         final var organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
@@ -86,7 +87,7 @@ public class OrganizationSettingsService {
     }
 
     public String viewInvitationLink(Long organizationId) {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
         final var organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 

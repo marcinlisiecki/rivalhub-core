@@ -9,6 +9,7 @@ import com.rivalhub.common.MergePatcher;
 import com.rivalhub.organization.*;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
+import com.rivalhub.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import com.rivalhub.user.UserData;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,19 +26,21 @@ public class OrganizationService {
     private final InvitationHelper invitationHelper;
 
     public OrganizationDTO saveOrganization(OrganizationDTO organizationDTO){
-        var savedOrganization = organizationRepository.save(autoMapper.mapToOrganization(organizationDTO));
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var savedOrganization = organizationRepository
+                .save(autoMapper.mapToOrganization(organizationDTO));
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
         setOrganizationSettings(requestUser, savedOrganization);
 
         return autoMapper.mapToOrganizationDto(organizationRepository.save(savedOrganization));
     }
 
      public OrganizationDTO findOrganization(Long id){
-        return autoMapper.mapToOrganizationDto(organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new));
+        return autoMapper.mapToOrganizationDto(organizationRepository.findById(id)
+                .orElseThrow(OrganizationNotFoundException::new));
     }
 
     public void deleteOrganization(Long id) {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
         var organization = organizationRepository.findById(id)
                 .orElseThrow(OrganizationNotFoundException::new);
 
@@ -46,8 +49,9 @@ public class OrganizationService {
     }
 
     public String createInvitation(Long id) {
-        var organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        var organization = organizationRepository.findById(id)
+                .orElseThrow(OrganizationNotFoundException::new);
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
 
@@ -58,8 +62,9 @@ public class OrganizationService {
     }
 
     public void updateOrganization(Long id, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        var organization = organizationRepository.findById(id)
+                .orElseThrow(OrganizationNotFoundException::new);
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
 
