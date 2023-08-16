@@ -5,12 +5,14 @@ import com.rivalhub.common.AutoMapper;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.event.EventNotFoundException;
 import com.rivalhub.event.EventServiceInterface;
+import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -34,10 +36,18 @@ public class PingPongService implements EventServiceInterface {
     @Override
     public List<EventDto> findAllEvents(long id) {
         var organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
-        return pingPongEventRepository.findAllByOrganization(organization)
+        return organization.getPingPongEvents()
                 .stream()
-                .map(autoMapper::mapToEventDto)
+                .map(setEventDTO(organization))
                 .collect(Collectors.toList());
+    }
+
+    private Function<PingPongEvent, EventDto> setEventDTO(Organization organization) {
+        return pingPongEvent -> {
+            EventDto eventDto = autoMapper.mapToEventDto(pingPongEvent);
+            eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
+            return eventDto;
+        };
     }
 
 

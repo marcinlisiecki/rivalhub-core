@@ -1,6 +1,7 @@
 package com.rivalhub.organization;
 
 import com.rivalhub.event.EventType;
+import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.station.Station;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.common.ErrorMessages;
@@ -73,8 +74,9 @@ public class Organization {
 
     private Boolean onlyAdminCanSeeInvitationLink = true;
 
-//    @OneToMany
-//    List<PingPongEvent> pingPongEvents = new ArrayList<>();
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    List<PingPongEvent> pingPongEvents = new ArrayList<>();
 
 
     @Override

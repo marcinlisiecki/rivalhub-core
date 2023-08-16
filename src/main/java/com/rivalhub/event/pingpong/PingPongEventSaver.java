@@ -3,6 +3,7 @@ package com.rivalhub.event.pingpong;
 import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.organization.Organization;
+import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.service.OrganizationReservationService;
 import com.rivalhub.reservation.AddReservationDTO;
 import com.rivalhub.reservation.Reservation;
@@ -20,10 +21,9 @@ import java.util.function.Predicate;
 public class PingPongEventSaver {
     private final OrganizationReservationService reservationService;
     private final PingPongEventRepository pingPongEventRepository;
+    private final OrganizationRepository organizationRepository;
 
     PingPongEvent saveEvent(PingPongEvent pingPongEvent, Organization organization, EventDto eventDto) {
-        addPingPongMatchTo(organization, pingPongEvent);
-
         //TODO Narazie można dodać tylko użytkowników z danej organizacji!
         List<UserData> participants =
                 organization.getUserList()
@@ -41,7 +41,9 @@ public class PingPongEventSaver {
         pingPongEvent.setEndTime(LocalDateTime.parse(eventDto.getEndTime(), FormatterHelper.formatter()));
         pingPongEvent.setReservation(reservation);
 
-        return pingPongEventRepository.save(pingPongEvent);
+        addPingPongMatchTo(organization, pingPongEvent);
+        organizationRepository.save(organization);
+        return pingPongEvent;
     }
 
     private Predicate<UserData> usersExistingInOrganization(EventDto eventDto) {
@@ -55,7 +57,7 @@ public class PingPongEventSaver {
                 .orElseThrow(UserAlreadyExistsException::new);
     }
     private void addPingPongMatchTo(Organization organization, PingPongEvent pingPongEvent) {
-        pingPongEvent.setOrganization(organization);
+        organization.getPingPongEvents().add(pingPongEvent);
     }
 
     private AddReservationDTO setAddReservationDTO(EventDto eventDto, Organization organization) {

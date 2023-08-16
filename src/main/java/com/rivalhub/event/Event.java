@@ -37,6 +37,6 @@ public class Event {
     @ManyToMany
     private List<UserData> participants = new ArrayList<>();
 
-    @ManyToOne
-    private Organization organization;
+//    @ManyToOne
+//    private Organization organization;
 }
