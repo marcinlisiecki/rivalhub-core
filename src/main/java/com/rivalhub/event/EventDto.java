@@ -20,6 +20,4 @@ public class EventDto {
     private EventType eventType;
     private String name;
     private String description;
-    private List<Long> team1;
-    private List<Long> team2;
 }
