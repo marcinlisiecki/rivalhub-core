@@ -29,7 +29,7 @@ public class StationAvailabilityFinder {
 
             if (!reservations.isEmpty()) {
                 if (ChronoUnit.SECONDS.between(currentStationFirstAvailable,
-                        reservations.get(0).getStartTime().plusSeconds(1)) >= timeWindow.getSeconds()) {
+                        reservations.get(0).getStartTime().plusMinutes(1)) >= timeWindow.getSeconds()) {
 
                     if (firstAvailable == null || currentStationFirstAvailable.isBefore(firstAvailable)) {
                         firstAvailable = currentStationFirstAvailable;
@@ -46,17 +46,17 @@ public class StationAvailabilityFinder {
                 Reservation currentReservation = reservations.get(i);
 
                 if (i + 1 >= reservations.size()) {
-                    currentStationFirstAvailable = currentReservation.getEndTime().plusSeconds(1);
+                    currentStationFirstAvailable = currentReservation.getEndTime().plusMinutes(1);
                     break;
                 }
 
                 Reservation nextReservation = reservations.get(i + 1);
 
                 if (ChronoUnit.SECONDS.between(
-                        currentReservation.getEndTime().plusSeconds(1),
-                        nextReservation.getStartTime().minusSeconds(1)) >= timeWindow.getSeconds()) {
+                        currentReservation.getEndTime().plusMinutes(1),
+                        nextReservation.getStartTime().minusMinutes(1)) >= timeWindow.getSeconds()) {
 
-                    currentStationFirstAvailable = currentReservation.getEndTime().plusSeconds(1);
+                    currentStationFirstAvailable = currentReservation.getEndTime().plusMinutes(1);
                     break;
                 }
             }

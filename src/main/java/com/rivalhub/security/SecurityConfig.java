@@ -36,6 +36,7 @@ class SecurityConfig implements WebMvcConfigurer {
                 .requestMatchers(new AntPathRequestMatcher("/register")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/users/**")).authenticated()
+                .requestMatchers(new AntPathRequestMatcher("/organizations/{id}", HttpMethod.GET.name())).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/organizations/**")).authenticated()
                 .requestMatchers(new AntPathRequestMatcher("/confirm/**")).permitAll()
                 .anyRequest().permitAll()).headers().frameOptions().disable();
