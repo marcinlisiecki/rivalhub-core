@@ -20,7 +20,6 @@ import java.util.function.Predicate;
 @RequiredArgsConstructor
 public class PingPongEventSaver {
     private final OrganizationReservationService reservationService;
-    private final PingPongEventRepository pingPongEventRepository;
     private final OrganizationRepository organizationRepository;
 
     PingPongEvent saveEvent(PingPongEvent pingPongEvent, Organization organization, EventDto eventDto) {

@@ -37,9 +37,6 @@ public class PingPongMatchHelper {
         return pingPongMatchMapper.map(savedMatch);
     }
 
-    private Predicate<Station> stationsExistsInOrganisation(AddReservationDTO addReservationDTO) {
-        return station -> addReservationDTO.getStationsIdList().contains(station.getId());
-    }
     private void addPingPongMatch(PingPongEvent pingPongEvent,PingPongMatch pingPongMatch){
         pingPongEvent.getPingPongMatchList().add(pingPongMatch);
     }

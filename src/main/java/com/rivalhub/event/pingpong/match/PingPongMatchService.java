@@ -35,20 +35,14 @@ public class PingPongMatchService {
         return pingPongMatchHelper.save(requestUser, pingPongEvent, pingPongMatch);
     }
 
-    public boolean setResultApproval(Long organizationId, Long eventId, Long matchId, boolean approve) {
-//        Organization organization = repositoryManager.findOrganizationById(organizationId);
+    public boolean setResultApproval(Long eventId, Long matchId, boolean approve) {
         var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         PingPongEvent pingPongEvent = pingPongEventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
 
         return pingPongMatchHelper.setResultApproval(requestUser, pingPongEvent, matchId, approve);
     }
 
-    public ViewPingPongMatchDTO findPingPongMatch(Long organizationId, Long eventId, Long matchId) {
-        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        OrganizationSettingsValidator.userIsInOrganization(organization, requestUser);
-
+    public ViewPingPongMatchDTO findPingPongMatch(Long eventId, Long matchId) {
         PingPongEvent pingPongEvent = pingPongEventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
 
         PingPongMatch pingPongMatch = pingPongMatchHelper.findMatchInEvent(pingPongEvent, matchId);
@@ -57,17 +51,14 @@ public class PingPongMatchService {
 
     }
 
-    public List<ViewPingPongMatchDTO> findPingPongMatches(Long organizationId, Long eventId) {
+    public List<ViewPingPongMatchDTO> findPingPongMatches(Long eventId) {
         PingPongEvent pingPongEvent = pingPongEventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
         List<PingPongMatch> pingPongMatches = pingPongEvent.getPingPongMatchList();
 
         return pingPongMatches.stream().map(pingPongMatchMapper::map).toList();
     }
 
-    public List<PingPongSet> addResult(Long organizationId, Long eventId, Long matchId, List<PingPongSet> sets) {
-        var requestUser = (UserData) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//        Organization organization = repositoryManager.findOrganizationById(organizationId);
-
+    public List<PingPongSet> addResult(Long eventId, Long matchId, List<PingPongSet> sets) {
         PingPongEvent pingPongEvent = pingPongEventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
         PingPongMatch pingPongMatch = pingPongMatchHelper.findMatchInEvent(pingPongEvent, matchId);
 

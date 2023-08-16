@@ -19,37 +19,33 @@ public class PingPongController {
 
     @PostMapping("")
     private ResponseEntity<?> createPingPongMatch(@PathVariable Long organizationId,
-                                          @PathVariable Long eventId,
-                                          @RequestBody AddPingPongMatchDTO pingPongMatchDTO){
-        return ResponseEntity.ok(pingPongMatchService.createPingPongMatch(organizationId, eventId, pingPongMatchDTO));
+                                                  @PathVariable Long eventId,
+                                                  @RequestBody AddPingPongMatchDTO pingPongMatchDTO) {
+        return ResponseEntity.ok(pingPongMatchService.createPingPongMatch(eventId, organizationId, pingPongMatchDTO));
     }
 
     @PostMapping("/{matchId}")
-    private ResponseEntity<?> addResults(@PathVariable Long organizationId,
-                                         @PathVariable Long eventId,
+    private ResponseEntity<?> addResults(@PathVariable Long eventId,
                                          @PathVariable Long matchId,
-                                         @RequestBody List<PingPongSet> setList){
-        return ResponseEntity.ok(pingPongMatchService.addResult(organizationId, eventId, matchId, setList));
+                                         @RequestBody List<PingPongSet> setList) {
+        return ResponseEntity.ok(pingPongMatchService.addResult(eventId, matchId, setList));
     }
 
     @GetMapping("/{matchId}/approve")
-    private ResponseEntity<?> setResultApproval(@PathVariable Long organizationId,
-                                             @PathVariable Long eventId,
-                                             @PathVariable Long matchId,
-                                             @RequestParam boolean approve){
-        return ResponseEntity.ok(pingPongMatchService.setResultApproval(organizationId, eventId, matchId, approve));
+    private ResponseEntity<?> setResultApproval(@PathVariable Long eventId,
+                                                @PathVariable Long matchId,
+                                                @RequestParam boolean approve) {
+        return ResponseEntity.ok(pingPongMatchService.setResultApproval(eventId, matchId, approve));
     }
 
     @GetMapping("/{matchId}")
-    private ResponseEntity<?> getPingPongMatch(@PathVariable Long organizationId,
-                                               @PathVariable Long eventId,
-                                               @PathVariable Long matchId){
-        return ResponseEntity.ok(pingPongMatchService.findPingPongMatch(organizationId, eventId, matchId));
+    private ResponseEntity<?> getPingPongMatch(@PathVariable Long eventId,
+                                               @PathVariable Long matchId) {
+        return ResponseEntity.ok(pingPongMatchService.findPingPongMatch(eventId, matchId));
     }
 
     @GetMapping("")
-    private ResponseEntity<?> getPingPongMatches(@PathVariable Long organizationId,
-                                               @PathVariable Long eventId){
-        return ResponseEntity.ok(pingPongMatchService.findPingPongMatches(organizationId, eventId));
+    private ResponseEntity<?> getPingPongMatches(@PathVariable Long eventId) {
+        return ResponseEntity.ok(pingPongMatchService.findPingPongMatches(eventId));
     }
 }
