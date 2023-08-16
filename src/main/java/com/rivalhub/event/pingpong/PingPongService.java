@@ -5,8 +5,10 @@ import com.rivalhub.common.AutoMapper;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.event.EventNotFoundException;
 import com.rivalhub.event.EventServiceInterface;
+import com.rivalhub.event.EventType;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.RepositoryManager;
+import jakarta.persistence.EnumType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -47,5 +49,10 @@ public class PingPongService implements EventServiceInterface {
                 .findById(eventId)
                 .map(autoMapper::mapToEventDto)
                 .orElseThrow(EventNotFoundException::new);
+    }
+
+    @Override
+    public EventType getEventType() {
+        return EventType.PING_PONG;
     }
 }
