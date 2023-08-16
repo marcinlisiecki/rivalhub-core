@@ -20,6 +20,9 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long eventId;
 
+    private String name;
+    private String description;
+
     @OneToOne(cascade = CascadeType.REMOVE)
     @JsonManagedReference
     @JoinColumn(name = "reservation_id")

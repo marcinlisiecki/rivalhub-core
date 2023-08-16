@@ -18,4 +18,8 @@ public class EventDto {
     private List<Long> participants;
     private OrganizationDTO organization;
     private EventType eventType;
+    private String name;
+    private String description;
+    private List<Long> team1;
+    private List<Long> team2;
 }
