@@ -57,12 +57,7 @@ public class PingPongMatchService {
 
     }
 
-    public List<ViewPingPongMatchDTO> findPingPongMatches(Long organizationId, Long eventId, String email) {
-        Organization organization = repositoryManager.findOrganizationById(organizationId);
-        UserData loggedUser = repositoryManager.findUserByEmail(email);
-
-        OrganizationSettingsValidator.userIsInOrganization(organization, loggedUser);
-
+    public List<ViewPingPongMatchDTO> findPingPongMatches(Long organizationId, Long eventId) {
         PingPongEvent pingPongEvent = pingPongEventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
         List<PingPongMatch> pingPongMatches = pingPongEvent.getPingPongMatchList();
 

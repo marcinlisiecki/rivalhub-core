@@ -114,8 +114,9 @@ public class OrganizationStationService {
         EventTypeStationsDto eventStation = new EventTypeStationsDto();
         eventStation.setType(eventType);
         eventStation.setStations(availableStations.stream().map(autoMapper::mapToNewStationDto).toList());
+        List<Station> stationList = StationAvailabilityFinder.filterForActiveStationsAndTypeIn(organization, eventType);
         eventStation.setFirstAvailable(StationAvailabilityFinder
-                .getFirstDateAvailableForDuration(filterForActiveStations(organization.getStationList()), timeNeeded, eventType));
+                .getFirstDateAvailableForDuration(stationList, timeNeeded, eventType));
 
         return eventStation;
     }
