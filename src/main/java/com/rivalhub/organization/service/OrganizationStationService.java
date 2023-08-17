@@ -8,16 +8,12 @@ import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.common.MergePatcher;
 import com.rivalhub.event.EventType;
 import com.rivalhub.organization.Organization;
+import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
-import com.rivalhub.organization.validator.OrganizationStationValidator;
-import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
-import com.rivalhub.station.EventTypeStationsDto;
-import com.rivalhub.station.Station;
-import com.rivalhub.station.StationAvailabilityFinder;
-import com.rivalhub.station.StationDTO;
+import com.rivalhub.security.SecurityUtils;
+import com.rivalhub.station.*;
 import com.rivalhub.user.UserData;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -31,55 +27,108 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OrganizationStationService {
-
-    private final RepositoryManager repositoryManager;
+    private final StationRepository stationRepository;
+    private final OrganizationRepository organizationRepository;
     private final AutoMapper autoMapper;
     private final MergePatcher<StationDTO> stationMergePatcher;
-    private final OrganizationStationValidator validator;
 
-    public StationDTO addStation(StationDTO stationDTO, Long id, String email) {
-        UserData user = repositoryManager.findUserByEmail(email);
-        List<Organization> organizationList = user.getOrganizationList();
+    public StationDTO addStation(StationDTO stationDTO, Long id) {
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        var organizationList = requestUser.getOrganizationList();
 
-        Organization organization = organizationList
-                .stream().filter(org -> org.getId().equals(id))
-                .findFirst()
-                .orElseThrow(OrganizationNotFoundException::new);
-
-        OrganizationSettingsValidator.checkIfUserIsAdmin(user, organization);
+        var organization = findOrganizationIn(organizationList, id);
+        OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
 
         Station station = autoMapper.mapToStation(stationDTO);
         UserOrganizationService.addStation(station, organization);
 
-        station = repositoryManager.save(station);
+        station = stationRepository.save(station);
+        organizationRepository.save(organization);
 
         return autoMapper.mapToNewStationDto(station);
     }
 
-
     public List<Station> viewStations(Long organizationId, String start, String end, EventType type,
-                               boolean onlyAvailable, String email, boolean showInactive) {
-        UserData user = repositoryManager.findUserByEmail(email);
-
-        Organization organization = validator.checkIfViewStationIsPossible(organizationId, user);
-
-        List<Station> stationList = organization.getStationList();
-        if (!showInactive) stationList = filterForActiveStations(stationList);
+                               boolean onlyAvailable, boolean showInactive) {
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        final var organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
 
         if (onlyAvailable && start != null && end != null)
             return StationAvailabilityFinder
-                    .getAvailableStations(organization, start, end, type, user, stationList);
+                    .getAvailableStations(organization, start, end, type, requestUser);
 
-        return stationList;
+        if (showInactive) return StationAvailabilityFinder.filterForTypeIn(organization.getStationList(), type);
+        return StationAvailabilityFinder.filterForActiveStationsAndTypeIn(organization, type);
     }
 
     public List<EventTypeStationsDto> getEventStations(Long organizationId, String start, String end, EventType type) {
-        UserData userData = repositoryManager
-                .findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        var organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
 
-        Organization organization = repositoryManager.findOrganizationById(organizationId);
+        return getEventTypeStationsByTime(start, end, type, requestUser, organization);
+    }
+
+    public void updateStation(Long organizationId, Long stationId, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        var organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
+
+        OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
+
+        StationDTO station = autoMapper.mapToNewStationDto(findStationIn(organization, stationId));
+        StationDTO stationPatched = stationMergePatcher.patch(patch, station, StationDTO.class);
+
+        stationPatched.setId(stationId);
+        stationRepository.save(autoMapper.mapToStation(stationPatched));
+    }
+
+    public void deleteStation(Long stationId, Long organizationId) {
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        var organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
+
+        OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
+        deleteStationIn(organization, stationId);
+    }
+
+    private void deleteStationIn(Organization organization, Long id){
+        Station station = findStationIn(organization, id);
+        organization.getStationList().remove(station);
+        organizationRepository.save(organization);
+    }
+
+    private Station findStationIn(Organization organization, Long id){
+        return organization.getStationList().stream()
+                .filter(station -> station.getId().equals(id))
+                .findFirst()
+                .orElseThrow(StationNotFoundException::new);
+    }
+
+    private Organization findOrganizationIn(List<Organization> organizationList, Long id){
+        return organizationList
+                .stream().filter(org -> org.getId().equals(id))
+                .findFirst()
+                .orElseThrow(OrganizationNotFoundException::new);
+    }
+
+    private EventTypeStationsDto getEventTypeStation(EventType eventType, List<Station> availableStations,
+                                                     Organization organization, Duration timeNeeded) {
+        EventTypeStationsDto eventStation = new EventTypeStationsDto();
+        eventStation.setType(eventType);
+        eventStation.setStations(availableStations
+                .stream().map(autoMapper::mapToNewStationDto)
+                .toList());
+        List<Station> stationList = StationAvailabilityFinder.filterForActiveStationsAndTypeIn(organization, eventType);
+        eventStation.setFirstAvailable(StationAvailabilityFinder
+                .getFirstDateAvailableForDuration(stationList, timeNeeded, eventType));
+
+        return eventStation;
+    }
 
 
+    private List<EventTypeStationsDto> getEventTypeStationsByTime(String start, String end, EventType type, UserData requestUser, Organization organization) {
         LocalDateTime startTime = LocalDateTime.parse(start, FormatterHelper.formatter());
         LocalDateTime endTime = LocalDateTime.parse(end, FormatterHelper.formatter());
 
@@ -88,63 +137,17 @@ public class OrganizationStationService {
 
         if (type != null) {
             List<Station> availableStations = StationAvailabilityFinder
-                    .getAvailableStations(organization, start, end, type, userData, organization.getStationList());
-            availableStations = filterForActiveStations(availableStations);
+                    .getAvailableStations(organization, start, end, type, requestUser);
             eventStations.add(getEventTypeStation(type, availableStations, organization, timeNeeded));
             return eventStations;
         }
 
         for (EventType eventType : EventType.values()) {
             List<Station> availableStations = StationAvailabilityFinder
-                    .getAvailableStations(organization, start, end, eventType, userData, organization.getStationList());
-            availableStations = filterForActiveStations(availableStations);
+                    .getAvailableStations(organization, start, end, eventType, requestUser);
             eventStations.add(getEventTypeStation(eventType, availableStations, organization, timeNeeded));
         }
 
         return eventStations;
     }
-
-    private EventTypeStationsDto getEventTypeStation(EventType eventType,
-                                                     List<Station> availableStations,
-                                                     Organization organization,
-                                                     Duration timeNeeded) {
-
-        EventTypeStationsDto eventStation = new EventTypeStationsDto();
-        eventStation.setType(eventType);
-        eventStation.setStations(availableStations.stream().map(autoMapper::mapToNewStationDto).toList());
-        eventStation.setFirstAvailable(StationAvailabilityFinder
-                .getFirstDateAvailableForDuration(filterForActiveStations(organization.getStationList()), timeNeeded, eventType));
-
-        return eventStation;
-    }
-
-    StationDTO findStation(Long stationId) {
-        return autoMapper.mapToNewStationDto(repositoryManager.findStationById(stationId));
-    }
-
-    public void updateStation(Long organizationId, Long stationId, String email, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
-        UserData user = repositoryManager.findUserByEmail(email);
-
-        validator.checkIfUpdateStationIsPossible(organizationId, user);
-
-        StationDTO station = findStation(stationId);
-        StationDTO stationPatched = stationMergePatcher.patch(patch, station, StationDTO.class);
-        stationPatched.setId(stationId);
-
-        repositoryManager.save(autoMapper.mapToStation(stationPatched));
-    }
-
-    @Transactional
-    public void deleteStation(Long stationId, Long organizationId, String email) {
-        Organization organization = repositoryManager.findOrganizationById(organizationId);
-        OrganizationSettingsValidator.checkIfUserIsAdmin(repositoryManager.findUserByEmail(email), organization);
-        UserOrganizationService.removeStation(repositoryManager.findStationById(stationId), organization);
-    }
-
-    private List<Station> filterForActiveStations(List<Station> stationList) {
-        return stationList
-                .stream().filter(Station::isActive)
-                .toList();
-    }
-
 }

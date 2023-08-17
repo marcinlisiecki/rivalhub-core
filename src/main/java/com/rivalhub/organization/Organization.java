@@ -1,6 +1,7 @@
 package com.rivalhub.organization;
 
 import com.rivalhub.event.EventType;
+import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.station.Station;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.common.ErrorMessages;
@@ -13,16 +14,13 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
 @Setter
+@Getter
 public class Organization {
 
     @Id
@@ -43,7 +41,7 @@ public class Organization {
     @CreationTimestamp
     private LocalDateTime addedDate;
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(fetch = FetchType.EAGER)
     @JsonManagedReference("user-organizations")
     @JoinTable(name = "organization_users",
             joinColumns = @JoinColumn(name = "organization_id", referencedColumnName = "organization_id"),
@@ -51,7 +49,8 @@ public class Organization {
     )
     private List<UserData> userList = new ArrayList<>();
 
-    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
+    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+            orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinTable(
             name = "organization_station_list",
             joinColumns = @JoinColumn(
@@ -70,8 +69,25 @@ public class Organization {
     @CollectionTable
     private Set<EventType> eventTypeInOrganization = new HashSet<>();
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(fetch = FetchType.EAGER)
     private Set<UserData> adminUsers = new HashSet<>();
 
     private Boolean onlyAdminCanSeeInvitationLink = true;
+
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    List<PingPongEvent> pingPongEvents = new ArrayList<>();
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Organization that)) return false;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

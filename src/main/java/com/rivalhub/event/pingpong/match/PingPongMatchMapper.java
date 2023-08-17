@@ -2,29 +2,30 @@ package com.rivalhub.event.pingpong.match;
 
 
 import com.rivalhub.common.AutoMapper;
-import com.rivalhub.organization.RepositoryManager;
+import com.rivalhub.organization.Organization;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 @RequiredArgsConstructor
 @Component
 public class PingPongMatchMapper {
     private final AutoMapper autoMapper;
-    private final RepositoryManager repositoryManager;
 
-    PingPongMatch map(AddPingPongMatchDTO pingPongMatchDTO){
+    PingPongMatch map(AddPingPongMatchDTO pingPongMatchDTO, Organization organization){
         PingPongMatch pingPongMatch = new PingPongMatch();
 
+        List<UserData> team1 = organization.getUserList().stream()
+                .filter(getUserFromOrganization(pingPongMatchDTO.getTeam1Ids()))
+                .toList();
 
-        List<UserData> team1 = pingPongMatchDTO.getTeam1Ids().stream()
-                .map(repositoryManager::findUserById).toList();
-
-        List<UserData> team2 = pingPongMatchDTO.getTeam2Ids().stream()
-                .map(repositoryManager::findUserById).toList();
+        List<UserData> team2 = organization.getUserList().stream()
+                .filter(getUserFromOrganization(pingPongMatchDTO.getTeam2Ids()))
+                .toList();
 
         pingPongMatch.setTeam1(team1);
         pingPongMatch.setTeam2(team2);
@@ -32,11 +33,19 @@ public class PingPongMatchMapper {
         return pingPongMatch;
     }
 
+    private Predicate<UserData> getUserFromOrganization(List<Long> pingPongMatchDTO) {
+        return userData -> pingPongMatchDTO.contains(userData.getId());
+    }
+
     ViewPingPongMatchDTO map(PingPongMatch pingPongMatch){
         ViewPingPongMatchDTO pingPongMatchDTO = new ViewPingPongMatchDTO();
 
-        List<UserDetailsDto> team1 = pingPongMatch.getTeam1().stream().map(autoMapper::mapToUserDetails).toList();
-        List<UserDetailsDto> team2 = pingPongMatch.getTeam2().stream().map(autoMapper::mapToUserDetails).toList();
+        List<UserDetailsDto> team1 = pingPongMatch.getTeam1()
+                .stream().map(autoMapper::mapToUserDetails)
+                .toList();
+        List<UserDetailsDto> team2 = pingPongMatch.getTeam2()
+                .stream().map(autoMapper::mapToUserDetails)
+                .toList();
 
         pingPongMatchDTO.setId(pingPongMatch.getId());
         pingPongMatchDTO.setTeam1(team1);

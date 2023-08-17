@@ -15,13 +15,15 @@ import java.util.List;
 @Setter
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne
     @JsonManagedReference("user-reservations")
     @JoinTable(name = "user_reservations",
             joinColumns = @JoinColumn(name = "reservation_id", referencedColumnName = "id"),

@@ -18,25 +18,14 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class EventOperator {
-    private Map<String,EventServiceInterface> strategies;
     private final List<EventServiceInterface> listOfImplementations;
 
 
-    @PostConstruct
-    private void prepareEventOperator(){
-        strategies = new HashMap<>();
-        for (EventServiceInterface implementation: listOfImplementations) {
-            strategies.put(implementation.getEventType().name(),implementation);
-        }
-    }
-
-    public EventServiceInterface useStrategy(String strategy){
-        EventServiceInterface strategyChosen = this.strategies.get(strategy);
-        if(strategyChosen == null){
-            throw new InvalidPathParamException();
-        }
-        return strategyChosen;
-
+    public EventServiceInterface useStrategy(String strategy) {
+        return listOfImplementations.stream()
+                .filter(implementation -> implementation.matchStrategy(strategy))
+                .findFirst()
+                .orElseThrow(InvalidPathParamException::new);
     }
 
 

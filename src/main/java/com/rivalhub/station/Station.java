@@ -37,9 +37,6 @@ public class Station {
     @JsonBackReference("reservation-stations")
     private List<Reservation> reservationList = new ArrayList<>();
 
-//    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-//    private Organization organization;
-
     private boolean isActive;
 
     public Station(Long id, EventType type) {

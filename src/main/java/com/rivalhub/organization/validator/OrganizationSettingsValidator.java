@@ -11,7 +11,8 @@ public class OrganizationSettingsValidator {
     public static void checkIfUserIsAdmin(UserData user, Organization organization) {
         organization.getAdminUsers()
                 .stream().filter(user::equals)
-                .findFirst().orElseThrow(InsufficientPermissionsException::new);
+                .findFirst()
+                .orElseThrow(InsufficientPermissionsException::new);
     }
 
     public static Organization userIsInOrganization(Organization organization, UserData user){
@@ -20,6 +21,4 @@ public class OrganizationSettingsValidator {
                 .findFirst()
                 .orElseThrow(OrganizationNotFoundException::new);
     }
-
-
 }
