@@ -4,6 +4,7 @@ import com.rivalhub.organization.OrganizationDTO;
 import com.rivalhub.organization.service.OrganizationUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +35,12 @@ public class OrganizationUserController {
     @GetMapping("/{id}/users/all")
     private ResponseEntity<?> viewAllUsers(@PathVariable Long id){
         return ResponseEntity.ok(organizationUserService.viewAllUsers(id));
+    }
+
+    @DeleteMapping("/{organizationId}/users/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void deleteUserFromOrganization(@PathVariable Long organizationId, @PathVariable Long userId){
+        organizationUserService.deleteUserFromOrganization(organizationId, userId);
     }
 
 }

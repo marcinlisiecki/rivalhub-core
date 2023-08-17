@@ -76,4 +76,17 @@ public class OrganizationUserService {
                                                       u.get(4, LocalDateTime.class)))
                 .collect(Collectors.toSet());
     }
+
+    public void deleteUserFromOrganization(Long organizationId, Long userId) {
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        var organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
+
+        OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
+
+        var userToDelete = userRepository.findById(userId).orElseThrow(UserAlreadyExistsException::new);
+        UserOrganizationService.deleteUserFrom(organization, userToDelete);
+
+        organizationRepository.save(organization);
+    }
 }
