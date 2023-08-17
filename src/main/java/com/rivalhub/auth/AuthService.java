@@ -1,6 +1,7 @@
 package com.rivalhub.auth;
 
 import com.rivalhub.common.ErrorMessages;
+import com.rivalhub.organization.Organization;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
@@ -18,6 +19,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -94,6 +96,11 @@ public class AuthService {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("id", userData.getId());
         extraClaims.put("name", userData.getName());
+
+        List<Organization> organizations = userData.getOrganizationList()
+                .stream().filter(organization -> organization.getAdminUsers().contains(userData)).toList();
+
+        extraClaims.put("adminOrganizationIds", organizations.stream().map(Organization::getId).toList());
 
         if (userData.getActivationTime() == null) {
             extraClaims.put("activationTime", null);
