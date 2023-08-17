@@ -3,6 +3,7 @@ package com.rivalhub.organization.controller;
 import com.rivalhub.organization.OrganizationDTO;
 import com.rivalhub.organization.service.OrganizationUserService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,4 +44,8 @@ public class OrganizationUserController {
         organizationUserService.deleteUserFromOrganization(organizationId, userId);
     }
 
+    @GetMapping("/{id}/users/search")
+    private ResponseEntity<?> viewUsersByNamePhrase(@PathVariable Long id, @RequestParam String namePhrase) {
+        return ResponseEntity.ok(organizationUserService.findUsersByNamePhrase(id, namePhrase));
+    }
 }

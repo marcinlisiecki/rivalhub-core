@@ -6,6 +6,7 @@ import com.rivalhub.common.PaginationHelper;
 import com.rivalhub.email.EmailService;
 import com.rivalhub.organization.OrganizationDTO;
 import com.rivalhub.organization.OrganizationRepository;
+import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.organization.exception.AlreadyInOrganizationException;
@@ -33,6 +34,7 @@ public class OrganizationUserService {
     private final AutoMapper autoMapper;
     private final EmailService emailService;
     private final InvitationHelper invitationHelper;
+    private final RepositoryManager repositoryManager;
 
     public Page<?> findUsersByOrganization(Long id, int page, int size) {
         var organization = organizationRepository.findById(id)
@@ -96,5 +98,15 @@ public class OrganizationUserService {
         UserOrganizationService.deleteUserFrom(organization, userToDelete);
 
         organizationRepository.save(organization);
+    }
+
+    public List<UserDetailsDto> findUsersByNamePhrase(Long id, String namePhrase) {
+        return repositoryManager.findByNamePhrase(id, namePhrase)
+                .stream().map(u -> new UserDetailsDto(u.get(0, Long.class),
+                        u.get(1, String.class),
+                        u.get(2, String.class),
+                        u.get(3, String.class),
+                        u.get(4, LocalDateTime.class)))
+                .collect(Collectors.toList());
     }
 }

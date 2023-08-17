@@ -4,6 +4,8 @@ import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.event.pingpong.PingPongEventRepository;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.reservation.*;
+import com.rivalhub.user.UserRepository;
+import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import java.util.Set;
@@ -11,6 +13,7 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 public class RepositoryManager {
+    private final UserRepository userRepository;
     private final OrganizationRepository organizationRepository;
     private final ReservationRepository reservationRepository;
     private final PingPongEventRepository pingPongEventRepository;
@@ -28,4 +31,7 @@ public class RepositoryManager {
         return pingPongEventRepository.findAllByOrganizationIdAndUserId(organizationId, userId);
     }
 
+    public Set<Tuple> findByNamePhrase(Long id, String namePhrase) {
+        return userRepository.findByNamePhraseAndOrganizationId(id, namePhrase);
+    }
 }
