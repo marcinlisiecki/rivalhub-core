@@ -2,7 +2,6 @@ package com.rivalhub.email;
 
 import com.rivalhub.common.InvitationHelper;
 import com.rivalhub.organization.Organization;
-import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDto;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -10,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -35,20 +33,19 @@ public class EmailService {
     private String frontUrl;
 
 
-    public void sendSimpleMessage(UserData userToAdd, Organization organization){
+    public void sendEmailWithInvitationToOrganization(String email, Organization organization){
         Context context = new Context();
-        context.setVariable("username", userToAdd.getName());
+        context.setVariable("username", email);
         context.setVariable("invitation", invitationHelper.createInvitationLink(organization));
         context.setVariable("organizationName", organization.getName());
 
         ServletUriComponentsBuilder uri = ServletUriComponentsBuilder.fromCurrentRequest();
         uri.replacePath("");
-
         String message = templateEngine.process("confirmOrganizationInvitation.html", context);
         MimeMessage mailMessage = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(mailMessage, true);
-            helper.setTo(userToAdd.getEmail());
+            helper.setTo(email);
             helper.setFrom(sender);
             helper.setSubject("Invitation to " + organization.getName());
             helper.setText(message,true);

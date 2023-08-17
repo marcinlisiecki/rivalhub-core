@@ -45,23 +45,24 @@
 </head>
 <body class="body" style="background: #19201C;border-radius: 30px">
     <div  class="head">
-    Zaproszenie do Organizacji.
+        Zaproszenie do Organizacji.
     </div>
     <img src="cid:identifier1234" alt="logo" style="  display: block; margin-left: auto; margin-right: auto;">
     <p class="text" style="text-align: center" >Cześć <span th:text="${username}"></span>,
-
 
         <p class="text" style="text-align: center">
             Masz zaproszenie do <span th:text="${organizationName}"></span>
         </p>
 
-
+    <p class="text" style="text-align: center">
+        Dołącz do organizacji klikając w przycisk poniżej
+    </p>
 
     </p>
     <p></p>
     <p></p>
     <form th:action="${invitation}" style = "text-align: center">
-        <input class="button" type="submit" value="Potwierdź" />
+        <input class="button" type="submit" value="Dołącz" />
     </form>
 
 </body>
