@@ -11,4 +11,7 @@ public class OrganizationDTO {
     private Long id;
     private String name;
     private String imageUrl;
+    public OrganizationDTO(String name){
+        this.name = name;
+    }
 }

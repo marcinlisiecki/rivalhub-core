@@ -7,9 +7,11 @@ import com.rivalhub.organization.exception.*;
 import com.rivalhub.station.StationNotFoundException;
 import com.rivalhub.user.UserAlreadyExistsException;
 import com.rivalhub.user.UserNotFoundException;
+import io.jsonwebtoken.io.IOException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class ExceptionHandler {
@@ -25,7 +27,8 @@ public class ExceptionHandler {
             InsufficientPermissionsException.class,
             EmailNotSentException.class,
             UserNotFoundException.class,
-            MatchNotFoundException.class
+            MatchNotFoundException.class,
+            IOException.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessageDto handleExceptions(Exception e) {

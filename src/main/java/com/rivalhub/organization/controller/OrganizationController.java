@@ -9,8 +9,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import java.net.URI;
+
+
 
 @RestController
 @RequestMapping("/organizations")
@@ -23,8 +27,10 @@ public class OrganizationController {
     }
 
     @PostMapping
-    private ResponseEntity<OrganizationDTO> addOrganization(@RequestBody OrganizationDTO organizationDTO){
-        OrganizationDTO savedOrganization = organizationService.saveOrganization(organizationDTO);
+    private ResponseEntity<OrganizationDTO> addOrganization(@RequestParam("organization") String organizationJson,
+                                                            @RequestParam("thumbnail") MultipartFile multipartFile) {
+        OrganizationDTO savedOrganization = organizationService.saveOrganization(organizationJson, multipartFile);
+
         URI savedOrganizationUri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(savedOrganization.getId())
