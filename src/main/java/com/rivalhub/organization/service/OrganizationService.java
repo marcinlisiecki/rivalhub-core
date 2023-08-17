@@ -7,22 +7,16 @@ import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.InvitationHelper;
 import com.rivalhub.common.MergePatcher;
 import com.rivalhub.organization.*;
-import com.rivalhub.organization.controller.FileUploadUtil;
+import com.rivalhub.common.exception.FileUploadUtil;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import com.rivalhub.user.UserData;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
