@@ -6,5 +6,5 @@ public interface EventServiceInterface {
     EventDto addEvent(Long organizationId, EventDto eventDto);
     List<EventDto> findAllEvents(long id);
     EventDto findEvent(long eventId);
-    EventType getEventType();
+    boolean matchStrategy(String eventType);
 }
