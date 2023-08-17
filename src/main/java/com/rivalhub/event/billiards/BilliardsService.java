@@ -11,41 +11,56 @@ import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.event.pingpong.PingPongEventRepository;
 import com.rivalhub.organization.Organization;
+import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.RepositoryManager;
+import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Service
 @RequiredArgsConstructor
-public class BilliardsService implements MatchServiceInterface {
+public class BilliardsService implements EventServiceInterface {
     private final AutoMapper autoMapper;
-    private final RepositoryManager repositoryManager;
+    private final OrganizationRepository organizationRepository;
     private final BilliardsEventRepository billiardsEventRepository;
     private final BilliardsEventSaver billiardsEventSaver;
 
+
     @Override
-    public boolean setResultApproval(Long eventId, Long matchId, boolean approve) {
-        return false;
+    public EventDto addEvent(Long organizationId, EventDto eventDto) {
+        BilliardsEvent billiardsEvent = new BilliardsEvent();
+        var organization  = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+
+        return autoMapper.mapToEventDto(billiardsEventSaver.saveEvent(billiardsEvent,organization,eventDto));
     }
 
     @Override
-    public MatchDto createMatch(Long organizationId, Long eventId, MatchDto MatchDTO) {
-        return null;
+    public List<EventDto> findAllEvents(long id) {
+        var organization = organizationRepository.findById(id)
+                .orElseThrow(OrganizationNotFoundException::new);
+        return organization.getBilliardsEvents()
+                .stream()
+                .map(billiardsEvent -> {
+                    EventDto eventDto = autoMapper.mapToEventDto(billiardsEvent);
+                    eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
+                    return eventDto;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
-    public ViewMatchDto findMatch(Long eventId, Long matchId) {
-        return null;
+    public EventDto findEvent(long eventId) {
+        return billiardsEventRepository
+                .findById(eventId)
+                .map(autoMapper::mapToEventDto)
+                .orElseThrow(EventNotFoundException::new);
     }
 
     @Override
-    public List<ViewMatchDto> findMatches(Long eventId) {
-        return null;
-    }
-
-    @Override
-    public boolean matchStrategy(String strategy) {
-        return false;
+    public boolean matchStrategy(String eventType) {
+        return eventType.equalsIgnoreCase(EventType.BILLIARDS.name());
     }
 }

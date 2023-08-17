@@ -2,6 +2,7 @@ package com.rivalhub.common;
 
 
 import com.rivalhub.event.EventDto;
+import com.rivalhub.event.billiards.BilliardsEvent;
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationDTO;
@@ -27,10 +28,29 @@ public class Config {
 
         modelMapper.getConfiguration().setSkipNullEnabled(true);
 
+        modelMapper.typeMap(EventDto.class, BilliardsEvent.class).addMappings(mapper ->
+                mapper.skip(BilliardsEvent::setParticipants));
+        modelMapper.typeMap(EventDto.class, BilliardsEvent.class).addMappings(mapper ->
+                mapper.skip(BilliardsEvent::setHost));
+
+        modelMapper.typeMap(BilliardsEvent.class, EventDto.class).addMappings(mapper ->
+                mapper.map(BilliardsEvent::getParticipantsId,
+                        EventDto::setParticipants));
+        modelMapper.typeMap(BilliardsEvent.class, EventDto.class).addMappings(mapper ->
+                mapper.map(src -> src.getHost().getId(),
+                        EventDto::setHost));
+        modelMapper.typeMap(BilliardsEvent.class, EventDto.class).addMappings(mapper ->
+                mapper.map(BilliardsEvent::getStationId,EventDto::setStationList));
+
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+
         modelMapper.typeMap(EventDto.class, PingPongEvent.class).addMappings(mapper ->
                 mapper.skip(PingPongEvent::setParticipants));
         modelMapper.typeMap(EventDto.class, PingPongEvent.class).addMappings(mapper ->
                 mapper.skip(PingPongEvent::setHost));
+
+
+
 
         modelMapper.typeMap(OrganizationDTO.class, Organization.class).addMappings(mapper ->
                 mapper.skip(Organization::setAdminUsers));

@@ -7,7 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+//TODO Wydaje mi się że można wbić tą klase do
+// matchcontrolera za pomocą zewnętrznego interfejsu na każdy
+// z wyników i customowego deserializatora gdy nie bedzie co robic
+// refactor
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/organizations/{organizationId}/events/{eventId}/match")
