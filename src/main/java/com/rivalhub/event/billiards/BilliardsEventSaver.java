@@ -2,60 +2,55 @@ package com.rivalhub.event.billiards;
 
 import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.event.EventDto;
-import com.rivalhub.event.billiards.match.BilliardsMatch;
-import com.rivalhub.event.billiards.match.BilliardsMatchRepository;
+import com.rivalhub.event.EventUtils;
 import com.rivalhub.event.pingpong.PingPongEvent;
-import com.rivalhub.event.pingpong.match.PingPongMatch;
 import com.rivalhub.organization.Organization;
-import com.rivalhub.organization.RepositoryManager;
+import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.service.OrganizationReservationService;
 import com.rivalhub.reservation.AddReservationDTO;
-import com.rivalhub.reservation.ReservationDTO;
+import com.rivalhub.reservation.Reservation;
+import com.rivalhub.user.UserAlreadyExistsException;
+import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.function.Predicate;
 
 @Component
 @RequiredArgsConstructor
 public class BilliardsEventSaver {
 
-    private final RepositoryManager repositoryManager;
     private final OrganizationReservationService reservationService;
-    private final BilliardsEventRepository billiardsEventRepository;
-    private final BilliardsMatchRepository billiardsMatchRepository;
+    private final OrganizationRepository organizationRepository;
 
     BilliardsEvent saveEvent(BilliardsEvent billiardsEvent, Organization organization, EventDto eventDto) {
-        BilliardsMatch match= new BilliardsMatch();
+        //TODO Narazie można dodać tylko użytkowników z danej organizacji!
+        List<UserData> participants =
+                organization.getUserList()
+                        .stream().filter(EventUtils.usersExistingInOrganization(eventDto))
+                        .toList();
 
-        for (Long id : eventDto.getTeam1()) {
-            match.getTeam1().add(repositoryManager.findUserById(id));
-        }
-        for (Long id : eventDto.getTeam2()) {
-            match.getTeam2().add(repositoryManager.findUserById(id));
-        }
-        billiardsMatchRepository.save(match);
-        billiardsEvent.getBilliardsMatches().add(match);
-        billiardsEvent.setOrganization(organization);
+        billiardsEvent.getParticipants().addAll(participants);
+        billiardsEvent.setHost(EventUtils.getHost(organization, eventDto.getHost()));
 
-        for (Long id : eventDto.getParticipants()) {
-            billiardsEvent.getParticipants().add(repositoryManager.findUserById(id));
-        }
-        billiardsEvent.setHost(repositoryManager.findUserById(eventDto.getHost()));
-        billiardsEvent.setName(eventDto.getName());
-        billiardsEvent.setDescription(eventDto.getDescription());
+        AddReservationDTO addReservationDTO = EventUtils.createAddReservationDTO(eventDto, organization);
 
-        AddReservationDTO addReservationDTO = new AddReservationDTO();
-        addReservationDTO.setEndTime(eventDto.getEndTime());
-        addReservationDTO.setStartTime(eventDto.getStartTime());
-        addReservationDTO.setStationsIdList(eventDto.getStationList());
-        ReservationDTO reservationDTO = reservationService.addReservation(addReservationDTO, organization.getId(), billiardsEvent.getHost().getEmail());
+        Reservation reservation = reservationService.addReservationForEvent(addReservationDTO, organization);
 
         billiardsEvent.setStartTime(LocalDateTime.parse(eventDto.getStartTime(), FormatterHelper.formatter()));
         billiardsEvent.setEndTime(LocalDateTime.parse(eventDto.getEndTime(), FormatterHelper.formatter()));
+        billiardsEvent.setReservation(reservation);
 
-        billiardsEvent.setReservation(repositoryManager.findReservationById(reservationDTO.getId()));
-
-        return billiardsEventRepository.save(billiardsEvent);
+        addBilliardsEventTo(organization, billiardsEvent);
+        organizationRepository.save(organization);
+        return billiardsEvent;
     }
+
+    private void addBilliardsEventTo(Organization organization, BilliardsEvent billiardsEvent) {
+        organization.getBilliardsEvents().add(billiardsEvent);
+    }
+
+
 }

@@ -2,6 +2,7 @@ package com.rivalhub.event.pingpong;
 
 import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.event.EventDto;
+import com.rivalhub.event.EventUtils;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.service.OrganizationReservationService;
@@ -26,13 +27,13 @@ public class PingPongEventSaver {
         //TODO Narazie można dodać tylko użytkowników z danej organizacji!
         List<UserData> participants =
                 organization.getUserList()
-                        .stream().filter(usersExistingInOrganization(eventDto))
+                        .stream().filter(EventUtils.usersExistingInOrganization(eventDto))
                         .toList();
 
         pingPongEvent.getParticipants().addAll(participants);
-        pingPongEvent.setHost(getHost(organization, eventDto.getHost()));
+        pingPongEvent.setHost(EventUtils.getHost(organization, eventDto.getHost()));
 
-        AddReservationDTO addReservationDTO = createAddReservationDTO(eventDto, organization);
+        AddReservationDTO addReservationDTO = EventUtils.createAddReservationDTO(eventDto, organization);
 
         Reservation reservation = reservationService.addReservationForEvent(addReservationDTO, organization);
 
@@ -45,26 +46,10 @@ public class PingPongEventSaver {
         return pingPongEvent;
     }
 
-    private Predicate<UserData> usersExistingInOrganization(EventDto eventDto) {
-        return userData -> eventDto.getParticipants().contains(userData.getId());
-    }
 
-    private UserData getHost(Organization organization, Long host) {
-        return organization.getUserList()
-                .stream().filter(userData -> userData.getId().equals(host))
-                .findFirst()
-                .orElseThrow(UserAlreadyExistsException::new);
-    }
+
     private void addPingPongEventTo(Organization organization, PingPongEvent pingPongEvent) {
         organization.getPingPongEvents().add(pingPongEvent);
     }
 
-    private AddReservationDTO createAddReservationDTO(EventDto eventDto, Organization organization) {
-        return AddReservationDTO.builder()
-                .endTime(eventDto.getEndTime())
-                .startTime(eventDto.getStartTime())
-                .stationsIdList(eventDto.getStationList())
-                .organizationId(organization.getId())
-                .build();
-    }
 }

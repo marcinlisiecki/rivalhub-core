@@ -5,6 +5,9 @@ import com.rivalhub.event.EventDto;
 import com.rivalhub.event.EventNotFoundException;
 import com.rivalhub.event.EventServiceInterface;
 import com.rivalhub.event.EventType;
+import com.rivalhub.event.match.MatchDto;
+import com.rivalhub.event.match.MatchServiceInterface;
+import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.event.pingpong.PingPongEventRepository;
 import com.rivalhub.organization.Organization;
@@ -15,40 +18,34 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public class BilliardsService implements EventServiceInterface {
+public class BilliardsService implements MatchServiceInterface {
     private final AutoMapper autoMapper;
     private final RepositoryManager repositoryManager;
     private final BilliardsEventRepository billiardsEventRepository;
     private final BilliardsEventSaver billiardsEventSaver;
 
     @Override
-    public EventDto addEvent(Long organizationId, EventDto eventDto) {
-        BilliardsEvent billiardsEvent = new BilliardsEvent();
-        Organization organization = repositoryManager.findOrganizationById(organizationId);
-
-        BilliardsEvent savedEvent = billiardsEventSaver.saveEvent(billiardsEvent, organization, eventDto);
-        return autoMapper.mapToEventDto(savedEvent);
+    public boolean setResultApproval(Long eventId, Long matchId, boolean approve) {
+        return false;
     }
 
     @Override
-    public List<EventDto> findAllEvents(long id) {
-        Organization organization = repositoryManager.findOrganizationById(id);
-        return billiardsEventRepository.findAllByOrganization(organization)
-                .stream()
-                .map(autoMapper::mapToEventDto)
-                .collect(Collectors.toList());
-    }
-
-
-    public EventDto findEvent(long eventId) {
-        return billiardsEventRepository
-                .findById(eventId)
-                .map(autoMapper::mapToEventDto)
-                .orElseThrow(EventNotFoundException::new);
+    public MatchDto createMatch(Long organizationId, Long eventId, MatchDto MatchDTO) {
+        return null;
     }
 
     @Override
-    public EventType getEventType() {
-        return EventType.PING_PONG;
+    public ViewMatchDto findMatch(Long eventId, Long matchId) {
+        return null;
+    }
+
+    @Override
+    public List<ViewMatchDto> findMatches(Long eventId) {
+        return null;
+    }
+
+    @Override
+    public boolean matchStrategy(String strategy) {
+        return false;
     }
 }
