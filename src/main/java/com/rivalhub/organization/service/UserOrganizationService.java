@@ -38,4 +38,8 @@ public class UserOrganizationService {
     public static void addEventType(Organization organization, EventType eventType) {
         organization.getEventTypeInOrganization().add(eventType);
     }
+
+    public static void deleteUserFrom(Organization organization, UserData user){
+        organization.getUserList().remove(user);
+    }
 }

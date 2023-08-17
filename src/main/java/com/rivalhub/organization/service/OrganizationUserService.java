@@ -11,6 +11,7 @@ import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.organization.exception.AlreadyInOrganizationException;
 import com.rivalhub.organization.exception.WrongInvitationException;
 import com.rivalhub.security.SecurityUtils;
+import com.rivalhub.user.UserAlreadyExistsException;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
 import com.rivalhub.user.UserRepository;
@@ -82,5 +83,18 @@ public class OrganizationUserService {
                                                       u.get(3, String.class),
                                                       u.get(4, LocalDateTime.class)))
                 .collect(Collectors.toSet());
+    }
+
+    public void deleteUserFromOrganization(Long organizationId, Long userId) {
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        var organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
+
+        OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
+
+        var userToDelete = userRepository.findById(userId).orElseThrow(UserAlreadyExistsException::new);
+        UserOrganizationService.deleteUserFrom(organization, userToDelete);
+
+        organizationRepository.save(organization);
     }
 }
