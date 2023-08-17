@@ -11,6 +11,7 @@ import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.organization.exception.AlreadyInOrganizationException;
 import com.rivalhub.organization.exception.WrongInvitationException;
 import com.rivalhub.security.SecurityUtils;
+import com.rivalhub.user.UserAlreadyExistsException;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
 import com.rivalhub.user.UserRepository;
@@ -31,7 +32,6 @@ public class OrganizationUserService {
     private final UserRepository userRepository;
     private final AutoMapper autoMapper;
     private final EmailService emailService;
-    private final InvitationHelper invitationHelper;
 
     public Page<?> findUsersByOrganization(Long id, int page, int size) {
         var organization = organizationRepository.findById(id)
@@ -62,9 +62,8 @@ public class OrganizationUserService {
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
 
-        String subject = "Invitation to " + organization.getName();
-        String body = invitationHelper.createInvitationLink(organization);
-        emailService.sendSimpleMessage(email, subject, body);
+        var userToAdd = userRepository.findByEmail(email).orElseThrow(UserAlreadyExistsException::new);
+        emailService.sendSimpleMessage(userToAdd, organization);
 
         return autoMapper.mapToOrganizationDto(organization);
     }

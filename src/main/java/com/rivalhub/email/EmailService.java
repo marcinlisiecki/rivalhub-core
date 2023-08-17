@@ -1,5 +1,8 @@
 package com.rivalhub.email;
 
+import com.rivalhub.common.InvitationHelper;
+import com.rivalhub.organization.Organization;
+import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDto;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -23,6 +26,7 @@ public class EmailService {
     private final TemplateEngine templateEngine;
     private final JavaMailSender javaMailSender;
     private final ResourceLoader resourceLoader;
+    private final InvitationHelper invitationHelper;
 
     @Value("${spring.mail.username}")
     private String sender;
@@ -31,12 +35,29 @@ public class EmailService {
     private String frontUrl;
 
 
-    public void sendSimpleMessage(String receiver,String subject,String message){
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setText(message);
-        mailMessage.setTo(receiver);
-        mailMessage.setFrom(sender);
-        mailMessage.setSubject(subject);
+    public void sendSimpleMessage(UserData userToAdd, Organization organization){
+        Context context = new Context();
+        context.setVariable("username", userToAdd.getName());
+        context.setVariable("invitation", invitationHelper.createInvitationLink(organization));
+        context.setVariable("organizationName", organization.getName());
+
+        ServletUriComponentsBuilder uri = ServletUriComponentsBuilder.fromCurrentRequest();
+        uri.replacePath("");
+
+        String message = templateEngine.process("confirmOrganizationInvitation.html", context);
+        MimeMessage mailMessage = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mailMessage, true);
+            helper.setTo(userToAdd.getEmail());
+            helper.setFrom(sender);
+            helper.setSubject("Invitation to " + organization.getName());
+            helper.setText(message,true);
+
+            Resource resource = resourceLoader.getResource("classpath:/templates/logo.png");
+            helper.addInline("identifier1234", resource);
+        } catch (MessagingException exception){
+            throw new EmailNotSentException();
+        }
         javaMailSender.send(mailMessage);
     }
 
@@ -51,7 +72,7 @@ public class EmailService {
                 .append("/users/confirm/")
                 .append(user.getActivationHash());
         context.setVariable("activationLink",builder.toString());
-        String message = templateEngine.process("welcome.html", context);
+        String message = templateEngine.process("confirmAccount.html", context);
         MimeMessage mailMessage = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(mailMessage, true);
