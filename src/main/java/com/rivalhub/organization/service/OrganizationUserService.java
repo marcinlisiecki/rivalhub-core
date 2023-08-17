@@ -11,6 +11,7 @@ import com.rivalhub.organization.exception.AlreadyInOrganizationException;
 import com.rivalhub.organization.exception.WrongInvitationException;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserDetailsDto;
+import com.rivalhub.user.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -84,7 +85,7 @@ public class OrganizationUserService {
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
 
-        var userToDelete = userRepository.findById(userId).orElseThrow(UserAlreadyExistsException::new);
+        var userToDelete = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         UserOrganizationService.deleteUserFrom(organization, userToDelete);
 
         organizationRepository.save(organization);

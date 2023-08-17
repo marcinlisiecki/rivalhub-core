@@ -16,6 +16,7 @@
             font-family: sans-serif;
             position: relative;
             text-align: center;
+            padding: 1rem;
         }
         .head{
             font-family: sans-serif;
@@ -29,21 +30,23 @@
             font-size: 18px;
             color: white;
                  }
-         .button{
-             position: relative;
-             text-align: center;
-             font-family: sans-serif;
-             border-radius: 20px;
-             background: #DA2237;
-             width: 150px;
-             height: 50px;
-             font-size: 18px;
-             color: white;
-             font-family: sans-serif;
-         }
+        .button{
+            position: relative;
+            font-family: sans-serif;
+            border-radius: 20px;
+            background: #DA2237;
+            font-size: 18px;
+            color: white;
+            margin: auto;
+            width: 200px;
+            text-align: center;
+            display: block;
+            padding: 0.5rem;
+            height: 30px;
+        }
     </style>
 </head>
-<body class="body" style="background: #19201C;border-radius: 30px">
+<body style="background: #19201C;border-radius: 30px;padding:1rem">
     <div  class="head">
     Witaj na RIVALHUB
     </div>
@@ -56,16 +59,12 @@
         </p>
 
         <p class="text" style="text-align: center">
-        Pozdrawiamy,
-        Zespół RivalHub.
-            </p>
-    </p>
-    <p></p>
-    <p></p>
+            Pozdrawiamy,
+            Zespół RivalHub.
+        </p>
     <p class="text" style="text-align: center" ><span th:text="${username}"></span> potwierdź swój email: </p>
-    <form th:action="${activationLink}" style = "text-align: center">
-        <input class="button" type="submit" value="Potwierdź" />
-    </form>
+    </p>
+    <a class="button" th:href="@{${activationLink}}"><span style="text-align:center;color: white;text-decoration: none">Potwierdź</span></a>
 
 </body>
 </html>
