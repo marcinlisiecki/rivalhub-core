@@ -10,10 +10,13 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.RepositoryManager;
 import jakarta.persistence.EnumType;
 import jakarta.transaction.Transactional;
+import com.rivalhub.organization.OrganizationRepository;
+import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -21,28 +24,32 @@ import java.util.stream.Collectors;
 public class PingPongService implements EventServiceInterface {
 
     private final AutoMapper autoMapper;
-    private final RepositoryManager repositoryManager;
+    private final OrganizationRepository organizationRepository;
     private final PingPongEventRepository pingPongEventRepository;
     private final PingPongEventSaver pingPongEventSaver;
 
     @Override
     public EventDto addEvent(Long organizationId, EventDto eventDto) {
         PingPongEvent pingPongEvent = new PingPongEvent();
-        Organization organization = repositoryManager.findOrganizationById(organizationId);
+        var organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
 
-        PingPongEvent savedEvent = pingPongEventSaver.saveEvent(pingPongEvent, organization, eventDto);
-        return autoMapper.mapToEventDto(savedEvent);
+        return autoMapper.mapToEventDto(pingPongEventSaver.saveEvent(pingPongEvent, organization, eventDto));
     }
 
     @Override
     public List<EventDto> findAllEvents(long id) {
-        Organization organization = repositoryManager.findOrganizationById(id);
-        return pingPongEventRepository.findAllByOrganization(organization)
+        var organization = organizationRepository.findById(id)
+                .orElseThrow(OrganizationNotFoundException::new);
+        return organization.getPingPongEvents()
                 .stream()
-                .map(autoMapper::mapToEventDto)
+                .map(pingPongEvent -> {
+                    EventDto eventDto = autoMapper.mapToEventDto(pingPongEvent);
+                    eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
+                    return eventDto;
+                })
                 .collect(Collectors.toList());
     }
-
 
     public EventDto findEvent(long eventId) {
         return pingPongEventRepository

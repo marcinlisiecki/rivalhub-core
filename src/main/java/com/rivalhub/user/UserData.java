@@ -3,7 +3,6 @@ package com.rivalhub.user;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.rivalhub.common.ErrorMessages;
 import com.rivalhub.organization.Organization;
-import com.rivalhub.reservation.Reservation;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -18,10 +17,11 @@ import java.util.Collection;
 import java.util.List;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 @Entity
-@Getter
 @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -49,13 +49,13 @@ public class UserData implements UserDetails {
     //@Length(min=8,message = ErrorMessages.PASSWORD_IS_TOO_SHORT)
     private String password;
 
-    @ManyToMany(mappedBy = "userList", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(mappedBy = "userList", fetch = FetchType.EAGER)
     @JsonBackReference("user-organizations")
     private List<Organization> organizationList = new ArrayList<>();
 
-    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, mappedBy = "userData")
-    @JsonBackReference("user-reservations")
-    private List<Reservation> reservationList = new ArrayList<>();
+//    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, mappedBy = "userData")
+//    @JsonBackReference("user-reservations")
+//    private List<Reservation> reservationList = new ArrayList<>();
 
 
     @Override
@@ -90,5 +90,17 @@ public class UserData implements UserDetails {
 
     public UserData(String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserData userData)) return false;
+        return Objects.equals(id, userData.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

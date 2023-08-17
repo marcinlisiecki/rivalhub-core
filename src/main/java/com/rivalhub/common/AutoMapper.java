@@ -8,6 +8,8 @@ import com.rivalhub.organization.OrganizationDTO;
 import com.rivalhub.reservation.AddReservationDTO;
 import com.rivalhub.reservation.Reservation;
 import com.rivalhub.reservation.ReservationDTO;
+import com.rivalhub.user.profile.EventProfileDTO;
+import com.rivalhub.user.profile.ReservationInProfileDTO;
 import com.rivalhub.station.StationDTO;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.RegisterRequestDto;
@@ -76,6 +78,9 @@ public class AutoMapper {
     public ReservationDTO mapToReservationDto(Reservation reservation) {
         return modelMapper.map(reservation,ReservationDTO.class);
     }
+    public ReservationInProfileDTO mapToShowReservationInProfileDTO(Reservation reservation) {
+        return modelMapper.map(reservation, ReservationInProfileDTO.class);
+    }
 
     public UserDetailsDto mapToUserDisplayDTO(UserData userData) {
         return modelMapper.map(userData, UserDetailsDto.class);
@@ -91,5 +96,9 @@ public class AutoMapper {
 
     public UserData mapToUserData(UserDetailsDto userDetailsDto) {
         return modelMapper.map(userDetailsDto, UserData.class);
+    }
+
+    public EventProfileDTO mapToEventProfileDTO(PingPongEvent pingPongEvent) {
+        return modelMapper.map(pingPongEvent, EventProfileDTO.class);
     }
 }

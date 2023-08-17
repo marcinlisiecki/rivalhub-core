@@ -6,9 +6,8 @@ import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.organization.OrganizationDTO;
 import com.rivalhub.organization.service.OrganizationService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
@@ -24,9 +23,8 @@ public class OrganizationController {
     }
 
     @PostMapping
-    private ResponseEntity<OrganizationDTO> addOrganization(@RequestBody OrganizationDTO organizationDTO,
-                                                           @AuthenticationPrincipal UserDetails userDetails){
-        OrganizationDTO savedOrganization = organizationService.saveOrganization(organizationDTO, userDetails.getUsername());
+    private ResponseEntity<OrganizationDTO> addOrganization(@RequestBody OrganizationDTO organizationDTO){
+        OrganizationDTO savedOrganization = organizationService.saveOrganization(organizationDTO);
         URI savedOrganizationUri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(savedOrganization.getId())
@@ -35,23 +33,20 @@ public class OrganizationController {
     }
 
     @PatchMapping("/{id}")
-    private ResponseEntity<?> updateOrganization(@PathVariable Long id, @RequestBody JsonMergePatch patch,
-                                         @AuthenticationPrincipal UserDetails userDetails)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void updateOrganization(@PathVariable Long id, @RequestBody JsonMergePatch patch)
             throws JsonPatchException, JsonProcessingException {
-        organizationService.updateOrganization(id, patch, userDetails.getUsername());
-        return ResponseEntity.noContent().build();
+        organizationService.updateOrganization(id, patch);
     }
 
     @DeleteMapping("/{id}")
-    private ResponseEntity<?> deleteOrganization(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
-        organizationService.deleteOrganization(id, userDetails.getUsername());
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void deleteOrganization(@PathVariable Long id) {
+        organizationService.deleteOrganization(id);
     }
 
     @PostMapping("/{id}/invitation")
-    private ResponseEntity<?> createInvitation(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
-        return ResponseEntity.ok(organizationService.createInvitation(id, userDetails.getUsername()));
+    private ResponseEntity<?> createInvitation(@PathVariable Long id){
+        return ResponseEntity.ok(organizationService.createInvitation(id));
     }
-
-
 }

@@ -1,32 +1,34 @@
 package com.rivalhub.user.profile;
 
-import com.rivalhub.event.EventDto;
-import com.rivalhub.organization.RepositoryManager;
-import com.rivalhub.reservation.ReservationDTO;
+import com.rivalhub.security.SecurityUtils;
+import com.rivalhub.user.UserAlreadyExistsException;
 import com.rivalhub.user.UserData;
+import com.rivalhub.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class ProfileService {
-    private final RepositoryManager repositoryManager;
+    private final UserRepository userRepository;
     private final UserProfileHelper userProfileHelper;
 
-    Set<ReservationDTO> getSharedOrganizationReservations(Long id, String loggedUserEmail) {
-        UserData loggedUser = repositoryManager.findUserByEmail(loggedUserEmail);
-        UserData viewedUser = repositoryManager.findUserById(id);
+    Set<ReservationInProfileDTO> getSharedOrganizationReservations(Long id) {
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        UserData viewedUser = userRepository.findById(id)
+                .orElseThrow(UserAlreadyExistsException::new);
 
-        return userProfileHelper.getReservationsInSharedOrganizations(loggedUser, viewedUser);
+        return userProfileHelper.getReservationsInSharedOrganizations(requestUser, viewedUser);
     }
 
-    Set<EventDto> getSharedOrganizationEvents(Long id, String loggedUserEmail) {
-        UserData loggedUser = repositoryManager.findUserByEmail(loggedUserEmail);
-        UserData viewedUser = repositoryManager.findUserById(id);
+    Set<EventProfileDTO> getSharedOrganizationEvents(Long id) {
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        UserData viewedUser = userRepository.findById(id)
+                .orElseThrow(UserAlreadyExistsException::new);
 
-        return userProfileHelper.getEventsInSharedOrganizations(loggedUser, viewedUser);
+        return userProfileHelper.getEventsInSharedOrganizations(requestUser, viewedUser);
     }
 }

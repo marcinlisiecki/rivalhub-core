@@ -71,15 +71,16 @@ public class StationAvailabilityFinder {
 
 
     public static List<Station> getAvailableStations(Organization organization, String startTime,
-                                                     String endTime, EventType type, UserData user, List<Station> stationList) {
-
+                                                     String endTime, EventType type, UserData user) {
         List<Station> availableStations = new ArrayList<>();
+        List<Station> stationList = filterForActiveStationsAndTypeIn(organization, type);
 
         stationList.forEach(station -> {
-            AddReservationDTO reservationDTO = new AddReservationDTO();
-            reservationDTO.setStartTime(startTime);
-            reservationDTO.setEndTime(endTime);
-            reservationDTO.setStationsIdList(List.of(station.getId()));
+                    AddReservationDTO reservationDTO = AddReservationDTO.builder()
+                            .startTime(startTime)
+                            .endTime(endTime)
+                            .stationsIdList(List.of(station.getId()))
+                            .build();
 
             if (type != null && !station.getType().equals(type)) {
                 return;
@@ -89,7 +90,6 @@ public class StationAvailabilityFinder {
                     reservationDTO,
                     organization,
                     user,
-                    organization.getId(),
                     List.of(station))) {
 
                 availableStations.add(station);
@@ -97,6 +97,23 @@ public class StationAvailabilityFinder {
         });
 
         return availableStations;
+    }
+    private static List<Station> filterForActiveStations(List<Station> stationList) {
+        return stationList
+                .stream().filter(Station::isActive)
+                .toList();
+    }
+
+    public static List<Station> filterForTypeIn(List<Station> stationList, EventType type){
+        if (type == null) return stationList;
+        return stationList
+                .stream().filter(station -> station.getType().equals(type))
+                .toList();
+    }
+
+    public static List<Station> filterForActiveStationsAndTypeIn(Organization organization, EventType type) {
+        List<Station> stationList = filterForActiveStations(organization.getStationList());
+        return filterForTypeIn(stationList, type);
     }
 
 }

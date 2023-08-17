@@ -5,8 +5,6 @@ import com.rivalhub.organization.service.OrganizationUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -24,8 +22,8 @@ public class OrganizationUserController {
     }
 
     @GetMapping("/{id}/invitation/{hash}")
-    private ResponseEntity<?> addUser(@PathVariable Long id, @PathVariable String hash, @AuthenticationPrincipal UserDetails userDetails){
-        return ResponseEntity.ok(organizationUserService.addUser(id, hash, userDetails.getUsername()));
+    private ResponseEntity<?> addUser(@PathVariable Long id, @PathVariable String hash){
+        return ResponseEntity.ok(organizationUserService.addUser(id, hash));
     }
 
     @GetMapping("/{id}/invite/{email}")
@@ -34,8 +32,8 @@ public class OrganizationUserController {
     }
 
     @GetMapping("/{id}/users/all")
-    private ResponseEntity<?> viewAllUsers(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails){
-        return ResponseEntity.ok(organizationUserService.viewAllUsers(id, userDetails.getUsername()));
+    private ResponseEntity<?> viewAllUsers(@PathVariable Long id){
+        return ResponseEntity.ok(organizationUserService.viewAllUsers(id));
     }
 
 }

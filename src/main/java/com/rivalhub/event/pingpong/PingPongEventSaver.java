@@ -1,61 +1,70 @@
 package com.rivalhub.event.pingpong;
 
 import com.rivalhub.common.FormatterHelper;
-import com.rivalhub.event.Event;
 import com.rivalhub.event.EventDto;
-import com.rivalhub.event.EventType;
-import com.rivalhub.event.pingpong.match.PingPongMatch;
-import com.rivalhub.event.pingpong.match.PingPongMatchRepository;
 import com.rivalhub.organization.Organization;
-import com.rivalhub.organization.RepositoryManager;
+import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.service.OrganizationReservationService;
 import com.rivalhub.reservation.AddReservationDTO;
-import com.rivalhub.reservation.ReservationDTO;
+import com.rivalhub.reservation.Reservation;
+import com.rivalhub.user.UserAlreadyExistsException;
+import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Component
 @RequiredArgsConstructor
 public class PingPongEventSaver {
-    private final RepositoryManager repositoryManager;
     private final OrganizationReservationService reservationService;
-    private final PingPongEventRepository pingPongEventRepository;
-    private final PingPongMatchRepository pingPongMatchRepository;
+    private final OrganizationRepository organizationRepository;
+
     PingPongEvent saveEvent(PingPongEvent pingPongEvent, Organization organization, EventDto eventDto) {
-        PingPongMatch match= new PingPongMatch();
+        //TODO Narazie można dodać tylko użytkowników z danej organizacji!
+        List<UserData> participants =
+                organization.getUserList()
+                        .stream().filter(usersExistingInOrganization(eventDto))
+                        .toList();
 
-        for (Long id : eventDto.getTeam1()) {
-            match.getTeam1().add(repositoryManager.findUserById(id));
-        }
-        for (Long id : eventDto.getTeam2()) {
-            match.getTeam2().add(repositoryManager.findUserById(id));
-        }
-        pingPongMatchRepository.save(match);
-        pingPongEvent.getPingPongMatchList().add(match);
-        pingPongEvent.setOrganization(organization);
+        pingPongEvent.getParticipants().addAll(participants);
+        pingPongEvent.setHost(getHost(organization, eventDto.getHost()));
 
-        for (Long id : eventDto.getParticipants()) {
-            pingPongEvent.getParticipants().add(repositoryManager.findUserById(id));
-        }
-        pingPongEvent.setHost(repositoryManager.findUserById(eventDto.getHost()));
-        pingPongEvent.setName(eventDto.getName());
-        pingPongEvent.setDescription(eventDto.getDescription());
+        AddReservationDTO addReservationDTO = createAddReservationDTO(eventDto, organization);
 
-        AddReservationDTO addReservationDTO = new AddReservationDTO();
-        addReservationDTO.setEndTime(eventDto.getEndTime());
-        addReservationDTO.setStartTime(eventDto.getStartTime());
-        addReservationDTO.setStationsIdList(eventDto.getStationList());
-        ReservationDTO reservationDTO = reservationService.addReservation(addReservationDTO, organization.getId(), pingPongEvent.getHost().getEmail());
+        Reservation reservation = reservationService.addReservationForEvent(addReservationDTO, organization);
 
         pingPongEvent.setStartTime(LocalDateTime.parse(eventDto.getStartTime(), FormatterHelper.formatter()));
         pingPongEvent.setEndTime(LocalDateTime.parse(eventDto.getEndTime(), FormatterHelper.formatter()));
+        pingPongEvent.setReservation(reservation);
 
-        pingPongEvent.setReservation(repositoryManager.findReservationById(reservationDTO.getId()));
+        addPingPongEventTo(organization, pingPongEvent);
+        organizationRepository.save(organization);
+        return pingPongEvent;
+    }
 
-        return pingPongEventRepository.save(pingPongEvent);
+    private Predicate<UserData> usersExistingInOrganization(EventDto eventDto) {
+        return userData -> eventDto.getParticipants().contains(userData.getId());
+    }
+
+    private UserData getHost(Organization organization, Long host) {
+        return organization.getUserList()
+                .stream().filter(userData -> userData.getId().equals(host))
+                .findFirst()
+                .orElseThrow(UserAlreadyExistsException::new);
+    }
+    private void addPingPongEventTo(Organization organization, PingPongEvent pingPongEvent) {
+        organization.getPingPongEvents().add(pingPongEvent);
+    }
+
+    private AddReservationDTO createAddReservationDTO(EventDto eventDto, Organization organization) {
+        return AddReservationDTO.builder()
+                .endTime(eventDto.getEndTime())
+                .startTime(eventDto.getStartTime())
+                .stationsIdList(eventDto.getStationList())
+                .organizationId(organization.getId())
+                .build();
     }
 }

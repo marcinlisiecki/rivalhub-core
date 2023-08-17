@@ -1,14 +1,12 @@
 package com.rivalhub.event.pingpong;
 
-import com.rivalhub.organization.Organization;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-
-import java.util.List;
+import org.springframework.stereotype.Repository;
 import java.util.Set;
 
+@Repository
 public interface PingPongEventRepository extends CrudRepository<PingPongEvent,Long> {
-    List<PingPongEvent> findAllByOrganization(Organization organization);
 
     @Query(value = "SELECT * FROM PING_PONG_EVENT \n" +
             "JOIN PING_PONG_EVENT_PARTICIPANTS ON PING_PONG_EVENT_EVENT_ID = EVENT_ID\n" +

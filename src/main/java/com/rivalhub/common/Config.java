@@ -30,8 +30,6 @@ public class Config {
         modelMapper.typeMap(EventDto.class, PingPongEvent.class).addMappings(mapper ->
                 mapper.skip(PingPongEvent::setParticipants));
         modelMapper.typeMap(EventDto.class, PingPongEvent.class).addMappings(mapper ->
-                mapper.skip(PingPongEvent::setOrganization));
-        modelMapper.typeMap(EventDto.class, PingPongEvent.class).addMappings(mapper ->
                 mapper.skip(PingPongEvent::setHost));
 
         modelMapper.typeMap(OrganizationDTO.class, Organization.class).addMappings(mapper ->

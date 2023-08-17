@@ -10,8 +10,6 @@ import com.rivalhub.station.EventTypeStationsDto;
 import com.rivalhub.station.StationDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -25,9 +23,8 @@ public class OrganizationStationController {
     private final OrganizationStationService organizationStationService;
 
     @PostMapping("/{id}/stations")
-    private ResponseEntity<StationDTO> saveStation(@PathVariable Long id, @RequestBody StationDTO newStation,
-                                           @AuthenticationPrincipal UserDetails userDetails) {
-        StationDTO savedStation = organizationStationService.addStation(newStation, id, userDetails.getUsername());
+    private ResponseEntity<StationDTO> saveStation(@PathVariable Long id, @RequestBody StationDTO newStation) {
+        StationDTO savedStation = organizationStationService.addStation(newStation, id);
         URI savedStationUri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(savedStation.getId())
@@ -42,10 +39,9 @@ public class OrganizationStationController {
             @RequestParam(required = false) String start,
             @RequestParam(required = false) String end,
             @RequestParam(required = false) EventType type,
-            @RequestParam(required = false, defaultValue = "false") boolean showInactive,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @RequestParam(required = false, defaultValue = "false") boolean showInactive) {
         return ResponseEntity.ok(organizationStationService
-                .viewStations(id, start, end, type, onlyAvailable, userDetails.getUsername(), showInactive));
+                .viewStations(id, start, end, type, onlyAvailable, showInactive));
     }
 
     @GetMapping("/{id}/event-stations")
@@ -57,17 +53,17 @@ public class OrganizationStationController {
     }
 
     @PatchMapping("/{organizationId}/stations/{stationId}")
-    private ResponseEntity<?> updateStation(@RequestBody JsonMergePatch patch, @AuthenticationPrincipal UserDetails userDetails,
-                                    @PathVariable Long stationId, @PathVariable Long organizationId) throws JsonPatchException, JsonProcessingException {
-        organizationStationService.updateStation(organizationId, stationId, userDetails.getUsername(), patch);
+    private ResponseEntity<?> updateStation(@RequestBody JsonMergePatch patch,
+                                            @PathVariable Long stationId,
+                                            @PathVariable Long organizationId) throws JsonPatchException, JsonProcessingException {
+        organizationStationService.updateStation(organizationId, stationId, patch);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("{organizationId}/stations/{stationId}")
     private ResponseEntity<?> deleteStation(@PathVariable Long stationId,
-                                    @PathVariable Long organizationId,
-                                    @AuthenticationPrincipal UserDetails userDetails) {
-        organizationStationService.deleteStation(stationId, organizationId, userDetails.getUsername());
+                                    @PathVariable Long organizationId) {
+        organizationStationService.deleteStation(stationId, organizationId);
         return ResponseEntity.noContent().build();
     }
 

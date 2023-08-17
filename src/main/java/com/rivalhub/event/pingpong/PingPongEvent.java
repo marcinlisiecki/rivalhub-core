@@ -5,9 +5,7 @@ import com.rivalhub.event.EventType;
 import com.rivalhub.event.pingpong.match.PingPongMatch;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.OneToMany;
 import lombok.Data;
 
