@@ -52,7 +52,7 @@ public class PingPongService implements EventServiceInterface {
     }
 
     @Override
-    public EventType getEventType() {
-        return EventType.PING_PONG;
+    public boolean matchStrategy(String eventType) {
+        return eventType.equalsIgnoreCase(EventType.PING_PONG.name());
     }
 }
