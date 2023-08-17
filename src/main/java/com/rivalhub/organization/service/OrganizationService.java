@@ -27,9 +27,9 @@ public class OrganizationService {
     private final FileUploadUtil fileUploadUtil;
     private final InvitationHelper invitationHelper;
 
-    public OrganizationDTO saveOrganization(String organizationName, MultipartFile multipartFile){
+    public OrganizationDTO saveOrganization(String organizationName, String color, MultipartFile multipartFile){
         Organization organizationToSave = autoMapper.mapToOrganization(
-                new OrganizationDTO(organizationName));
+                new OrganizationDTO(organizationName, color));
         var savedOrganization = organizationRepository.save(organizationToSave);
 
         var requestUser = SecurityUtils.getUserFromSecurityContext();

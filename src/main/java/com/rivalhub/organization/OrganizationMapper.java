@@ -4,6 +4,7 @@ public class OrganizationMapper {
     public static Organization map(OrganizationDTO organizationDTO, Organization organization){
         organization.setName(organizationDTO.getName());
         organization.setImageUrl(organizationDTO.getImageUrl());
+        organization.setColorForDefaultImage(organizationDTO.getColorForDefaultImage());
         return organization;
     }
 }
