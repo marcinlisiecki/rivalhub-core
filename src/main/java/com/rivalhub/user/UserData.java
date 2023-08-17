@@ -96,11 +96,11 @@ public class UserData implements UserDetails {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof UserData userData)) return false;
-        return Objects.equals(id, userData.id) && Objects.equals(name, userData.name) && Objects.equals(email, userData.email);
+        return Objects.equals(id, userData.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, email);
+        return Objects.hash(id);
     }
 }
