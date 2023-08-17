@@ -1,4 +1,4 @@
-package com.rivalhub.organization.controller;
+package com.rivalhub.common.exception;
 
 import com.rivalhub.common.ErrorMessages;
 import com.rivalhub.organization.Organization;
@@ -42,14 +42,15 @@ public class FileUploadUtil {
     }
 
     public String saveOrganizationImage(MultipartFile multipartFile, Organization organization){
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
+        String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()
+                .replace(" ", "")));
         String uploadDir = organizationImgCatalog + organization.getId();
         try {
             saveFile(uploadDir, fileName, multipartFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return uploadDir + "/" + multipartFile.getOriginalFilename();
+        return uploadDir + "/" + fileName;
     }
 
 
