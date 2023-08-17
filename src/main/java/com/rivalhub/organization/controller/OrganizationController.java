@@ -28,7 +28,8 @@ public class OrganizationController {
 
     @PostMapping
     private ResponseEntity<OrganizationDTO> addOrganization(@RequestParam("organization") String organizationJson,
-                                                            @RequestParam("thumbnail") MultipartFile multipartFile) {
+                                                            @RequestParam(name = "thumbnail",
+                                                            required = false) MultipartFile multipartFile) {
         OrganizationDTO savedOrganization = organizationService.saveOrganization(organizationJson, multipartFile);
 
         URI savedOrganizationUri = ServletUriComponentsBuilder.fromCurrentRequest()
