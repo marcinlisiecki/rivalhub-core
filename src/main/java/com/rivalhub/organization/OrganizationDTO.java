@@ -11,7 +11,9 @@ public class OrganizationDTO {
     private Long id;
     private String name;
     private String imageUrl;
-    public OrganizationDTO(String name){
+    private String colorForDefaultImage;
+    public OrganizationDTO(String name, String colorForDefaultImage){
         this.name = name;
+        this.colorForDefaultImage = colorForDefaultImage;
     }
 }
