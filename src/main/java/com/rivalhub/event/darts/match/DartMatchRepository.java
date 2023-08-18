@@ -1,6 +1,8 @@
 package com.rivalhub.event.darts.match;
 
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
-public interface DartMatchRepository extends CrudRepository<DartMatch,DartMatchRepository> {
+@Repository
+public interface DartMatchRepository extends CrudRepository<DartMatch,Long> {
 }
