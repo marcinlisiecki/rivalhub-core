@@ -55,7 +55,7 @@ public class UserService {
 
         return organizationList
                 .stream().map(organization -> new OrganizationDTO(organization.getId(),
-                        organization.getName(), organization.getImageUrl()))
+                        organization.getName(), organization.getImageUrl(), organization.getColorForDefaultImage()))
                 .collect(Collectors.toList());
     }
 

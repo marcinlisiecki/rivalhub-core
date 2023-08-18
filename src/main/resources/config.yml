@@ -25,3 +25,7 @@ spring:
 app:
   jwt:
     secret:
+
+  organization:
+    img:
+      catalog: 'organization-img/'

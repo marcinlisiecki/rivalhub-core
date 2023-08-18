@@ -5,6 +5,8 @@ public class ErrorMessages {
 
     private ErrorMessages() {}
 
+
+    public static final String COULD_NOT_SAVE_FILE = "Nie można zapisać pliku o nazwie";
     public static final String DEFAULT_ERROR = "Wystąpił błąd";
 
     public static final String BAD_CREDENTIALS = "Niepoprawny adres email lub/i hasło";

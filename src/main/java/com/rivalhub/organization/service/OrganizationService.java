@@ -7,13 +7,14 @@ import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.InvitationHelper;
 import com.rivalhub.common.MergePatcher;
 import com.rivalhub.organization.*;
+import com.rivalhub.common.exception.FileUploadUtil;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import com.rivalhub.user.UserData;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
@@ -23,13 +24,18 @@ public class OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final AutoMapper autoMapper;
     private final MergePatcher<OrganizationDTO> organizationMergePatcher;
+    private final FileUploadUtil fileUploadUtil;
     private final InvitationHelper invitationHelper;
 
-    public OrganizationDTO saveOrganization(OrganizationDTO organizationDTO){
-        var savedOrganization = organizationRepository
-                .save(autoMapper.mapToOrganization(organizationDTO));
+    public OrganizationDTO saveOrganization(String organizationName, String color, MultipartFile multipartFile){
+        Organization organizationToSave = autoMapper.mapToOrganization(
+                new OrganizationDTO(organizationName, color));
+        var savedOrganization = organizationRepository.save(organizationToSave);
+
         var requestUser = SecurityUtils.getUserFromSecurityContext();
+
         setOrganizationSettings(requestUser, savedOrganization);
+        if(multipartFile != null) savedOrganization.setImageUrl(fileUploadUtil.saveOrganizationImage(multipartFile, savedOrganization));
 
         return autoMapper.mapToOrganizationDto(organizationRepository.save(savedOrganization));
     }
