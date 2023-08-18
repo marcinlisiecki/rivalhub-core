@@ -7,5 +7,7 @@ public enum EventType {
     TABLE_FOOTBALL,
     DARTS,
     PULL_UPS,
+    RUNNING,
+    DEFAULT
 
 }

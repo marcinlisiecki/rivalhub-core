@@ -1,12 +1,10 @@
-package com.rivalhub.event.pullups;
+package com.rivalhub.event.running;
 
 import com.rivalhub.event.Event;
-import com.rivalhub.event.pullups.match.PullUpMatch;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,9 +14,10 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-public class PullUpEvent extends Event {
+public class RunningEvent extends Event {
     @OneToMany
-    List<PullUpMatch> pullUpMatchList;
+    List<UserTimes> userTimesList;
+    Double distance;
 
     //TODO do wywalenia po custom maperze
     public List<Long> getParticipantsId(){

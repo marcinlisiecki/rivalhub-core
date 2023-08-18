@@ -6,6 +6,7 @@ import com.rivalhub.event.billiards.BilliardsEvent;
 import com.rivalhub.event.darts.DartEvent;
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.event.pullups.PullUpEvent;
+import com.rivalhub.event.running.RunningEvent;
 import com.rivalhub.event.tablefootball.TableFootballEvent;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationDTO;
@@ -91,6 +92,21 @@ public class Config {
                         EventDto::setHost));
         modelMapper.typeMap(TableFootballEvent.class, EventDto.class).addMappings(mapper ->
                 mapper.map(TableFootballEvent::getStationId,EventDto::setStationList));
+
+        modelMapper.typeMap(EventDto.class, RunningEvent.class).addMappings(mapper ->
+                mapper.skip(RunningEvent::setParticipants));
+        modelMapper.typeMap(EventDto.class, RunningEvent.class).addMappings(mapper ->
+                mapper.skip(RunningEvent::setHost));
+
+        modelMapper.typeMap(RunningEvent.class, EventDto.class).addMappings(mapper ->
+                mapper.map(RunningEvent::getParticipantsId,
+                        EventDto::setParticipants));
+        modelMapper.typeMap(RunningEvent.class, EventDto.class).addMappings(mapper ->
+                mapper.map(src -> src.getHost().getId(),
+                        EventDto::setHost));
+        modelMapper.typeMap(RunningEvent.class, EventDto.class).addMappings(mapper ->
+                mapper.map(RunningEvent::getStationId,EventDto::setStationList));
+
 
 
         modelMapper.getConfiguration().setSkipNullEnabled(true);

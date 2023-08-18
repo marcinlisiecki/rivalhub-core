@@ -6,6 +6,7 @@ import com.rivalhub.event.billiards.BilliardsEvent;
 import com.rivalhub.event.darts.DartEvent;
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.event.pullups.PullUpEvent;
+import com.rivalhub.event.running.RunningEvent;
 import com.rivalhub.event.tablefootball.TableFootballEvent;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationDTO;
@@ -98,6 +99,9 @@ public class AutoMapper {
         return modelMapper.map(pingPongEvent,EventDto.class);
     }
 
+    public EventDto mapToEventDto(RunningEvent runningEvent){
+        return modelMapper.map(runningEvent,EventDto.class);
+    }
     public EventDto mapToEventDto(TableFootballEvent tableFootballEvent){
         return modelMapper.map(tableFootballEvent,EventDto.class);
     }

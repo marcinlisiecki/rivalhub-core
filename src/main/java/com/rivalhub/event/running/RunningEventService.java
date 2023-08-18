@@ -1,4 +1,4 @@
-package com.rivalhub.event.pullups;
+package com.rivalhub.event.running;
 
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.event.EventDto;
@@ -15,31 +15,33 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class PullUpEventService implements EventServiceInterface {
+public class RunningEventService implements EventServiceInterface {
+
     private final AutoMapper autoMapper;
     private final OrganizationRepository organizationRepository;
-    private final PullUpEventRepository pullUpEventRepository;
-    private final PullUpEventSaver pullUpEventSaver;
+    private final RunningEventRepository runningEventRepository;
+    private final RunningEventSaver runningEventSaver;
 
 
     @Override
     public EventDto addEvent(Long organizationId, EventDto eventDto) {
-        PullUpEvent pullUpEvent = new PullUpEvent();
+        RunningEvent runningEvent = new RunningEvent();
         var organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
-        return autoMapper.mapToEventDto(pullUpEventSaver.saveEvent(pullUpEvent, organization, eventDto));
+        return autoMapper.mapToEventDto(runningEventSaver.saveEvent(runningEvent, organization, eventDto));
 
     }
 
     @Override
     public List<EventDto> findAllEvents(long id) {
+
         var organization = organizationRepository.findById(id)
                 .orElseThrow(OrganizationNotFoundException::new);
-        return organization.getPullUpsEvents()
+        return organization.getRunningEvents()
                 .stream()
-                .map(pullUpEvent -> {
-                    EventDto eventDto = autoMapper.mapToEventDto(pullUpEvent);
+                .map(runningEvent -> {
+                    EventDto eventDto = autoMapper.mapToEventDto(runningEvent);
                     eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
                     return eventDto;
                 })
@@ -48,16 +50,14 @@ public class PullUpEventService implements EventServiceInterface {
 
     @Override
     public EventDto findEvent(long eventId) {
-        return pullUpEventRepository
+        return runningEventRepository
                 .findById(eventId)
                 .map(autoMapper::mapToEventDto)
                 .orElseThrow(EventNotFoundException::new);
-
     }
 
     @Override
     public boolean matchStrategy(String eventType) {
-        return eventType.equalsIgnoreCase(EventType.PULL_UPS.name());
+        return eventType.equalsIgnoreCase(EventType.RUNNING.name());
     }
-
 }

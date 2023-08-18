@@ -3,9 +3,10 @@ package com.rivalhub.organization;
 import com.rivalhub.event.EventType;
 import com.rivalhub.event.billiards.BilliardsEvent;
 import com.rivalhub.event.darts.DartEvent;
-import com.rivalhub.event.darts.DartEventSaver;
+
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.event.pullups.PullUpEvent;
+import com.rivalhub.event.running.RunningEvent;
 import com.rivalhub.event.tablefootball.TableFootballEvent;
 import com.rivalhub.station.Station;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -88,6 +89,11 @@ public class Organization {
     @OneToMany(fetch = FetchType.EAGER,
             cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     List<BilliardsEvent> billiardsEvents = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    List<RunningEvent> runningEvents = new ArrayList<>();
+
 
     @OneToMany(fetch = FetchType.EAGER,
             cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
