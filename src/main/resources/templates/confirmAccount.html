@@ -31,6 +31,7 @@
             color: white;
                  }
         .button{
+            display:block;
             position: relative;
             font-family: sans-serif;
             border-radius: 20px;
@@ -40,9 +41,9 @@
             margin: auto;
             width: 200px;
             text-align: center;
-            display: block;
-            padding: 0.5rem;
+            padding: 10px 8px 8px 8px;
             height: 30px;
+            text-decoration: none;
         }
     </style>
 </head>
@@ -64,7 +65,7 @@
         </p>
     <p class="text" style="text-align: center" ><span th:text="${username}"></span> potwierdź swój email: </p>
     </p>
-    <a class="button" th:href="@{${activationLink}}"><span style="text-align:center;color: white;text-decoration: none">Potwierdź</span></a>
+    <a  class="button" th:href="@{${activationLink}}"><span style="text-align:center;color: white;text-decoration: none">Potwierdź</span></a>
 
 </body>
 </html>
