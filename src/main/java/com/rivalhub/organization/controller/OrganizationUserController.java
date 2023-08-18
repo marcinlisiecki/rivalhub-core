@@ -48,4 +48,9 @@ public class OrganizationUserController {
     private ResponseEntity<?> viewUsersByNamePhrase(@PathVariable Long id, @RequestParam String namePhrase) {
         return ResponseEntity.ok(organizationUserService.findUsersByNamePhrase(id, namePhrase));
     }
+
+    @GetMapping("/{id}/users/admins")
+    private ResponseEntity<?> viewAdminIds(@PathVariable Long id) {
+        return ResponseEntity.ok(organizationUserService.findAdminUsersByOrganization(id));
+    }
 }

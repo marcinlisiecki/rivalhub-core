@@ -109,4 +109,18 @@ public class OrganizationUserService {
                         u.get(4, LocalDateTime.class)))
                 .collect(Collectors.toList());
     }
+
+    public List<UserDetailsDto> findAdminUsersByOrganization(Long id) {
+        var organization = repositoryManager.findOrganizationById(id);
+        var adminUsers = organization.getAdminUsers();
+        return adminUsers
+                .stream().map(u -> new UserDetailsDto(
+                        u.getId(),
+                        u.getName(),
+                        u.getEmail(),
+                        u.getProfilePictureUrl(),
+                        u.getActivationTime()
+                ))
+                .collect(Collectors.toList());
+    }
 }
