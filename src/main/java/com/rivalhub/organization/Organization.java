@@ -5,6 +5,8 @@ import com.rivalhub.event.billiards.BilliardsEvent;
 import com.rivalhub.event.darts.DartEvent;
 import com.rivalhub.event.darts.DartEventSaver;
 import com.rivalhub.event.pingpong.PingPongEvent;
+import com.rivalhub.event.pullups.PullUpEvent;
+import com.rivalhub.event.tablefootball.TableFootballEvent;
 import com.rivalhub.station.Station;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.common.ErrorMessages;
@@ -89,6 +91,13 @@ public class Organization {
             cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     List<DartEvent> dartEvents = new ArrayList<>();
 
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    List<PullUpEvent> pullUpsEvents = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    List<TableFootballEvent> tableFootballEvents = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
