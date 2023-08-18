@@ -78,6 +78,9 @@ public class Organization {
             cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     List<PingPongEvent> pingPongEvents = new ArrayList<>();
 
+    private String colorForDefaultImage;
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
