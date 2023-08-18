@@ -24,10 +24,10 @@ public class ReservationValidator {
     public static boolean checkIfReservationIsPossible(AddReservationDTO reservationDTO, Organization organization,
                                                 UserData user, List<Station> stationList) {
 
-        user.getOrganizationList()
-                .stream().filter(org -> org.getId().equals(organization.getId()))
-                .findFirst()
-                .orElseThrow(OrganizationNotFoundException::new);
+//        user.getOrganizationList()
+//                .stream().filter(org -> org.getId().equals(organization.getId()))
+//                .findFirst()
+//                .orElseThrow(OrganizationNotFoundException::new);
 
         if (!ReservationValidator.checkIfStationsAreInOrganization(stationList, organization)) return false;
         if (ReservationValidator.checkForTimeCollision(stationList, reservationDTO.getStartTime(), reservationDTO.getEndTime())) return false;

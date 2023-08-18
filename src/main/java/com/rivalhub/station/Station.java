@@ -34,7 +34,7 @@ public class Station {
     private String name;
 
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "stationList")
-    @JsonBackReference("reservation-stations")
+    @JsonBackReference
     private List<Reservation> reservationList = new ArrayList<>();
 
     private boolean isActive;

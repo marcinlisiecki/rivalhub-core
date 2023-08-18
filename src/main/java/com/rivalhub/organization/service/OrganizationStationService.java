@@ -14,8 +14,8 @@ import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.station.*;
 import com.rivalhub.user.UserData;
+import com.rivalhub.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -30,15 +30,17 @@ public class OrganizationStationService {
     private final StationRepository stationRepository;
     private final OrganizationRepository organizationRepository;
     private final AutoMapper autoMapper;
+    private final UserRepository userRepository;
     private final MergePatcher<StationDTO> stationMergePatcher;
 
     public StationDTO addStation(StationDTO stationDTO, Long id) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
-        var organizationList = requestUser.getOrganizationList();
+        var organizationIdsList = userRepository.getOrganizationIdsWhereUserIsAdmin(requestUser.getId())
+                .stream().map(orgId -> orgId.get(0, Long.class)).toList();;
 
-        var organization = findOrganizationIn(organizationList, id);
-        OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
+        var organizationId = findRequestOrganizationIn(organizationIdsList, id);
 
+        var organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
         Station station = autoMapper.mapToStation(stationDTO);
         UserOrganizationService.addStation(station, organization);
 
@@ -106,10 +108,9 @@ public class OrganizationStationService {
                 .orElseThrow(StationNotFoundException::new);
     }
 
-    private Organization findOrganizationIn(List<Organization> organizationList, Long id){
-        return organizationList
-                .stream().filter(org -> org.getId().equals(id))
-                .findFirst()
+    private Long findRequestOrganizationIn(List<Long> organizationIdsList, Long id){
+        return organizationIdsList.stream()
+                .filter(orgId -> orgId.equals(id)).findFirst()
                 .orElseThrow(OrganizationNotFoundException::new);
     }
 

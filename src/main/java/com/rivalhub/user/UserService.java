@@ -11,7 +11,6 @@ import com.rivalhub.security.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -50,13 +49,13 @@ public class UserService {
     }
 
     List<OrganizationDTO> findOrganizationsByRequestUser() {
-        var requestUser = SecurityUtils.getUserFromSecurityContext();
-        List<Organization> organizationList = requestUser.getOrganizationList();
-
-        return organizationList
-                .stream().map(organization -> new OrganizationDTO(organization.getId(),
-                        organization.getName(), organization.getImageUrl()))
-                .collect(Collectors.toList());
+        return userRepository.getOrganizationsByUserId(SecurityUtils.getUserFromSecurityContext().getId())
+                .stream().map(u -> OrganizationDTO.builder()
+                        .id(u.get(0, Long.class))
+                        .name(u.get(1, String.class))
+                        .imageUrl(u.get(2, String.class))
+                        .build())
+                        .collect(Collectors.toList());
     }
 
     @Transactional

@@ -7,6 +7,7 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.reservation.Reservation;
 import com.rivalhub.user.UserData;
+import com.rivalhub.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -22,18 +23,18 @@ public class UserProfileHelper {
     private final RepositoryManager repositoryManager;
     private final AutoMapper autoMapper;
     Set<ReservationInProfileDTO> getReservationsInSharedOrganizations(UserData loggedUser, UserData viewedUser) {
-        List<Organization> sharedOrganizations = getSharedOrganizationList(loggedUser, viewedUser);
+        List<Long> sharedOrganizationIds = getSharedOrganizationList(loggedUser, viewedUser);
 
         Set<ReservationInProfileDTO> reservationDTOs = new HashSet<>();
 
-        for (Organization sharedOrganization : sharedOrganizations) {
-            List<ReservationInProfileDTO> reservations = repositoryManager
-                    .reservationsByOrganizationIdAndUserId(sharedOrganization.getId(), viewedUser.getId())
-                    .stream().map(setReservationInProfileDTO(sharedOrganization))
-                    .toList();
-
-            reservationDTOs.addAll(reservations);
-        }
+//        for (Long sharedOrganizationId : sharedOrganizationIds) {
+//            List<ReservationInProfileDTO> reservations = repositoryManager
+//                    .reservationsByOrganizationIdAndUserId(sharedOrganizationId, viewedUser.getId())
+//                    .stream().map(setReservationInProfileDTO(sharedOrganization))
+//                    .toList();
+//
+//            reservationDTOs.addAll(reservations);
+//        }
         return reservationDTOs;
     }
 
@@ -46,18 +47,18 @@ public class UserProfileHelper {
     }
 
     Set<EventProfileDTO> getEventsInSharedOrganizations(UserData loggedUser, UserData viewedUser) {
-        List<Organization> sharedOrganizations = getSharedOrganizationList(loggedUser, viewedUser);
+//        List<Organization> sharedOrganizations = getSharedOrganizationList(loggedUser, viewedUser);
 
         Set<EventProfileDTO> eventList = new HashSet<>();
 
-        for (Organization sharedOrganization : sharedOrganizations) {
-            Set<EventProfileDTO> events =
-                    repositoryManager.eventsByOrganizationIdAndUserId(sharedOrganization.getId(), viewedUser.getId())
-                            .stream().map(setEventProfileDTO())
-                            .collect(Collectors.toSet());
-
-            eventList.addAll(events);
-        }
+//        for (Organization sharedOrganization : sharedOrganizations) {
+//            Set<EventProfileDTO> events =
+//                    repositoryManager.eventsByOrganizationIdAndUserId(sharedOrganization.getId(), viewedUser.getId())
+//                            .stream().map(setEventProfileDTO())
+//                            .collect(Collectors.toSet());
+//
+//            eventList.addAll(events);
+//        }
 
         return eventList;
     }
@@ -70,9 +71,7 @@ public class UserProfileHelper {
         };
     }
 
-    private static List<Organization> getSharedOrganizationList(UserData loggedUser, UserData viewedUser) {
-        return loggedUser.getOrganizationList()
-                .stream().filter(viewedUser.getOrganizationList()::contains)
-                .toList();
+    private List<Long> getSharedOrganizationList(UserData loggedUser, UserData viewedUser) {
+        return repositoryManager.getSharedOrganizationIds(loggedUser.getId(), viewedUser.getId());
     }
 }

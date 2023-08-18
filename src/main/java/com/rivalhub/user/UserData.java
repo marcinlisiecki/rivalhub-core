@@ -49,9 +49,9 @@ public class UserData implements UserDetails {
     //@Length(min=8,message = ErrorMessages.PASSWORD_IS_TOO_SHORT)
     private String password;
 
-    @ManyToMany(mappedBy = "userList", fetch = FetchType.EAGER)
-    @JsonBackReference("user-organizations")
-    private List<Organization> organizationList = new ArrayList<>();
+//    @ManyToMany(mappedBy = "userList", fetch = FetchType.LAZY)
+//    @JsonBackReference
+//    private List<Organization> organizationList = new ArrayList<>();
 
 //    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, mappedBy = "userData")
 //    @JsonBackReference("user-reservations")

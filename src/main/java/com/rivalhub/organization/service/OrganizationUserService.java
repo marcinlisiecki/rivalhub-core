@@ -68,7 +68,7 @@ public class OrganizationUserService {
         var organization = organizationRepository.findById(id)
                 .orElseThrow(OrganizationNotFoundException::new);
 
-        OrganizationSettingsValidator.userIsInOrganization(organization, requestUser);
+//        OrganizationSettingsValidator.userIsInOrganization(organization, requestUser);
         return userRepository.getAllUsersByOrganizationId(id)
                 .stream().map(u -> new UserDetailsDto(u.get(0, Long.class),
                                                       u.get(1, String.class),

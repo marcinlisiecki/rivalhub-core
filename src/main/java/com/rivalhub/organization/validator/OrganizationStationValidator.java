@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 public class OrganizationStationValidator {
     private final RepositoryManager repositoryManager;
 
-    public Organization checkIfViewStationIsPossible(Long organizationId, UserData user){
-        Organization organization = organizationExists(organizationId);
-        return OrganizationSettingsValidator.userIsInOrganization(organization, user);
-    }
+//    public Organization checkIfViewStationIsPossible(Long organizationId, UserData user){
+//        Organization organization = organizationExists(organizationId);
+//        return OrganizationSettingsValidator.userIsInOrganization(organization, user);
+//    }
 
     private Organization organizationExists(Long id) {
         return repositoryManager.findOrganizationById(id);
@@ -22,7 +22,7 @@ public class OrganizationStationValidator {
 
     public void checkIfUpdateStationIsPossible(Long organizationId, UserData user) {
         Organization organization = organizationExists(organizationId);
-        OrganizationSettingsValidator.userIsInOrganization(organization, user);
+//        OrganizationSettingsValidator.userIsInOrganization(organization, user);
         OrganizationSettingsValidator.checkIfUserIsAdmin(user, organization);
     }
 }
