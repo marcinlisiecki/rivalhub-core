@@ -1,7 +1,6 @@
 package com.rivalhub.event.tablefootball;
 
 import com.rivalhub.event.Event;
-import com.rivalhub.event.pullups.match.PullUpMatch;
 import com.rivalhub.event.tablefootball.match.TableFootballMatch;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;

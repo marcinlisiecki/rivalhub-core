@@ -2,7 +2,6 @@ package com.rivalhub.event.pullups;
 
 import com.rivalhub.event.EventDto;
 import com.rivalhub.event.EventUtils;
-import com.rivalhub.event.darts.DartEvent;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.service.OrganizationReservationService;

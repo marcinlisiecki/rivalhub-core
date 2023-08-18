@@ -1,6 +1,5 @@
 package com.rivalhub.event.tablefootball;
 
-import com.rivalhub.event.pingpong.PingPongEvent;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 

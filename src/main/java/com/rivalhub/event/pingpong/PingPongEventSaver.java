@@ -1,6 +1,5 @@
 package com.rivalhub.event.pingpong;
 
-import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.event.EventUtils;
 import com.rivalhub.organization.Organization;
@@ -8,14 +7,8 @@ import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.service.OrganizationReservationService;
 import com.rivalhub.reservation.AddReservationDTO;
 import com.rivalhub.reservation.Reservation;
-import com.rivalhub.user.UserAlreadyExistsException;
-import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.function.Predicate;
 
 @Component
 @RequiredArgsConstructor
