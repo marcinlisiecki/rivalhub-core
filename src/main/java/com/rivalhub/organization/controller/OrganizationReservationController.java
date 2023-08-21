@@ -14,7 +14,7 @@ public class OrganizationReservationController {
 
     private final OrganizationReservationService organizationReservationService;
 
-    @PostMapping("reservations")
+    @PostMapping("/reservations")
     private ResponseEntity<?> addReservations(@RequestBody AddReservationDTO reservationDTO){
         ReservationDTO reservation = organizationReservationService.addReservation(reservationDTO);
         return ResponseEntity.ok(reservation);
