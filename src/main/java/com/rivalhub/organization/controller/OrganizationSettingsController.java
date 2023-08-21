@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -36,8 +38,8 @@ public class OrganizationSettingsController {
     @DeleteMapping("{organizationId}/admin/event-types")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     private void removeEventType(@PathVariable Long organizationId,
-                                      @RequestParam("type") EventType eventType){
-        organizationSettingsService.removeEventType(organizationId, eventType);
+                                      @RequestParam List<EventType> eventTypes){
+        organizationSettingsService.removeEventType(organizationId, eventTypes);
     }
 
     @GetMapping("{organizationId}/event-types")
@@ -47,8 +49,8 @@ public class OrganizationSettingsController {
 
     @PostMapping("{organizationId}/admin/event-types")
     private ResponseEntity<?> addEventType(@PathVariable Long organizationId,
-                                   @RequestParam("type") EventType eventType){
-        return ResponseEntity.ok(organizationSettingsService.addEventType(organizationId, eventType));
+                                   @RequestParam List<EventType> eventTypes){
+        return ResponseEntity.ok(organizationSettingsService.addEventType(organizationId, eventTypes));
     }
 
     @GetMapping("/event-types")
