@@ -19,10 +19,4 @@ public class OrganizationReservationController {
         ReservationDTO reservation = organizationReservationService.addReservation(reservationDTO);
         return ResponseEntity.ok(reservation);
     }
-
-    @GetMapping("{id}/reservations")
-    private ResponseEntity<?> viewReservations(@PathVariable Long id){
-        return ResponseEntity.ok(organizationReservationService.viewReservations(id));
-    }
-
 }

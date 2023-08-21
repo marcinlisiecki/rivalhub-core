@@ -27,9 +27,9 @@ public class OrganizationUserController {
         return ResponseEntity.ok(organizationUserService.addUser(id, hash));
     }
 
-    @GetMapping("/{id}/invite/{email}")
-    private ResponseEntity<OrganizationDTO> addUserThroughEmail(@PathVariable Long id, @PathVariable String email){
-        return ResponseEntity.ok(organizationUserService.addUserThroughEmail(id, email));
+    @GetMapping("/{id}/invite/{emailUserToAdd}")
+    private ResponseEntity<OrganizationDTO> addUserThroughEmail(@PathVariable Long id, @PathVariable String emailUserToAdd){
+        return ResponseEntity.ok(organizationUserService.addUserThroughEmail(id, emailUserToAdd));
     }
 
     @GetMapping("/{id}/users/all")
@@ -42,5 +42,4 @@ public class OrganizationUserController {
     private void deleteUserFromOrganization(@PathVariable Long organizationId, @PathVariable Long userId){
         organizationUserService.deleteUserFromOrganization(organizationId, userId);
     }
-
 }

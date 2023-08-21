@@ -1,5 +1,6 @@
 package com.rivalhub.user;
 
+import com.rivalhub.organization.Organization;
 import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
@@ -25,4 +26,23 @@ public interface UserRepository extends CrudRepository<UserData, Long>, PagingAn
             "   JOIN ORGANIZATION_USERS ON USER_DATA.USER_ID=ORGANIZATION_USERS.USER_ID\n" +
             "   WHERE ORGANIZATION_ID=?1", nativeQuery = true)
     Set<Tuple> getAllUsersByOrganizationId(Long id);
+
+
+    @Query(value = "SELECT ORGANIZATION.ORGANIZATION_ID, ORGANIZATION.NAME, ORGANIZATION.IMAGE_URL FROM ORGANIZATION\n" +
+            "LEFT JOIN ORGANIZATION_USERS ON ORGANIZATION.ORGANIZATION_ID=ORGANIZATION_USERS.ORGANIZATION_ID\n" +
+            "LEFT JOIN USER_DATA ON ORGANIZATION_USERS.USER_ID = USER_DATA.USER_ID\n" +
+            "WHERE USER_DATA.USER_ID = ?1", nativeQuery = true)
+    Set<Tuple> getOrganizationsByUserId(Long id);
+
+    @Query(value = "SELECT ORGANIZATION_ADMIN_USERS.ORGANIZATION_ORGANIZATION_ID FROM ORGANIZATION\n" +
+            "JOIN ORGANIZATION_ADMIN_USERS ON ORGANIZATION_ADMIN_USERS.ORGANIZATION_ORGANIZATION_ID = ORGANIZATION.ORGANIZATION_ID\n" +
+            "WHERE ORGANIZATION_ADMIN_USERS.ADMIN_USERS_USER_ID= ?1", nativeQuery = true)
+    Set<Tuple> getOrganizationIdsWhereUserIsAdmin(Long id);
+
+
+    @Query(value = "SELECT DISTINCT O1.ORGANIZATION_ID\n" +
+            "FROM ORGANIZATION_USERS O1\n" +
+            "JOIN ORGANIZATION_USERS O2 ON O1.ORGANIZATION_ID = O2.ORGANIZATION_ID\n" +
+            "WHERE O1.USER_ID = ?1 AND O2.USER_ID = ?2", nativeQuery = true)
+    Set<Tuple> getSharedOrganizationsIds(Long requestUserId, Long userId);
 }

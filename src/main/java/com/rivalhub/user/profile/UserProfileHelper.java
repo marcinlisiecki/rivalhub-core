@@ -4,7 +4,7 @@ package com.rivalhub.user.profile;
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.organization.Organization;
-import com.rivalhub.organization.RepositoryManager;
+import com.rivalhub.organization.OrganizationRepoManager;
 import com.rivalhub.reservation.Reservation;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
@@ -14,20 +14,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class UserProfileHelper {
-    private final RepositoryManager repositoryManager;
+    private final OrganizationRepoManager organizationRepoManager;
     private final AutoMapper autoMapper;
     Set<ReservationInProfileDTO> getReservationsInSharedOrganizations(UserData loggedUser, UserData viewedUser) {
-        List<Organization> sharedOrganizations = getSharedOrganizationList(loggedUser, viewedUser);
+        List<Long> sharedOrganizationIds = getSharedOrganizationList(loggedUser, viewedUser);
 
+        List<Organization> sharedOrganizations = organizationRepoManager.findAllOrganizationsByIds(sharedOrganizationIds);
         Set<ReservationInProfileDTO> reservationDTOs = new HashSet<>();
 
         for (Organization sharedOrganization : sharedOrganizations) {
-            List<ReservationInProfileDTO> reservations = repositoryManager
+            List<ReservationInProfileDTO> reservations = organizationRepoManager
                     .reservationsByOrganizationIdAndUserId(sharedOrganization.getId(), viewedUser.getId())
                     .stream().map(setReservationInProfileDTO(sharedOrganization))
                     .toList();
@@ -37,26 +37,18 @@ public class UserProfileHelper {
         return reservationDTOs;
     }
 
-    private Function<Reservation, ReservationInProfileDTO> setReservationInProfileDTO(Organization sharedOrganization) {
-        return reservation -> {
-            ReservationInProfileDTO reservationDTO = autoMapper.mapToShowReservationInProfileDTO(reservation);
-            reservationDTO.setOrganization(autoMapper.mapToOrganizationDto(sharedOrganization));
-            return reservationDTO;
-        };
-    }
-
     Set<EventProfileDTO> getEventsInSharedOrganizations(UserData loggedUser, UserData viewedUser) {
-        List<Organization> sharedOrganizations = getSharedOrganizationList(loggedUser, viewedUser);
+        List<Long> sharedOrganizationIds = getSharedOrganizationList(loggedUser, viewedUser);
+        List<Organization> sharedOrganizations = organizationRepoManager.findAllOrganizationsByIds(sharedOrganizationIds);
 
         Set<EventProfileDTO> eventList = new HashSet<>();
 
         for (Organization sharedOrganization : sharedOrganizations) {
-            Set<EventProfileDTO> events =
-                    repositoryManager.eventsByOrganizationIdAndUserId(sharedOrganization.getId(), viewedUser.getId())
-                            .stream().map(setEventProfileDTO())
-                            .collect(Collectors.toSet());
+            Set<PingPongEvent> events = organizationRepoManager.
+                    eventsWithParticipantsByOrganizationIdAndUserId(sharedOrganization, viewedUser.getId());
 
-            eventList.addAll(events);
+            List<EventProfileDTO> eventProfileDTOStream = events.stream().map(setEventProfileDTO()).toList();
+            eventList.addAll(eventProfileDTOStream);
         }
 
         return eventList;
@@ -70,9 +62,15 @@ public class UserProfileHelper {
         };
     }
 
-    private static List<Organization> getSharedOrganizationList(UserData loggedUser, UserData viewedUser) {
-        return loggedUser.getOrganizationList()
-                .stream().filter(viewedUser.getOrganizationList()::contains)
-                .toList();
+    private Function<Reservation, ReservationInProfileDTO> setReservationInProfileDTO(Organization sharedOrganization) {
+        return reservation -> {
+            ReservationInProfileDTO reservationDTO = autoMapper.mapToShowReservationInProfileDTO(reservation);
+            reservationDTO.setOrganization(autoMapper.mapToOrganizationDto(sharedOrganization));
+            return reservationDTO;
+        };
+    }
+
+    private List<Long> getSharedOrganizationList(UserData loggedUser, UserData viewedUser) {
+        return organizationRepoManager.getSharedOrganizationIds(loggedUser.getId(), viewedUser.getId());
     }
 }
