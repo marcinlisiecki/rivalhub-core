@@ -17,7 +17,6 @@ public class DartEventSaver {
     private final OrganizationRepository organizationRepository;
 
     DartEvent saveEvent(DartEvent dartEvent, Organization organization, EventDto eventDto) {
-        //TODO Narazie można dodać tylko użytkowników z danej organizacji!
         AddReservationDTO addReservationDTO = EventUtils.createAddReservationDTO(eventDto, organization);
         Reservation reservation = reservationService.addReservationForEvent(addReservationDTO, organization);
         EventUtils.setBasicInfo(dartEvent,organization,eventDto,reservation);

@@ -4,7 +4,7 @@ package com.rivalhub.event.pingpong;
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.event.EventNotFoundException;
-import com.rivalhub.event.EventServiceInterface;
+import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
 import com.rivalhub.organization.OrganizationRepoManager;
 import com.rivalhub.organization.OrganizationRepository;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
-public class PingPongService implements EventServiceInterface {
+public class PingPongService implements EventService {
 
     private final AutoMapper autoMapper;
     private final OrganizationRepository organizationRepository;

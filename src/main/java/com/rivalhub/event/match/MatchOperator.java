@@ -1,7 +1,6 @@
 package com.rivalhub.event.match;
 
 import com.rivalhub.common.exception.InvalidPathParamException;
-import com.rivalhub.event.EventServiceInterface;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
