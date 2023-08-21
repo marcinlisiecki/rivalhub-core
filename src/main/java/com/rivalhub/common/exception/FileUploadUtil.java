@@ -42,8 +42,9 @@ public class FileUploadUtil {
     }
 
     public String saveOrganizationImage(MultipartFile multipartFile, Organization organization){
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()
-                .replace(" ", "")));
+        String fileName = "avatar" + multipartFile.getOriginalFilename()
+                .substring(multipartFile.getOriginalFilename().lastIndexOf("."));
+
         String uploadDir = organizationImgCatalog + organization.getId();
         try {
             saveFile(uploadDir, fileName, multipartFile);
