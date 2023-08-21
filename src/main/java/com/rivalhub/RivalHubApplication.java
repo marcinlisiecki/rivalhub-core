@@ -48,7 +48,7 @@ public class RivalHubApplication {
 //		UserOrganizationService.addAdminUser(userNew, organization);
 ////		UserOrganizationService.addUser(userNew, organization);
 //
-//		for (long i = 1; i < 50; i++) {
+//		for (long i = 1; i < 20; i++) {
 //			UserData user = new UserData();
 //			user.setName("User " + i);
 //			user.setEmail(i + "@gmail.com");
@@ -57,19 +57,5 @@ public class RivalHubApplication {
 //			userRepository.save(user);
 //		}
 //		organizationRepository.save(organization);
-
-//		var x = organization.getAdminUsers();
-//		for (var user : x) {
-//			System.out.println(user.getName());
-//		}
-//		organization.getAdminUsers().remove(userAdmin);
-//		organizationRepository.save(organization);
-//		for (var user : x) {
-//			System.out.println(user.getName());
-//		}
-//		var admins = organizationUserService.findAdminUsersIdsByOrganization(1L);
-//		for (var admin: admins) {
-//			System.out.println(admin);
-//		}
 	}
 }
