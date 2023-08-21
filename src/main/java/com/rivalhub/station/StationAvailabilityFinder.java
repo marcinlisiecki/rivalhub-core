@@ -89,7 +89,6 @@ public class StationAvailabilityFinder {
             if (ReservationValidator.checkIfReservationIsPossible(
                     reservationDTO,
                     organization,
-                    user,
                     List.of(station))) {
 
                 availableStations.add(station);

@@ -6,17 +6,13 @@ import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.event.pingpong.PingPongEventRepository;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
-import com.rivalhub.organization.RepositoryManager;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
-import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 @Service
 @RequiredArgsConstructor

@@ -3,6 +3,7 @@ package com.rivalhub.event.pingpong;
 import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.organization.Organization;
+import com.rivalhub.organization.OrganizationRepoManager;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.service.OrganizationReservationService;
 import com.rivalhub.reservation.AddReservationDTO;

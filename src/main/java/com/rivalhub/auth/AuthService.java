@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
@@ -31,19 +32,16 @@ public class AuthService {
     private final JwtService jwtService;
 
     public JwtTokenDto login(LoginRequestDto loginRequestDto) {
+        Authentication authenticate;
         try {
-            authenticationManager.authenticate(
+            authenticate = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequestDto.getEmail(),
                             loginRequestDto.getPassword()));
-
         } catch (AuthenticationException e) {
             throw new BadCredentialsException(ErrorMessages.BAD_CREDENTIALS);
         }
-
-        UserData userData = userRepository
-                .findByEmail(loginRequestDto.getEmail())
-                .orElseThrow(UserNotFoundException::new);
+        var userData = (UserData) authenticate.getPrincipal();
 
         String jwtToken = jwtService.generateToken(userData, generateExtraClaims(userData));
         String refreshToken = jwtService.generateRefresh(userData);
@@ -97,10 +95,10 @@ public class AuthService {
         extraClaims.put("id", userData.getId());
         extraClaims.put("name", userData.getName());
 
-        List<Organization> organizations = userData.getOrganizationList()
-                .stream().filter(organization -> organization.getAdminUsers().contains(userData)).toList();
+        List<Long> organizationIdsWhereUserIsAdmin = userRepository.getOrganizationIdsWhereUserIsAdmin(userData.getId())
+                .stream().map(id -> id.get(0, Long.class)).toList();
 
-        extraClaims.put("adminOrganizationIds", organizations.stream().map(Organization::getId).toList());
+        extraClaims.put("adminOrganizationIds", organizationIdsWhereUserIsAdmin);
 
         if (userData.getActivationTime() == null) {
             extraClaims.put("activationTime", null);

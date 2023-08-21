@@ -21,7 +21,7 @@ public class PingPongController {
     private ResponseEntity<?> createPingPongMatch(@PathVariable Long organizationId,
                                                   @PathVariable Long eventId,
                                                   @RequestBody AddPingPongMatchDTO pingPongMatchDTO) {
-        return ResponseEntity.ok(pingPongMatchService.createPingPongMatch(eventId, organizationId, pingPongMatchDTO));
+        return ResponseEntity.ok(pingPongMatchService.createPingPongMatch(organizationId, eventId, pingPongMatchDTO));
     }
 
     @PostMapping("/{matchId}")

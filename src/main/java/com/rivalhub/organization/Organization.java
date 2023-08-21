@@ -41,7 +41,7 @@ public class Organization {
     @CreationTimestamp
     private LocalDateTime addedDate;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JsonManagedReference("user-organizations")
     @JoinTable(name = "organization_users",
             joinColumns = @JoinColumn(name = "organization_id", referencedColumnName = "organization_id"),
@@ -50,7 +50,7 @@ public class Organization {
     private List<UserData> userList = new ArrayList<>();
 
     @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
-            orphanRemoval = true, fetch = FetchType.EAGER)
+            orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinTable(
             name = "organization_station_list",
             joinColumns = @JoinColumn(
@@ -69,12 +69,12 @@ public class Organization {
     @CollectionTable
     private Set<EventType> eventTypeInOrganization = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     private Set<UserData> adminUsers = new HashSet<>();
 
     private Boolean onlyAdminCanSeeInvitationLink = true;
 
-    @OneToMany(fetch = FetchType.EAGER,
+    @OneToMany(fetch = FetchType.LAZY,
             cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     List<PingPongEvent> pingPongEvents = new ArrayList<>();
 
