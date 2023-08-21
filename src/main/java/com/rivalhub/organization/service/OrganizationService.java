@@ -82,7 +82,6 @@ public class OrganizationService {
 
     private void setOrganizationSettings(UserData user, Organization organization){
         UserOrganizationService.addAdminUser(user, organization);
-        UserOrganizationService.addAllEventTypes(organization);
         createInvitation(organization.getId());
     }
 
