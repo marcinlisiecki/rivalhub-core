@@ -85,6 +85,32 @@ public class OrganizationUserService {
                 .orElseThrow(UserNotFoundException::new);
 
         UserOrganizationService.deleteUserFrom(organization, userToDelete);
+
         organizationRepository.save(organization);
+    }
+
+    public List<UserDetailsDto> findUsersByNamePhrase(Long id, String namePhrase) {
+        return userRepository.findByNamePhraseAndOrganizationId(id, "%" + namePhrase + "%")
+                .stream().map(u -> new UserDetailsDto(u.get(0, Long.class),
+                        u.get(1, String.class),
+                        u.get(2, String.class),
+                        u.get(3, String.class),
+                        u.get(4, LocalDateTime.class)))
+                .collect(Collectors.toList());
+    }
+
+    public List<UserDetailsDto> findAdminUsersByOrganization(Long id) {
+        var organization = organizationRepository.findById(id)
+                .orElseThrow(OrganizationNotFoundException::new);
+        var adminUsers = organization.getAdminUsers();
+        return adminUsers
+                .stream().map(u -> new UserDetailsDto(
+                        u.getId(),
+                        u.getName(),
+                        u.getEmail(),
+                        u.getProfilePictureUrl(),
+                        u.getActivationTime()
+                ))
+                .collect(Collectors.toList());
     }
 }

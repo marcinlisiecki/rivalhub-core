@@ -15,10 +15,15 @@ import org.springframework.web.bind.annotation.*;
 public class OrganizationSettingsController {
     private final OrganizationSettingsService organizationSettingsService;
 
-
     @PostMapping("{organizationId}/admin/{userId}")
     private ResponseEntity<?> addAdmin(@PathVariable Long organizationId, @PathVariable Long userId){
         return ResponseEntity.ok(organizationSettingsService.setAdmin(organizationId, userId));
+    }
+
+    @DeleteMapping("{organizationId}/admin/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void deleteAdmin(@PathVariable Long organizationId, @PathVariable Long userId) {
+        organizationSettingsService.removeAdmin(organizationId, userId);
     }
 
     @PostMapping("{organizationId}/admin")

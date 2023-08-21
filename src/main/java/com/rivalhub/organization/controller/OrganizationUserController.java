@@ -42,4 +42,14 @@ public class OrganizationUserController {
     private void deleteUserFromOrganization(@PathVariable Long organizationId, @PathVariable Long userId){
         organizationUserService.deleteUserFromOrganization(organizationId, userId);
     }
+
+    @GetMapping("/{id}/users/search")
+    private ResponseEntity<?> viewUsersByNamePhrase(@PathVariable Long id, @RequestParam String namePhrase) {
+        return ResponseEntity.ok(organizationUserService.findUsersByNamePhrase(id, namePhrase));
+    }
+
+    @GetMapping("/{id}/users/admins")
+    private ResponseEntity<?> viewAdminIds(@PathVariable Long id) {
+        return ResponseEntity.ok(organizationUserService.findAdminUsersByOrganization(id));
+    }
 }

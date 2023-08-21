@@ -40,6 +40,17 @@ public class OrganizationSettingsService {
         return autoMapper.mapToUserDetails(user);
     }
 
+    public void removeAdmin(Long organizationId, Long userId) {
+        final var organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+
+        OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
+        UserData user = findUserInOrganization(organization, userId);
+        organization.getAdminUsers().remove(user);
+        organizationRepository.save(organization);
+    }
+
 
     public void removeEventType(Long organizationId, EventType eventType) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
