@@ -26,10 +26,11 @@ public class OrganizationService {
     private final MergePatcher<OrganizationDTO> organizationMergePatcher;
     private final FileUploadUtil fileUploadUtil;
     private final InvitationHelper invitationHelper;
+    private final OrganizationRepoManager organizationRepoManager;
 
-    public OrganizationDTO saveOrganization(String organizationName, MultipartFile multipartFile){
+    public OrganizationDTO saveOrganization(String organizationName, String color, MultipartFile multipartFile){
         Organization organizationToSave = autoMapper.mapToOrganization(
-                new OrganizationDTO(organizationName));
+                new OrganizationDTO(organizationName, color));
         var savedOrganization = organizationRepository.save(organizationToSave);
 
         var requestUser = SecurityUtils.getUserFromSecurityContext();
@@ -47,8 +48,7 @@ public class OrganizationService {
 
     public void deleteOrganization(Long id) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
-        var organization = organizationRepository.findById(id)
-                .orElseThrow(OrganizationNotFoundException::new);
+        var organization = organizationRepoManager.getOrganizationWithUsersById(id);
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
         organizationRepository.delete(organization);

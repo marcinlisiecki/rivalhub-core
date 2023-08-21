@@ -1,6 +1,7 @@
 package com.rivalhub.common;
 
 import com.rivalhub.common.dto.ErrorMessageDto;
+import com.rivalhub.common.exception.InvalidPathParamException;
 import com.rivalhub.email.EmailNotSentException;
 import com.rivalhub.event.MatchNotFoundException;
 import com.rivalhub.organization.exception.*;
@@ -28,7 +29,9 @@ public class ExceptionHandler {
             EmailNotSentException.class,
             UserNotFoundException.class,
             MatchNotFoundException.class,
-            IOException.class
+            IOException.class,
+            MatchNotFoundException.class,
+            InvalidPathParamException.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessageDto handleExceptions(Exception e) {

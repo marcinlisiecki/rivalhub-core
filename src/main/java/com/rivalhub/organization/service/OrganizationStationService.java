@@ -8,6 +8,7 @@ import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.common.MergePatcher;
 import com.rivalhub.event.EventType;
 import com.rivalhub.organization.Organization;
+import com.rivalhub.organization.OrganizationRepoManager;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
@@ -15,7 +16,6 @@ import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.station.*;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -31,13 +31,16 @@ public class OrganizationStationService {
     private final OrganizationRepository organizationRepository;
     private final AutoMapper autoMapper;
     private final MergePatcher<StationDTO> stationMergePatcher;
+    private final OrganizationRepoManager organizationRepoManager;
 
     public StationDTO addStation(StationDTO stationDTO, Long id) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
-        var organizationList = requestUser.getOrganizationList();
+        var organizationIdsListWhereUserIsAdmin = organizationRepoManager.getOrganizationIdsWhereUserIsAdmin(requestUser);
 
-        var organization = findOrganizationIn(organizationList, id);
-        OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
+        var organizationId = findRequestOrganizationIn(organizationIdsListWhereUserIsAdmin, id);
+
+        var organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
 
         Station station = autoMapper.mapToStation(stationDTO);
         UserOrganizationService.addStation(station, organization);
@@ -51,12 +54,13 @@ public class OrganizationStationService {
     public List<Station> viewStations(Long organizationId, String start, String end, EventType type,
                                boolean onlyAvailable, boolean showInactive) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
-        final var organization = organizationRepository.findById(organizationId)
+
+        var organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
         if (onlyAvailable && start != null && end != null)
             return StationAvailabilityFinder
-                    .getAvailableStations(organization, start, end, type, requestUser);
+                    .getAvailableStations(organizationRepoManager.fetchReservationsFor(organization), start, end, type, requestUser);
 
         if (showInactive) return StationAvailabilityFinder.filterForTypeIn(organization.getStationList(), type);
         return StationAvailabilityFinder.filterForActiveStationsAndTypeIn(organization, type);
@@ -64,16 +68,14 @@ public class OrganizationStationService {
 
     public List<EventTypeStationsDto> getEventStations(Long organizationId, String start, String end, EventType type) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
-        var organization = organizationRepository.findById(organizationId)
-                .orElseThrow(OrganizationNotFoundException::new);
+        var organization = organizationRepoManager.getOrganizationWithStationsAndReservationsById(organizationId);
 
         return getEventTypeStationsByTime(start, end, type, requestUser, organization);
     }
 
     public void updateStation(Long organizationId, Long stationId, JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
-        var organization = organizationRepository.findById(organizationId)
-                .orElseThrow(OrganizationNotFoundException::new);
+        var organization = organizationRepoManager.getOrganizationWithStationsById(organizationId);
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
 
@@ -86,8 +88,7 @@ public class OrganizationStationService {
 
     public void deleteStation(Long stationId, Long organizationId) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
-        var organization = organizationRepository.findById(organizationId)
-                .orElseThrow(OrganizationNotFoundException::new);
+        var organization = organizationRepoManager.getOrganizationWithStationsById(organizationId);
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
         deleteStationIn(organization, stationId);
@@ -106,10 +107,9 @@ public class OrganizationStationService {
                 .orElseThrow(StationNotFoundException::new);
     }
 
-    private Organization findOrganizationIn(List<Organization> organizationList, Long id){
-        return organizationList
-                .stream().filter(org -> org.getId().equals(id))
-                .findFirst()
+    private Long findRequestOrganizationIn(List<Long> organizationIdsList, Long id){
+        return organizationIdsList.stream()
+                .filter(orgId -> orgId.equals(id)).findFirst()
                 .orElseThrow(OrganizationNotFoundException::new);
     }
 

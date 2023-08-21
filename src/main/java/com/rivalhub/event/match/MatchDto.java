@@ -1,11 +1,11 @@
-package com.rivalhub.event.pingpong.match;
+package com.rivalhub.event.match;
 
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class AddPingPongMatchDTO {
+public class MatchDto {
     private Long id;
     private List<Long> team1Ids;
     private List<Long> team2Ids;

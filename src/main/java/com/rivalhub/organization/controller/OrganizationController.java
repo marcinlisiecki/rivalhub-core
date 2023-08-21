@@ -28,9 +28,9 @@ public class OrganizationController {
 
     @PostMapping
     private ResponseEntity<OrganizationDTO> addOrganization(@RequestParam("organization") String organizationJson,
-                                                            @RequestParam(name = "thumbnail",
-                                                            required = false) MultipartFile multipartFile) {
-        OrganizationDTO savedOrganization = organizationService.saveOrganization(organizationJson, multipartFile);
+                                                            @RequestParam("color") String color,
+                                                            @RequestParam(name = "thumbnail", required = false) MultipartFile multipartFile) {
+        OrganizationDTO savedOrganization = organizationService.saveOrganization(organizationJson, color, multipartFile);
 
         URI savedOrganizationUri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -51,6 +51,7 @@ public class OrganizationController {
     private void deleteOrganization(@PathVariable Long id) {
         organizationService.deleteOrganization(id);
     }
+
 
     @PostMapping("/{id}/invitation")
     private ResponseEntity<?> createInvitation(@PathVariable Long id){

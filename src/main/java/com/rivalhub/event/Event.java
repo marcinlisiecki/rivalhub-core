@@ -23,7 +23,7 @@ public class Event {
     private String name;
     private String description;
 
-    @OneToOne(cascade = CascadeType.REMOVE)
+    @OneToOne(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     @JsonManagedReference
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
@@ -39,7 +39,4 @@ public class Event {
 
     @ManyToMany
     private List<UserData> participants = new ArrayList<>();
-
-//    @ManyToOne
-//    private Organization organization;
 }

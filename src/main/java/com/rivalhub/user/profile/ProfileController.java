@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 @RequiredArgsConstructor
-public class ShowProfileController {
+public class ProfileController {
     private final ProfileService profileService;
 
     @GetMapping("/users/{id}/reservations")

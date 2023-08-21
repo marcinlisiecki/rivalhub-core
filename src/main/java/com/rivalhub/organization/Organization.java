@@ -1,7 +1,13 @@
 package com.rivalhub.organization;
 
 import com.rivalhub.event.EventType;
+import com.rivalhub.event.billiards.BilliardsEvent;
+import com.rivalhub.event.darts.DartEvent;
+
 import com.rivalhub.event.pingpong.PingPongEvent;
+import com.rivalhub.event.pullups.PullUpEvent;
+import com.rivalhub.event.running.RunningEvent;
+import com.rivalhub.event.tablefootball.TableFootballEvent;
 import com.rivalhub.station.Station;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.common.ErrorMessages;
@@ -41,7 +47,7 @@ public class Organization {
     @CreationTimestamp
     private LocalDateTime addedDate;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JsonManagedReference("user-organizations")
     @JoinTable(name = "organization_users",
             joinColumns = @JoinColumn(name = "organization_id", referencedColumnName = "organization_id"),
@@ -50,7 +56,7 @@ public class Organization {
     private List<UserData> userList = new ArrayList<>();
 
     @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
-            orphanRemoval = true, fetch = FetchType.EAGER)
+            orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinTable(
             name = "organization_station_list",
             joinColumns = @JoinColumn(
@@ -69,15 +75,37 @@ public class Organization {
     @CollectionTable
     private Set<EventType> eventTypeInOrganization = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     private Set<UserData> adminUsers = new HashSet<>();
 
     private Boolean onlyAdminCanSeeInvitationLink = true;
 
-    @OneToMany(fetch = FetchType.EAGER,
+    @OneToMany(fetch = FetchType.LAZY,
             cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     List<PingPongEvent> pingPongEvents = new ArrayList<>();
 
+    private String colorForDefaultImage;
+
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    List<BilliardsEvent> billiardsEvents = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    List<RunningEvent> runningEvents = new ArrayList<>();
+
+
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    List<DartEvent> dartEvents = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    List<PullUpEvent> pullUpsEvents = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    List<TableFootballEvent> tableFootballEvents = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
