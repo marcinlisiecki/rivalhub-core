@@ -9,4 +9,4 @@ import java.util.Set;
 @Repository
 public interface PingPongEventRepository extends CrudRepository<PingPongEvent,Long> {
 
-}
+   }

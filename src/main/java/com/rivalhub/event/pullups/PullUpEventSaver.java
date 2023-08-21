@@ -1,9 +1,8 @@
-package com.rivalhub.event.pingpong;
+package com.rivalhub.event.pullups;
 
 import com.rivalhub.event.EventDto;
 import com.rivalhub.event.EventUtils;
 import com.rivalhub.organization.Organization;
-import com.rivalhub.organization.OrganizationRepoManager;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.service.OrganizationReservationService;
 import com.rivalhub.reservation.AddReservationDTO;
@@ -11,26 +10,22 @@ import com.rivalhub.reservation.Reservation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-@Component
 @RequiredArgsConstructor
-public class PingPongEventSaver {
-    private final OrganizationReservationService reservationService;
+@Component
+public class PullUpEventSaver {
     private final OrganizationRepository organizationRepository;
-
-    PingPongEvent saveEvent(PingPongEvent pingPongEvent, Organization organization, EventDto eventDto) {
+    private final OrganizationReservationService reservationService;
+    PullUpEvent saveEvent(PullUpEvent pullUpEvent, Organization organization, EventDto eventDto) {
         //TODO Narazie można dodać tylko użytkowników z danej organizacji!
         AddReservationDTO addReservationDTO = EventUtils.createAddReservationDTO(eventDto, organization);
         Reservation reservation = reservationService.addReservationForEvent(addReservationDTO, organization);
-        EventUtils.setBasicInfo(pingPongEvent,organization,eventDto,reservation);
-        addPingPongEventTo(organization, pingPongEvent);
+        EventUtils.setBasicInfo(pullUpEvent,organization,eventDto,reservation);
+        addPullUpEventTo(organization, pullUpEvent);
         organizationRepository.save(organization);
-        return pingPongEvent;
+        return pullUpEvent;
     }
 
-
-
-    private void addPingPongEventTo(Organization organization, PingPongEvent pingPongEvent) {
-        organization.getPingPongEvents().add(pingPongEvent);
+    private void addPullUpEventTo(Organization organization, PullUpEvent pullUpEvent) {
+        organization.getPullUpsEvents().add(pullUpEvent);
     }
-
 }

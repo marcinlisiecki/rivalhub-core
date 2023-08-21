@@ -1,36 +1,26 @@
-package com.rivalhub.event.pingpong;
+package com.rivalhub.event.darts;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.event.Event;
 import com.rivalhub.event.EventType;
-import com.rivalhub.event.pingpong.match.PingPongMatch;
-import com.rivalhub.reservation.Reservation;
+import com.rivalhub.event.darts.match.DartMatch;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
-
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Data
-public class PingPongEvent extends Event {
-
-
+public class DartEvent extends Event {
     @OneToMany
-    private List<PingPongMatch> pingPongMatchList = new ArrayList<>();
+    List<DartMatch> dartsMatch;
+    private EventType eventType = EventType.DARTS;
 
-    private EventType eventType = EventType.PING_PONG;
 
-    //TODO wywalić te metody do innej klasy jeżeli to możliwe
+    //TODO do wywalenia po custom maperze
     public List<Long> getParticipantsId(){
         List<Long> participantsId = new ArrayList<>();
         for (UserData userData:this.getParticipants()) {
@@ -46,6 +36,5 @@ public class PingPongEvent extends Event {
         }
         return stationId;
     }
-
-
 }
+

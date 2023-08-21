@@ -1,9 +1,14 @@
 package com.rivalhub.event.pingpong.match;
 
 import com.rivalhub.event.EventNotFoundException;
+import com.rivalhub.event.EventType;
 import com.rivalhub.event.MatchNotFoundException;
+import com.rivalhub.event.match.MatchDto;
+import com.rivalhub.event.match.MatchServiceInterface;
+import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.event.pingpong.PingPongEventRepository;
+import com.rivalhub.event.pingpong.match.result.PingPongSet;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
@@ -12,17 +17,20 @@ import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class PingPongMatchService {
+public class PingPongMatchService implements MatchServiceInterface {
     private final OrganizationRepository organizationRepository;
     private final PingPongEventRepository pingPongEventRepository;
     private final PingPongMatchRepository pingPongMatchRepository;
     private final PingPongMatchMapper pingPongMatchMapper;
 
-    public ViewPingPongMatchDTO createPingPongMatch(Long organizationId, Long eventId, AddPingPongMatchDTO pingPongMatchDTO) {
+
+
+    public MatchDto createMatch(Long organizationId, Long eventId, MatchDto MatchDTO) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
         Organization organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
@@ -30,10 +38,16 @@ public class PingPongMatchService {
         PingPongEvent pingPongEvent = pingPongEventRepository.findById(eventId)
                 .orElseThrow(EventNotFoundException::new);
 
-        PingPongMatch pingPongMatch = pingPongMatchMapper.map(pingPongMatchDTO, organization);
+        PingPongMatch pingPongMatch = pingPongMatchMapper.map(MatchDTO, organization);
 
         return save(requestUser, pingPongEvent, pingPongMatch);
     }
+
+    @Override
+    public boolean matchStrategy(String eventType) {
+        return eventType.equalsIgnoreCase(EventType.PING_PONG.name());
+    }
+
 
     public boolean setResultApproval(Long eventId, Long matchId, boolean approve) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
@@ -44,7 +58,7 @@ public class PingPongMatchService {
         return setResultApproval(requestUser, pingPongEvent, matchId, approve);
     }
 
-    public ViewPingPongMatchDTO findPingPongMatch(Long eventId, Long matchId) {
+    public ViewPingPongMatchDTO findMatch(Long eventId, Long matchId) {
         PingPongEvent pingPongEvent = pingPongEventRepository
                 .findById(eventId)
                 .orElseThrow(EventNotFoundException::new);
@@ -54,14 +68,14 @@ public class PingPongMatchService {
         return pingPongMatchMapper.map(pingPongMatch);
     }
 
-    public List<ViewPingPongMatchDTO> findPingPongMatches(Long eventId) {
+    public List<ViewMatchDto> findMatches(Long eventId) {
         PingPongEvent pingPongEvent = pingPongEventRepository.
                 findById(eventId)
                 .orElseThrow(EventNotFoundException::new);
 
         List<PingPongMatch> pingPongMatches = pingPongEvent.getPingPongMatchList();
 
-        return pingPongMatches.stream().map(pingPongMatchMapper::map).toList();
+        return new ArrayList<ViewMatchDto>(pingPongMatches.stream().map(pingPongMatchMapper::map).toList());
     }
 
     public List<PingPongSet> addResult(Long eventId, Long matchId, List<PingPongSet> sets) {
@@ -81,7 +95,7 @@ public class PingPongMatchService {
         pingPongMatch.getSets().addAll(sets);
     }
 
-    private ViewPingPongMatchDTO save(UserData loggedUser, PingPongEvent pingPongEvent,
+    private MatchDto save(UserData loggedUser, PingPongEvent pingPongEvent,
                               PingPongMatch pingPongMatch){
         boolean loggedUserInTeam1 = pingPongMatch.getTeam1()
                 .stream().anyMatch(loggedUser::equals);
@@ -98,7 +112,7 @@ public class PingPongMatchService {
         PingPongMatch savedMatch = pingPongMatchRepository.save(pingPongMatch);
         pingPongEventRepository.save(pingPongEvent);
 
-        return pingPongMatchMapper.map(savedMatch);
+        return pingPongMatchMapper.mapToMatchDto(savedMatch);
     }
 
     private void addPingPongMatch(PingPongEvent pingPongEvent,PingPongMatch pingPongMatch){

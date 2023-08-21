@@ -2,7 +2,12 @@ package com.rivalhub.common;
 
 import com.rivalhub.auth.LoginRequestDto;
 import com.rivalhub.event.EventDto;
+import com.rivalhub.event.billiards.BilliardsEvent;
+import com.rivalhub.event.darts.DartEvent;
 import com.rivalhub.event.pingpong.PingPongEvent;
+import com.rivalhub.event.pullups.PullUpEvent;
+import com.rivalhub.event.running.RunningEvent;
+import com.rivalhub.event.tablefootball.TableFootballEvent;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationDTO;
 import com.rivalhub.reservation.AddReservationDTO;
@@ -92,6 +97,30 @@ public class AutoMapper {
 
     public EventDto mapToEventDto(PingPongEvent pingPongEvent){
         return modelMapper.map(pingPongEvent,EventDto.class);
+    }
+
+    public EventDto mapToEventDto(RunningEvent runningEvent){
+        return modelMapper.map(runningEvent,EventDto.class);
+    }
+    public EventDto mapToEventDto(TableFootballEvent tableFootballEvent){
+        return modelMapper.map(tableFootballEvent,EventDto.class);
+    }
+
+    public EventDto mapToEventDto(PullUpEvent pullUpEvent){
+        return modelMapper.map(pullUpEvent,EventDto.class);
+    }
+
+    public EventDto mapToEventDto(DartEvent dartEvent){
+        return modelMapper.map(dartEvent,EventDto.class);
+    }
+
+
+    public BilliardsEvent mapToBilliardsEvent(EventDto eventDto){
+        return modelMapper.map(eventDto,BilliardsEvent.class);
+    }
+
+    public EventDto mapToEventDto(BilliardsEvent billiardsEvent){
+        return modelMapper.map(billiardsEvent,EventDto.class);
     }
 
     public UserData mapToUserData(UserDetailsDto userDetailsDto) {

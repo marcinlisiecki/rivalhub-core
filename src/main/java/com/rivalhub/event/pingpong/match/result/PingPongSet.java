@@ -1,4 +1,4 @@
-package com.rivalhub.event.pingpong.match;
+package com.rivalhub.event.pingpong.match.result;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
