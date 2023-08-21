@@ -1,6 +1,7 @@
 package com.rivalhub.event.pullups;
 
 import com.rivalhub.event.Event;
+import com.rivalhub.event.EventType;
 import com.rivalhub.event.pullups.match.PullUpMatch;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
@@ -18,6 +19,8 @@ import java.util.List;
 public class PullUpEvent extends Event {
     @OneToMany
     List<PullUpMatch> pullUpMatchList;
+
+    private EventType eventType = EventType.PULL_UPS;
 
     //TODO do wywalenia po custom maperze
     public List<Long> getParticipantsId(){

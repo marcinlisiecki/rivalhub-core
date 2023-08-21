@@ -23,6 +23,8 @@ import java.util.List;
 @Entity
 @Data
 public class PingPongEvent extends Event {
+
+
     @OneToMany
     private List<PingPongMatch> pingPongMatchList = new ArrayList<>();
 

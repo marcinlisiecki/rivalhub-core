@@ -1,6 +1,7 @@
 package com.rivalhub.event.tablefootball;
 
 import com.rivalhub.event.Event;
+import com.rivalhub.event.EventType;
 import com.rivalhub.event.tablefootball.match.TableFootballMatch;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
@@ -18,6 +19,7 @@ public class TableFootballEvent extends Event {
     @OneToMany
     List<TableFootballMatch> tableFootballMatch;
 
+    private EventType eventType = EventType.TABLE_FOOTBALL;
     //TODO do wywalenia po custom maperze
     public List<Long> getParticipantsId(){
         List<Long> participantsId = new ArrayList<>();

@@ -1,6 +1,7 @@
 package com.rivalhub.event.darts;
 
 import com.rivalhub.event.Event;
+import com.rivalhub.event.EventType;
 import com.rivalhub.event.darts.match.DartMatch;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
@@ -16,6 +17,7 @@ import java.util.List;
 public class DartEvent extends Event {
     @OneToMany
     List<DartMatch> dartsMatch;
+    private EventType eventType = EventType.DARTS;
 
 
     //TODO do wywalenia po custom maperze

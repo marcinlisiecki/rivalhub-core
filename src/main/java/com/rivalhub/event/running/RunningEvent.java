@@ -1,6 +1,7 @@
 package com.rivalhub.event.running;
 
 import com.rivalhub.event.Event;
+import com.rivalhub.event.EventType;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.Entity;
@@ -17,6 +18,8 @@ public class RunningEvent extends Event {
     @OneToMany
     List<UserTimes> userTimesList;
     Double distance;
+
+    private EventType eventType = EventType.RUNNING;
 
     //TODO do wywalenia po custom maperze
     public List<Long> getParticipantsId(){
