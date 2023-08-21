@@ -90,7 +90,7 @@ public class OrganizationUserService {
     }
 
     public List<UserDetailsDto> findUsersByNamePhrase(Long id, String namePhrase) {
-        return userRepository.findByNamePhraseAndOrganizationId(id, namePhrase)
+        return userRepository.findByNamePhraseAndOrganizationId(id, "%" + namePhrase + "%")
                 .stream().map(u -> new UserDetailsDto(u.get(0, Long.class),
                         u.get(1, String.class),
                         u.get(2, String.class),

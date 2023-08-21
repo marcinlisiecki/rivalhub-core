@@ -47,7 +47,7 @@ public class RivalHubApplication {
 		UserOrganizationService.addAdminUser(userNew, organization);
 //		UserOrganizationService.addUser(userNew, organization);
 
-		for (long i = 1; i < 20; i++) {
+		for (long i = 1; i < 100; i++) {
 			UserData user = new UserData();
 			user.setName("User " + i);
 			user.setEmail(i + "@gmail.com");
