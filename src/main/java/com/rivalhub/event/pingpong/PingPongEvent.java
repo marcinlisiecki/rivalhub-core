@@ -8,15 +8,14 @@ import com.rivalhub.user.UserData;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter
-@Setter
+@Data
 public class PingPongEvent extends Event {
     @OneToMany
     private List<PingPongMatch> pingPongMatchList = new ArrayList<>();

@@ -5,15 +5,14 @@ import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter
-@Setter
+@Data
 public class RunningEvent extends Event {
     @OneToMany
     List<UserTimes> userTimesList;
