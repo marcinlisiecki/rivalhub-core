@@ -41,7 +41,8 @@ public class OrganizationUserService {
     }
 
     public OrganizationDTO addUser(Long id, String hash) {
-        var organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        var organization = organizationRepository.findById(id)
+                .orElseThrow(OrganizationNotFoundException::new);
 
         if (!organization.getInvitationHash().equals(hash)) throw new WrongInvitationException();
 
@@ -54,7 +55,8 @@ public class OrganizationUserService {
     }
 
     public OrganizationDTO addUserThroughEmail(Long id, String email) {
-        var organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        var organization = organizationRepository.findById(id)
+                .orElseThrow(OrganizationNotFoundException::new);
         var requestUser = SecurityUtils.getUserFromSecurityContext();
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
@@ -64,17 +66,11 @@ public class OrganizationUserService {
     }
 
     public Set<UserDetailsDto> viewAllUsers(Long id) {
-        var requestUser = SecurityUtils.getUserFromSecurityContext();
-        var organization = organizationRepository.findById(id)
-                .orElseThrow(OrganizationNotFoundException::new);
-
-//        OrganizationSettingsValidator.userIsInOrganization(organization, requestUser);
         return userRepository.getAllUsersByOrganizationId(id)
                 .stream().map(u -> new UserDetailsDto(u.get(0, Long.class),
                                                       u.get(1, String.class),
                                                       u.get(2, String.class),
-                                                      u.get(3, String.class),
-                                                      u.get(4, LocalDateTime.class)))
+                                                      u.get(3, String.class)))
                 .collect(Collectors.toSet());
     }
 
@@ -85,9 +81,10 @@ public class OrganizationUserService {
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
 
-        var userToDelete = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-        UserOrganizationService.deleteUserFrom(organization, userToDelete);
+        var userToDelete = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
 
+        UserOrganizationService.deleteUserFrom(organization, userToDelete);
         organizationRepository.save(organization);
     }
 }

@@ -42,5 +42,4 @@ public class OrganizationUserController {
     private void deleteUserFromOrganization(@PathVariable Long organizationId, @PathVariable Long userId){
         organizationUserService.deleteUserFromOrganization(organizationId, userId);
     }
-
 }

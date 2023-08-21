@@ -3,14 +3,14 @@ package com.rivalhub.organization.service;
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.organization.Organization;
+import com.rivalhub.organization.OrganizationRepoManager;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.reservation.*;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.station.Station;
-import com.rivalhub.user.UserData;
+import com.rivalhub.station.StationRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,16 +21,13 @@ import java.util.function.Predicate;
 @Service
 public class OrganizationReservationService {
     private final AutoMapper autoMapper;
-    private final OrganizationRepository organizationRepository;
     private final ReservationRepository reservationRepository;
-
+    private final OrganizationRepoManager organizationRepoManager;
 
     public ReservationDTO addReservation(AddReservationDTO addReservationDTO) {
-        final var organization = organizationRepository.findById(addReservationDTO.getOrganizationId())
-                .orElseThrow(OrganizationNotFoundException::new);
+        var organization = organizationRepoManager.getOrganizationWithStationsById(addReservationDTO.getOrganizationId());
 
         List<Station> stationsForReservation = getExistingStationsForReservation(organization, addReservationDTO);
-
         ReservationValidator.checkIfReservationIsPossible(addReservationDTO, stationsForReservation);
 
         var savedReservation = saveReservation(addReservationDTO, stationsForReservation);
@@ -42,8 +39,7 @@ public class OrganizationReservationService {
 
         ReservationValidator.checkIfReservationIsPossible(addReservationDTO, stationsForReservation);
 
-        var savedReservation = saveReservation(addReservationDTO, stationsForReservation);
-        return savedReservation;
+        return saveReservation(addReservationDTO, stationsForReservation);
     }
 
     private List<Station> getExistingStationsForReservation(Organization organization, AddReservationDTO addReservationDTO) {
@@ -66,10 +62,5 @@ public class OrganizationReservationService {
                 .stationList(reservationStations)
                 .build();
         return reservationRepository.save(newReservation);
-    }
-    public List<ReservationDTO> viewReservations(Long organizationId) {
-        return reservationRepository.reservationsByOrganization(organizationId)
-                .stream().map(autoMapper::mapToReservationDto)
-                .toList();
     }
 }

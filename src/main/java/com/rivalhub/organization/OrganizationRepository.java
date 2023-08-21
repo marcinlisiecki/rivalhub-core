@@ -1,5 +1,6 @@
 package com.rivalhub.organization;
 
+import jakarta.persistence.Tuple;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;

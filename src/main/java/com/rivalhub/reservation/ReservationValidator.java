@@ -21,14 +21,7 @@ public class ReservationValidator {
                 .allMatch(organization.getStationList()::contains);
     }
 
-    public static boolean checkIfReservationIsPossible(AddReservationDTO reservationDTO, Organization organization,
-                                                UserData user, List<Station> stationList) {
-
-//        user.getOrganizationList()
-//                .stream().filter(org -> org.getId().equals(organization.getId()))
-//                .findFirst()
-//                .orElseThrow(OrganizationNotFoundException::new);
-
+    public static boolean checkIfReservationIsPossible(AddReservationDTO reservationDTO, Organization organization, List<Station> stationList) {
         if (!ReservationValidator.checkIfStationsAreInOrganization(stationList, organization)) return false;
         if (ReservationValidator.checkForTimeCollision(stationList, reservationDTO.getStartTime(), reservationDTO.getEndTime())) return false;
 
@@ -37,7 +30,6 @@ public class ReservationValidator {
 
 
     public static void checkIfReservationIsPossible(AddReservationDTO addReservationDTO, List<Station> stations) {
-        //nie jestem pewny z kodu czy jak checkForTimeCollision is true to znaczy że mogę zarezerwować czy nie :D
         if (checkForTimeCollision(stations, addReservationDTO.getStartTime(), addReservationDTO.getEndTime())) {
             throw new ReservationIsNotPossible();
         }

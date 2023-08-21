@@ -40,8 +40,9 @@ public interface UserRepository extends CrudRepository<UserData, Long>, PagingAn
     Set<Tuple> getOrganizationIdsWhereUserIsAdmin(Long id);
 
 
-    @Query(value = "SELECT ORGANIZATION.ORGANIZATION_ID FROM ORGANIZATION\n" +
-            "JOIN ORGANIZATION_USERS ON ORGANIZATION_USERS.ORGANIZATION_ID = ORGANIZATION.ORGANIZATION_ID\n" +
-            "WHERE USER_ID IN (?1,?2)", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT O1.ORGANIZATION_ID\n" +
+            "FROM ORGANIZATION_USERS O1\n" +
+            "JOIN ORGANIZATION_USERS O2 ON O1.ORGANIZATION_ID = O2.ORGANIZATION_ID\n" +
+            "WHERE O1.USER_ID = ?1 AND O2.USER_ID = ?2", nativeQuery = true)
     Set<Tuple> getSharedOrganizationsIds(Long requestUserId, Long userId);
 }

@@ -14,11 +14,4 @@ public class OrganizationSettingsValidator {
                 .findFirst()
                 .orElseThrow(InsufficientPermissionsException::new);
     }
-
-//    public static Organization userIsInOrganization(Organization organization, UserData user){
-//        return user.getOrganizationList()
-//                .stream().filter(org -> org.getId().equals(organization.getId()))
-//                .findFirst()
-//                .orElseThrow(OrganizationNotFoundException::new);
-//    }
 }

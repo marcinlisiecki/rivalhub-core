@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -44,8 +46,15 @@ public class Station {
         this.type = type;
     }
 
-    public void addReservation(Reservation reservation) {
-        this.reservationList.add(reservation);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Station station)) return false;
+        return Objects.equals(id, station.id);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
