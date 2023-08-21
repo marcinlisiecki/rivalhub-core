@@ -13,4 +13,5 @@ public interface MatchServiceInterface {
 
     public List<ViewMatchDto> findMatches(Long eventId);
     boolean matchStrategy(String strategy);
+
 }
