@@ -47,7 +47,7 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(mailMessage, true);
             helper.setTo(email);
             helper.setFrom(sender);
-            helper.setSubject("Invitation to " + organization.getName());
+            helper.setSubject("Zaproszenie do " + organization.getName());
             helper.setText(message,true);
 
             Resource resource = resourceLoader.getResource("classpath:/templates/logo.png");

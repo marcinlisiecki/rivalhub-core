@@ -79,7 +79,7 @@ public class UserService {
                 .path("/users/{id}")
                 .buildAndExpand(savedUser.getId())
                 .toUri();
-        emailService.sendThymeleafInvitation(savedUser, "Activate your account");
+        emailService.sendThymeleafInvitation(savedUser, "Aktywuj konto");
         return savedUserUri;
     }
 
