@@ -5,7 +5,7 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.reservation.AddReservationDTO;
 import com.rivalhub.reservation.Reservation;
-import com.rivalhub.user.UserAlreadyExistsException;
+import com.rivalhub.common.exception.UserAlreadyExistsException;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
 

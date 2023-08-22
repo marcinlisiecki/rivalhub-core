@@ -1,9 +1,9 @@
 package com.rivalhub.auth;
 
 import com.rivalhub.common.ErrorMessages;
-import com.rivalhub.organization.Organization;
+import com.rivalhub.common.exception.UserNotAuthenticatedException;
 import com.rivalhub.user.UserData;
-import com.rivalhub.user.UserNotFoundException;
+import com.rivalhub.common.exception.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;

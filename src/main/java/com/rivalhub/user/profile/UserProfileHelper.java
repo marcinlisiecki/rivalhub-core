@@ -2,14 +2,17 @@ package com.rivalhub.user.profile;
 
 
 import com.rivalhub.common.AutoMapper;
+import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepoManager;
+import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.reservation.Reservation;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,6 +23,7 @@ import java.util.function.Function;
 public class UserProfileHelper {
     private final OrganizationRepoManager organizationRepoManager;
     private final AutoMapper autoMapper;
+
     Set<ReservationInProfileDTO> getReservationsInSharedOrganizations(UserData loggedUser, UserData viewedUser) {
         List<Long> sharedOrganizationIds = getSharedOrganizationList(loggedUser, viewedUser);
 
@@ -72,5 +76,43 @@ public class UserProfileHelper {
 
     private List<Long> getSharedOrganizationList(UserData loggedUser, UserData viewedUser) {
         return organizationRepoManager.getSharedOrganizationIds(loggedUser.getId(), viewedUser.getId());
+    }
+
+    public Set<EventProfileDTO> getEventsByOrganizationsAndDateForRequestUser(UserData requestUser, String date) {
+        List<Long> organizationsIdsByUser = organizationRepoManager.getOrganizationsIdsByUser(requestUser.getId());
+        List<Organization> userOrganizations = organizationRepoManager.findAllOrganizationsByIds(organizationsIdsByUser);
+
+        LocalDateTime datePattern = LocalDateTime.parse(date, FormatterHelper.formatter());
+
+        Set<EventProfileDTO> eventList = new HashSet<>();
+
+        //TODO DODAĆ RESZTĘ EVENTÓW JAK BĘDĄ JUŻ DZIAŁAĆ
+        for (Organization sharedOrganization : userOrganizations) {
+            Set<PingPongEvent> events = organizationRepoManager.
+                    eventsWithParticipantsByOrganizationIdAndUserIdWithPaginationByDate(sharedOrganization, requestUser.getId(), datePattern);
+
+            List<EventProfileDTO> eventProfileDTOStream = events.stream().map(setEventProfileDTO()).toList();
+            eventList.addAll(eventProfileDTOStream);
+        }
+        return eventList;
+    }
+
+    public Set<ReservationInProfileDTO> getAllReservationsByRequestUserAndMonth(UserData requestUser, String date) {
+        List<Long> organizationsIdsByUser = organizationRepoManager.getOrganizationsIdsByUser(requestUser.getId());
+        List<Organization> userOrganizations = organizationRepoManager.findAllOrganizationsByIds(organizationsIdsByUser);
+
+        LocalDateTime datePattern = LocalDateTime.parse(date, FormatterHelper.formatter());
+
+        Set<ReservationInProfileDTO> reservationDTOs = new HashSet<>();
+
+        for (Organization sharedOrganization : userOrganizations) {
+            List<ReservationInProfileDTO> reservations = organizationRepoManager
+                    .reservationsByOrganizationIdAndUserIdFilterByDate(sharedOrganization.getId(), requestUser.getId(), datePattern)
+                    .stream().map(setReservationInProfileDTO(sharedOrganization))
+                    .toList();
+
+            reservationDTOs.addAll(reservations);
+        }
+        return reservationDTOs;
     }
 }

@@ -1,4 +1,4 @@
-package com.rivalhub.station;
+package com.rivalhub.common.exception;
 
 import com.rivalhub.common.ErrorMessages;
 

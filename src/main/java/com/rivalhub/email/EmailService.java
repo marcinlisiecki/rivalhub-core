@@ -1,6 +1,7 @@
 package com.rivalhub.email;
 
 import com.rivalhub.common.InvitationHelper;
+import com.rivalhub.common.exception.EmailNotSentException;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.user.UserDto;
 import jakarta.mail.MessagingException;

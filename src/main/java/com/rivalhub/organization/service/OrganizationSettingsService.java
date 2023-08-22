@@ -7,13 +7,13 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.OrganizationSettingsDTO;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
-import com.rivalhub.user.UserNotFoundException;
+import com.rivalhub.common.exception.UserNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
