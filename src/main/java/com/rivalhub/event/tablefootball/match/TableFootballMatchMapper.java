@@ -3,8 +3,6 @@ package com.rivalhub.event.tablefootball.match;
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.event.EventUtils;
 import com.rivalhub.event.match.MatchDto;
-import com.rivalhub.event.pingpong.match.PingPongMatch;
-import com.rivalhub.event.pingpong.match.ViewPingPongMatchDTO;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
