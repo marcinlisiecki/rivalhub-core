@@ -1,9 +1,10 @@
-package com.rivalhub.common.exception;
+package com.rivalhub.common;
 
 import com.rivalhub.common.ErrorMessages;
 import com.rivalhub.organization.Organization;
 import io.github.classgraph.Resource;
 import jakarta.mail.Message;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
@@ -17,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Component
@@ -45,7 +47,9 @@ public class FileUploadUtil {
         String fileName = "avatar" + multipartFile.getOriginalFilename()
                 .substring(multipartFile.getOriginalFilename().lastIndexOf("."));
 
-        String uploadDir = organizationImgCatalog + organization.getId();
+        String uploadDir = organizationImgCatalog + organization.getName() + LocalDateTime.now()
+                .toString().replace(":", "-");
+
         try {
             saveFile(uploadDir, fileName, multipartFile);
         } catch (IOException e) {
@@ -53,6 +57,4 @@ public class FileUploadUtil {
         }
         return uploadDir + "/" + fileName;
     }
-
-
 }
