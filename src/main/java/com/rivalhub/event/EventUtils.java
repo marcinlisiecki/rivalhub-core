@@ -15,7 +15,6 @@ import java.util.function.Predicate;
 
 @RequiredArgsConstructor
 public class EventUtils {
-    private final OrganizationRepository organizationRepository;
     public static AddReservationDTO createAddReservationDTO(EventDto eventDto, Organization organization) {
         return AddReservationDTO.builder()
                 .endTime(eventDto.getEndTime())

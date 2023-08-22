@@ -9,6 +9,8 @@ import com.rivalhub.common.MergePatcher;
 import com.rivalhub.organization.*;
 import com.rivalhub.common.exception.FileUploadUtil;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
+import com.rivalhub.common.FileUploadUtil;
+import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -31,14 +33,14 @@ public class OrganizationService {
     public OrganizationDTO saveOrganization(String organizationName, String color, MultipartFile multipartFile){
         Organization organizationToSave = autoMapper.mapToOrganization(
                 new OrganizationDTO(organizationName, color));
-        var savedOrganization = organizationRepository.save(organizationToSave);
 
         var requestUser = SecurityUtils.getUserFromSecurityContext();
 
-        setOrganizationSettings(requestUser, savedOrganization);
-        if(multipartFile != null) savedOrganization.setImageUrl(fileUploadUtil.saveOrganizationImage(multipartFile, savedOrganization));
+        setOrganizationSettings(requestUser, organizationToSave);
+        if(multipartFile != null)
+            organizationToSave.setImageUrl(fileUploadUtil.saveOrganizationImage(multipartFile, organizationToSave));
 
-        return autoMapper.mapToOrganizationDto(organizationRepository.save(savedOrganization));
+        return autoMapper.mapToOrganizationDto(organizationRepository.save(organizationToSave));
     }
 
      public OrganizationDTO findOrganization(Long id){
@@ -82,11 +84,15 @@ public class OrganizationService {
 
     private void setOrganizationSettings(UserData user, Organization organization){
         UserOrganizationService.addAdminUser(user, organization);
-        createInvitation(organization.getId());
+        createInvitationForNewOrganization(organization);
+    }
+
+    private void createInvitationForNewOrganization(Organization organization){
+        organization.setInvitationHash(createInvitationHash(organization));
     }
 
     private String createInvitationHash(Organization organization){
-        String valueToHash = organization.getName() + organization.getId() + LocalDateTime.now();
+        String valueToHash = organization.getName() + LocalDateTime.now();
         return String.valueOf(valueToHash.hashCode() & 0x7fffffff);
     }
 }
