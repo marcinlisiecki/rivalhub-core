@@ -20,7 +20,6 @@ public class DartEvent extends Event {
     private EventType eventType = EventType.DARTS;
 
 
-    //TODO do wywalenia po custom maperze
     public List<Long> getParticipantsId(){
         List<Long> participantsId = new ArrayList<>();
         for (UserData userData:this.getParticipants()) {

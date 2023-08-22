@@ -21,7 +21,7 @@ public class RunningEvent extends Event {
 
     private EventType eventType = EventType.RUNNING;
 
-    //TODO do wywalenia po custom maperze
+
     public List<Long> getParticipantsId(){
         List<Long> participantsId = new ArrayList<>();
         for (UserData userData:this.getParticipants()) {

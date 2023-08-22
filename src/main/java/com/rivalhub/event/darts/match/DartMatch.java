@@ -14,16 +14,12 @@ public class DartMatch {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //Lista list teamów
-    //Lista wyników
-    //Lista zatwierdzeń
     @ManyToMany
     private List<UserData> team1 = new ArrayList<>();
     @ManyToMany
     private List<UserData> team2 = new ArrayList<>();
     //      TODO jakie dane z meczu chcemy??????
-//    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
-//    private List<PingPongSet> sets = new ArrayList<>();
+
     private boolean team1Approval;
     private boolean team2Approval;
 }

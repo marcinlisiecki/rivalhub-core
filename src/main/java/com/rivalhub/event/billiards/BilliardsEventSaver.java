@@ -19,7 +19,6 @@ public class BilliardsEventSaver {
     private final OrganizationRepository organizationRepository;
 
     BilliardsEvent saveEvent(BilliardsEvent billiardsEvent, Organization organization, EventDto eventDto) {
-        //TODO Narazie można dodać tylko użytkowników z danej organizacji!
         AddReservationDTO addReservationDTO = EventUtils.createAddReservationDTO(eventDto, organization);
         Reservation reservation = reservationService.addReservationForEvent(addReservationDTO, organization);
         EventUtils.setBasicInfo(billiardsEvent,organization,eventDto,reservation);
