@@ -1,17 +1,21 @@
 package com.rivalhub.organization;
 
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
-@ToString
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class OrganizationDTO {
     private Long id;
     private String name;
-    private String invitationHash;
     private String imageUrl;
+    private String colorForDefaultImage;
+    public OrganizationDTO(String name, String colorForDefaultImage){
+        this.name = name;
+        this.colorForDefaultImage = colorForDefaultImage;
+    }
 }

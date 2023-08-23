@@ -1,14 +1,15 @@
 package com.rivalhub.event;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.reservation.Reservation;
-import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.apache.catalina.User;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -16,15 +17,26 @@ import java.util.List;
 @MappedSuperclass
 public class Event {
     @Id
-    Long eventId;
-    @OneToOne
-    Reservation reservation;
-    LocalDateTime startTime;
-    LocalDateTime endTime;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long eventId;
 
-//    UserData host;
-    @OneToMany
-    List<UserData> participants;
+    private String name;
+    private String description;
+
+    @OneToOne(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    @JoinColumn(name = "reservation_id")
+    private Reservation reservation;
+
+    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm")
+    private LocalDateTime startTime;
+
+    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm")
+    private LocalDateTime endTime;
+
     @ManyToOne
-    Organization organization;
+    private UserData host;
+
+    @ManyToMany
+    private List<UserData> participants = new ArrayList<>();
 }

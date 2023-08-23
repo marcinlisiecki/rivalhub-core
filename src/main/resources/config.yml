@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:test
+    url: jdbc:h2:file:~/testdb
     username:
     password:
   h2:
@@ -18,7 +18,14 @@ spring:
           starttls:
             enable: true
   jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
     defer-datasource-initialization: true
 app:
   jwt:
     secret:
+
+  organization:
+    img:
+      catalog: 'organization-img/'

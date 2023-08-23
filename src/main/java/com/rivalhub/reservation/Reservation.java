@@ -10,19 +10,22 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Setter
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JsonManagedReference
+    @ManyToOne
+    @JsonManagedReference("user-reservations")
     @JoinTable(name = "user_reservations",
             joinColumns = @JoinColumn(name = "reservation_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id")
@@ -30,7 +33,8 @@ public class Reservation {
     private UserData userData;
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JsonManagedReference
+//    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonManagedReference("reservation-stations")
     @JoinTable(name = "reservations_stations",
             joinColumns = @JoinColumn(name = "reservation_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "station_id", referencedColumnName = "id")
@@ -49,7 +53,15 @@ public class Reservation {
         this.endTime = endTime;
     }
 
-//    private Event event
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Reservation that)) return false;
+        return Objects.equals(id, that.id);
+    }
 
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

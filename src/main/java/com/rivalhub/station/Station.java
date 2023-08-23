@@ -4,12 +4,13 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.rivalhub.reservation.Reservation;
 import com.rivalhub.common.ErrorMessages;
 import com.rivalhub.event.EventType;
-import com.rivalhub.organization.Organization;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -34,20 +35,26 @@ public class Station {
     @Size(min = 2, max = 256, message = ErrorMessages.NAME_SIZE)
     private String name;
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, mappedBy = "stationList")
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "stationList")
     @JsonBackReference
     private List<Reservation> reservationList = new ArrayList<>();
 
-//    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-//    private Organization organization;
+    private boolean isActive;
 
     public Station(Long id, EventType type) {
         this.id = id;
         this.type = type;
     }
 
-    public void addReservation(Reservation reservation) {
-        this.reservationList.add(reservation);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Station station)) return false;
+        return Objects.equals(id, station.id);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

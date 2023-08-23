@@ -1,6 +1,13 @@
 package com.rivalhub.organization;
 
-import com.rivalhub.reservation.Reservation;
+import com.rivalhub.event.EventType;
+import com.rivalhub.event.billiards.BilliardsEvent;
+import com.rivalhub.event.darts.DartEvent;
+
+import com.rivalhub.event.pingpong.PingPongEvent;
+import com.rivalhub.event.pullups.PullUpEvent;
+import com.rivalhub.event.running.RunningEvent;
+import com.rivalhub.event.tablefootball.TableFootballEvent;
 import com.rivalhub.station.Station;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.common.ErrorMessages;
@@ -11,17 +18,15 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.engine.internal.Cascade;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
 @Setter
+@Getter
 public class Organization {
 
     @Id
@@ -42,34 +47,75 @@ public class Organization {
     @CreationTimestamp
     private LocalDateTime addedDate;
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JsonManagedReference
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JsonManagedReference("user-organizations")
     @JoinTable(name = "organization_users",
             joinColumns = @JoinColumn(name = "organization_id", referencedColumnName = "organization_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     )
     private List<UserData> userList = new ArrayList<>();
 
-    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
+    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+            orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinTable(
-            name = "ORGANIZATION_STATION_LIST",
+            name = "organization_station_list",
             joinColumns = @JoinColumn(
-                    name = "ORGANIZATION_ID",
+                    name = "organization_id",
                     referencedColumnName = "organization_id"
             ),
             inverseJoinColumns = @JoinColumn(
-                    name = "STATION_LIST_ID",
+                    name = "station_list_id",
                     referencedColumnName = "id"
             )
     )
-    private List<Station> stationList;
+    private List<Station> stationList =  new ArrayList<>();
+
+    @ElementCollection(targetClass = EventType.class)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable
+    private Set<EventType> eventTypeInOrganization = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    private Set<UserData> adminUsers = new HashSet<>();
+
+    private Boolean onlyAdminCanSeeInvitationLink = true;
+
+    @OneToMany(fetch = FetchType.LAZY,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    List<PingPongEvent> pingPongEvents = new ArrayList<>();
+
+    private String colorForDefaultImage;
+
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    List<BilliardsEvent> billiardsEvents = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    List<RunningEvent> runningEvents = new ArrayList<>();
+
+
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    List<DartEvent> dartEvents = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    List<PullUpEvent> pullUpsEvents = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    List<TableFootballEvent> tableFootballEvents = new ArrayList<>();
 
     @Override
-    public String toString() {
-        return "Organization{" +
-                "name='" + name + '\'' +
-                ", invitationLink='" + invitationHash + '\'' +
-                ", imageUrl='" + imageUrl + '\'' +
-                '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Organization that)) return false;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

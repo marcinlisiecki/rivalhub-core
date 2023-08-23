@@ -1,9 +1,6 @@
 package com.rivalhub.user;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.rivalhub.common.ErrorMessages;
-import com.rivalhub.organization.Organization;
-import com.rivalhub.reservation.Reservation;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -17,11 +14,11 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
-import java.util.ArrayList;
+import java.util.Objects;
 
 @Entity
-@Getter
 @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -42,22 +39,12 @@ public class UserData implements UserDetails {
 
     private LocalDateTime activationTime;
 
-    private String activationHash;
-
     private String profilePictureUrl;
+
+    private String activationHash;
 
     //@Length(min=8,message = ErrorMessages.PASSWORD_IS_TOO_SHORT)
     private String password;
-
-    @ManyToMany(mappedBy = "userList", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JsonBackReference
-    private List<Organization> organizationList = new ArrayList<>();
-
-    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, mappedBy = "userData")
-    @JsonBackReference
-    private List<Reservation> reservationList = new ArrayList<>();
-
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
@@ -93,11 +80,14 @@ public class UserData implements UserDetails {
     }
 
     @Override
-    public String toString() {
-        return "UserData{" +
-                "name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", profilePictureUrl='" + profilePictureUrl + '\'' +
-                '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserData userData)) return false;
+        return Objects.equals(id, userData.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
