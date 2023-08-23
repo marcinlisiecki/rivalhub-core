@@ -16,7 +16,6 @@ public class PullUpEventSaver {
     private final OrganizationRepository organizationRepository;
     private final OrganizationReservationService reservationService;
     PullUpEvent saveEvent(PullUpEvent pullUpEvent, Organization organization, EventDto eventDto) {
-        //TODO Narazie można dodać tylko użytkowników z danej organizacji!
         AddReservationDTO addReservationDTO = EventUtils.createAddReservationDTO(eventDto, organization);
         Reservation reservation = reservationService.addReservationForEvent(addReservationDTO, organization);
         EventUtils.setBasicInfo(pullUpEvent,organization,eventDto,reservation);

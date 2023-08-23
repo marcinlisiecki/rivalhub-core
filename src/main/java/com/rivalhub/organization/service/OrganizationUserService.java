@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -60,8 +61,11 @@ public class OrganizationUserService {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
-        emailService.sendEmailWithInvitationToOrganization(email, organization);
 
+        var userToAdd = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        OrganizationSettingsValidator.throwIfUserIsInOrganization(organization, userToAdd);
+
+        emailService.sendEmailWithInvitationToOrganization(email, organization);
         return autoMapper.mapToOrganizationDto(organization);
     }
 
@@ -85,6 +89,31 @@ public class OrganizationUserService {
                 .orElseThrow(UserNotFoundException::new);
 
         UserOrganizationService.deleteUserFrom(organization, userToDelete);
+
         organizationRepository.save(organization);
+    }
+
+    public List<UserDetailsDto> findUsersByNamePhrase(Long id, String namePhrase) {
+        return userRepository.findByNamePhraseAndOrganizationId(id, "%" + namePhrase + "%")
+                .stream().map(u -> new UserDetailsDto(u.get(0, Long.class),
+                        u.get(1, String.class),
+                        u.get(2, String.class),
+                        u.get(3, String.class)))
+                .collect(Collectors.toList());
+    }
+
+    public List<UserDetailsDto> findAdminUsersByOrganization(Long id) {
+        var organization = organizationRepository.findById(id)
+                .orElseThrow(OrganizationNotFoundException::new);
+        var adminUsers = organization.getAdminUsers();
+        return adminUsers
+                .stream().map(u -> new UserDetailsDto(
+                        u.getId(),
+                        u.getName(),
+                        u.getEmail(),
+                        u.getProfilePictureUrl(),
+                        u.getActivationTime()
+                ))
+                .collect(Collectors.toList());
     }
 }

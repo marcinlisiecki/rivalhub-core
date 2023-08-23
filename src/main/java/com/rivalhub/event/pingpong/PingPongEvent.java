@@ -30,7 +30,6 @@ public class PingPongEvent extends Event {
 
     private EventType eventType = EventType.PING_PONG;
 
-    //TODO wywalić te metody do innej klasy jeżeli to możliwe
     public List<Long> getParticipantsId(){
         List<Long> participantsId = new ArrayList<>();
         for (UserData userData:this.getParticipants()) {

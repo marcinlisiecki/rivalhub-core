@@ -3,7 +3,7 @@ package com.rivalhub.event.tablefootball;
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.event.EventNotFoundException;
-import com.rivalhub.event.EventServiceInterface;
+import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.exception.OrganizationNotFoundException;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class TableFootballEventService implements EventServiceInterface {
+public class TableFootballEventService implements EventService {
 
     private final AutoMapper autoMapper;
     private final OrganizationRepository organizationRepository;

@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,14 +41,25 @@ public class OrganizationSettingsService {
         return autoMapper.mapToUserDetails(user);
     }
 
+    public void removeAdmin(Long organizationId, Long userId) {
+        final var organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
 
-    public void removeEventType(Long organizationId, EventType eventType) {
+        OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
+        UserData user = findUserInOrganization(organization, userId);
+        organization.getAdminUsers().remove(user);
+        organizationRepository.save(organization);
+    }
+
+
+    public void removeEventType(Long organizationId, List<EventType> eventTypes) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
         final var organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
-        UserOrganizationService.removeEventType(organization, eventType);
+        UserOrganizationService.removeEventType(organization, eventTypes);
 
         organizationRepository.save(organization);
     }
@@ -58,16 +70,16 @@ public class OrganizationSettingsService {
         return organization.getEventTypeInOrganization();
     }
 
-    public EventType addEventType(Long organizationId, EventType eventType) {
+    public List<EventType> addEventType(Long organizationId, List<EventType> eventTypes) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
         final var organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
-        UserOrganizationService.addEventType(organization, eventType);
+        UserOrganizationService.addEventType(organization, eventTypes);
 
         organizationRepository.save(organization);
-        return eventType;
+        return eventTypes;
     }
 
     public Set<EventType> allEventTypeInApp() {

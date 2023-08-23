@@ -60,7 +60,7 @@ public class OrganizationStationService {
 
         if (onlyAvailable && start != null && end != null)
             return StationAvailabilityFinder
-                    .getAvailableStations(organizationRepoManager.fetchReservationsFor(organization), start, end, type, requestUser);
+                    .getAvailableStations(organization, start, end, type, requestUser);
 
         if (showInactive) return StationAvailabilityFinder.filterForTypeIn(organization.getStationList(), type);
         return StationAvailabilityFinder.filterForActiveStationsAndTypeIn(organization, type);

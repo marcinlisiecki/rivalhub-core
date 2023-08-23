@@ -20,7 +20,6 @@ public class BilliardsEvent extends Event {
     private EventType eventType = EventType.BILLIARDS;
 
 
-    //TODO do wywalenia po custom maperze
     public List<Long> getParticipantsId(){
         List<Long> participantsId = new ArrayList<>();
         for (UserData userData:this.getParticipants()) {

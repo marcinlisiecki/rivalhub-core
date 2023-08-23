@@ -7,6 +7,7 @@ import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,17 +25,13 @@ public class UserOrganizationService {
         organization.getStationList().add(station);
     }
 
-    public static void addAllEventTypes(Organization organization) {
-        Set<EventType> eventTypes = Arrays.stream(EventType.values()).collect(Collectors.toSet());
-        organization.setEventTypeInOrganization(eventTypes);
+    public static void removeEventType(Organization organization, List<EventType> eventTypes) {
+        eventTypes.forEach(
+                organization.getEventTypeInOrganization()::remove);
     }
 
-    public static void removeEventType(Organization organization, EventType eventType) {
-        organization.getEventTypeInOrganization().remove(eventType);
-    }
-
-    public static void addEventType(Organization organization, EventType eventType) {
-        organization.getEventTypeInOrganization().add(eventType);
+    public static void addEventType(Organization organization, List<EventType> eventTypes) {
+        organization.getEventTypeInOrganization().addAll(eventTypes);
     }
 
     public static void deleteUserFrom(Organization organization, UserData user){

@@ -54,12 +54,13 @@ public class UserService {
                         .id(u.get(0, Long.class))
                         .name(u.get(1, String.class))
                         .imageUrl(u.get(2, String.class))
+                        .colorForDefaultImage(u.get(3, String.class))
                         .build())
                         .collect(Collectors.toList());
     }
 
     @Transactional
-    void confirmUserEmail(String hash) {
+    public void confirmUserEmail(String hash) {
         UserData user = userRepository.findByActivationHash(hash)
                 .orElseThrow(UserNotFoundException::new);
         user.setActivationTime(LocalDateTime.now());
@@ -68,7 +69,7 @@ public class UserService {
 
     @Scheduled(cron = "0 0 12 * * *")
     @Transactional
-    void deleteInactivatedUsers() {
+    public void deleteInactivatedUsers() {
         LocalDateTime deleteTime = LocalDateTime.now().minusDays(1);
         userRepository.deleteInactiveUsers(deleteTime);
     }
@@ -78,7 +79,7 @@ public class UserService {
                 .path("/users/{id}")
                 .buildAndExpand(savedUser.getId())
                 .toUri();
-        emailService.sendThymeleafInvitation(savedUser, "Activate your account");
+        emailService.sendThymeleafInvitation(savedUser, "Aktywuj konto");
         return savedUserUri;
     }
 

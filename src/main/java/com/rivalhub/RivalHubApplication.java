@@ -8,5 +8,4 @@ public class RivalHubApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(RivalHubApplication.class, args);
 	}
-
 }
