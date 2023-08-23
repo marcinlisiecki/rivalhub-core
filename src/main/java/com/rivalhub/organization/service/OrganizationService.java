@@ -93,4 +93,14 @@ public class OrganizationService {
         String valueToHash = organization.getName() + LocalDateTime.now();
         return String.valueOf(valueToHash.hashCode() & 0x7fffffff);
     }
+
+    public Object saveCustomImage(MultipartFile multipartFile, Long id) {
+        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+
+        OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
+        fileUploadUtil.updateOrganizationImage(multipartFile, organization);
+
+        return autoMapper.mapToOrganizationDto(organizationRepository.save(organization));
+    }
 }
