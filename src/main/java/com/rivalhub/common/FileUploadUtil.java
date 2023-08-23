@@ -27,6 +27,9 @@ public class FileUploadUtil {
     @Value("${app.organization.img.catalog}")
     private String organizationImgCatalog;
 
+    @Value("${app.organization.img.path}")
+    private String organizationImgPath;
+
     private void saveFile(String uploadDir, String fileName,
                                 MultipartFile multipartFile) throws IOException {
         Path uploadPath = Paths.get(uploadDir);
@@ -50,11 +53,14 @@ public class FileUploadUtil {
         String uploadDir = organizationImgCatalog + organization.getName() + LocalDateTime.now()
                 .toString().replace(":", "-");
 
+        String imgPath = organizationImgPath + organization.getName() + LocalDateTime.now()
+                .toString().replace(":", "-");
+
         try {
             saveFile(uploadDir, fileName, multipartFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return uploadDir + "/" + fileName;
+        return imgPath + "/" + fileName;
     }
 }
