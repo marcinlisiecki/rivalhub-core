@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -97,8 +98,7 @@ public class OrganizationUserService {
                 .stream().map(u -> new UserDetailsDto(u.get(0, Long.class),
                         u.get(1, String.class),
                         u.get(2, String.class),
-                        u.get(3, String.class),
-                        u.get(4, LocalDateTime.class)))
+                        u.get(3, String.class)))
                 .collect(Collectors.toList());
     }
 
