@@ -62,7 +62,7 @@ public class OrganizationUserService {
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
 
-        var userToAdd = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        var userToAdd = userRepository.findByEmail(email).get();
         OrganizationSettingsValidator.throwIfUserIsInOrganization(organization, userToAdd);
 
         emailService.sendEmailWithInvitationToOrganization(email, organization);
