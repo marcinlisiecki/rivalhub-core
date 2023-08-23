@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -106,10 +107,10 @@ public class UserProfileHelper {
         Set<ReservationInProfileDTO> reservationDTOs = new HashSet<>();
 
         for (Organization sharedOrganization : userOrganizations) {
-            List<ReservationInProfileDTO> reservations = organizationRepoManager
+            Set<ReservationInProfileDTO> reservations = organizationRepoManager
                     .reservationsByOrganizationIdAndUserIdFilterByDate(sharedOrganization.getId(), requestUser.getId(), datePattern)
                     .stream().map(setReservationInProfileDTO(sharedOrganization))
-                    .toList();
+                    .collect(Collectors.toSet());
 
             reservationDTOs.addAll(reservations);
         }
