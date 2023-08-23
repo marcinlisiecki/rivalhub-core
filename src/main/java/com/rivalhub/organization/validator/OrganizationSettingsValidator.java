@@ -1,6 +1,6 @@
 package com.rivalhub.organization.validator;
 
-import com.rivalhub.common.exception.AlreadyInOrganizationException;
+import com.rivalhub.common.exception.ImpossibleToAddUser;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.common.exception.InsufficientPermissionsException;
 import com.rivalhub.user.UserData;
