@@ -39,6 +39,12 @@ public class OrganizationController {
         return ResponseEntity.created(savedOrganizationUri).body(savedOrganization);
     }
 
+    @PostMapping("{id}/image")
+    private ResponseEntity<?> saveCustomImage(@RequestParam(name = "thumbnail", required = false) MultipartFile multipartFile,
+                                              @PathVariable Long id){
+        return ResponseEntity.ok(organizationService.saveCustomImage(multipartFile, id));
+    }
+
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     private void updateOrganization(@PathVariable Long id, @RequestBody JsonMergePatch patch)
