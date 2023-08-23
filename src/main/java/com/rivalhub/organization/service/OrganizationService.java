@@ -7,8 +7,8 @@ import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.InvitationHelper;
 import com.rivalhub.common.MergePatcher;
 import com.rivalhub.organization.*;
+import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.common.FileUploadUtil;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -92,5 +92,15 @@ public class OrganizationService {
     private String createInvitationHash(Organization organization){
         String valueToHash = organization.getName() + LocalDateTime.now();
         return String.valueOf(valueToHash.hashCode() & 0x7fffffff);
+    }
+
+    public Object saveCustomImage(MultipartFile multipartFile, Long id) {
+        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+
+        OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
+        fileUploadUtil.updateOrganizationImage(multipartFile, organization);
+
+        return autoMapper.mapToOrganizationDto(organizationRepository.save(organization));
     }
 }
