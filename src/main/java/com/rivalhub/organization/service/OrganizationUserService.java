@@ -61,8 +61,11 @@ public class OrganizationUserService {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
-        emailService.sendEmailWithInvitationToOrganization(email, organization);
 
+        var userToAdd = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        OrganizationSettingsValidator.throwIfUserIsInOrganization(organization, userToAdd);
+
+        emailService.sendEmailWithInvitationToOrganization(email, organization);
         return autoMapper.mapToOrganizationDto(organization);
     }
 
