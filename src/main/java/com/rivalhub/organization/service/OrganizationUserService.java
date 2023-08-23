@@ -62,8 +62,10 @@ public class OrganizationUserService {
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
 
-        var userToAdd = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
-        OrganizationSettingsValidator.throwIfUserIsInOrganization(organization, userToAdd);
+        userRepository.findByEmail(email)
+                .stream().findFirst()
+                .ifPresent(user ->
+                        OrganizationSettingsValidator.throwIfUserIsInOrganization(organization, user));
 
         emailService.sendEmailWithInvitationToOrganization(email, organization);
         return autoMapper.mapToOrganizationDto(organization);
@@ -111,8 +113,7 @@ public class OrganizationUserService {
                         u.getId(),
                         u.getName(),
                         u.getEmail(),
-                        u.getProfilePictureUrl(),
-                        u.getActivationTime()
+                        u.getProfilePictureUrl()
                 ))
                 .collect(Collectors.toList());
     }
