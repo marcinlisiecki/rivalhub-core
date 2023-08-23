@@ -31,16 +31,10 @@ import org.springframework.stereotype.Component;
 public class AutoMapper {
     private final ModelMapper modelMapper;
 
-    public UserData mapToUserData(UserDto userDto){
-        return modelMapper.map(userDto, UserData.class);
-    }
     public UserDto mapToUserDto(UserData userData){
         return modelMapper.map(userData, UserDto.class);
     }
 
-    public UserData mapToUserData(UserDetails userDetailsDto){
-        return modelMapper.map(userDetailsDto, UserData.class);
-    }
 
     public LoginRequestDto mapToLoginRequest(RegisterRequestDto registerRequestDto) {
         return modelMapper.map(registerRequestDto, LoginRequestDto.class);
@@ -60,14 +54,6 @@ public class AutoMapper {
 
     public StationDTO mapToNewStationDto(Station station){
         return modelMapper.map(station, StationDTO.class);
-    }
-
-    public Reservation mapToReservation(ReservationDTO reservationDTO){
-        return modelMapper.map(reservationDTO,Reservation.class);
-    }
-
-    public Reservation mapToReservation(AddReservationDTO addReservationDTO){
-        return modelMapper.map(addReservationDTO,Reservation.class);
     }
 
     public Organization mapToOrganization(OrganizationDTO organizationDTO){
@@ -91,9 +77,6 @@ public class AutoMapper {
         return modelMapper.map(userData, UserDetailsDto.class);
 
     }
-    public PingPongEvent mapToPingPongEvent(EventDto eventDto){
-        return modelMapper.map(eventDto,PingPongEvent.class);
-    }
 
     public EventDto mapToEventDto(PingPongEvent pingPongEvent){
         return modelMapper.map(pingPongEvent,EventDto.class);
@@ -115,17 +98,10 @@ public class AutoMapper {
     }
 
 
-    public BilliardsEvent mapToBilliardsEvent(EventDto eventDto){
-        return modelMapper.map(eventDto,BilliardsEvent.class);
-    }
-
     public EventDto mapToEventDto(BilliardsEvent billiardsEvent){
         return modelMapper.map(billiardsEvent,EventDto.class);
     }
 
-    public UserData mapToUserData(UserDetailsDto userDetailsDto) {
-        return modelMapper.map(userDetailsDto, UserData.class);
-    }
 
     public EventProfileDTO mapToEventProfileDTO(PingPongEvent pingPongEvent) {
         return modelMapper.map(pingPongEvent, EventProfileDTO.class);

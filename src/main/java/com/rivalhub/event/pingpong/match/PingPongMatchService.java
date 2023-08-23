@@ -4,7 +4,7 @@ import com.rivalhub.event.EventNotFoundException;
 import com.rivalhub.event.EventType;
 import com.rivalhub.event.MatchNotFoundException;
 import com.rivalhub.event.match.MatchDto;
-import com.rivalhub.event.match.MatchServiceInterface;
+import com.rivalhub.event.match.MatchService;
 import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.event.pingpong.PingPongEventRepository;
@@ -22,7 +22,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class PingPongMatchService implements MatchServiceInterface {
+public class PingPongMatchService implements MatchService {
     private final OrganizationRepository organizationRepository;
     private final PingPongEventRepository pingPongEventRepository;
     private final PingPongMatchRepository pingPongMatchRepository;

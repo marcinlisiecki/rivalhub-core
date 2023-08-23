@@ -2,13 +2,12 @@ package com.rivalhub.event.billiards.match;
 
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.MatchService;
-import com.rivalhub.event.match.MatchServiceInterface;
 import com.rivalhub.event.match.ViewMatchDto;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.List;
 
-public class BilliardsMatchService implements MatchServiceInterface {
+public class BilliardsMatchService implements MatchService {
     @Override
     public boolean setResultApproval(Long eventId, Long matchId, boolean approve) {
         throw new NotImplementedException();
