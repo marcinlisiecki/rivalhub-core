@@ -6,7 +6,6 @@ import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepoManager;
-import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.reservation.Reservation;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
@@ -52,16 +51,17 @@ public class UserProfileHelper {
             Set<PingPongEvent> events = organizationRepoManager.
                     eventsWithParticipantsByOrganizationIdAndUserId(sharedOrganization, viewedUser.getId());
 
-            List<EventProfileDTO> eventProfileDTOStream = events.stream().map(setEventProfileDTO()).toList();
+            List<EventProfileDTO> eventProfileDTOStream = events.stream().map(setEventProfileDTO(sharedOrganization)).toList();
             eventList.addAll(eventProfileDTOStream);
         }
 
         return eventList;
     }
 
-    private Function<PingPongEvent, EventProfileDTO> setEventProfileDTO() {
+    private Function<PingPongEvent, EventProfileDTO> setEventProfileDTO(Organization sharedOrganization) {
         return event -> {
             EventProfileDTO eventProfileDTO = autoMapper.mapToEventProfileDTO(event);
+            eventProfileDTO.setOrganization(autoMapper.mapToOrganizationDto(sharedOrganization));
             eventProfileDTO.setNumberOfParticipants((long) event.getParticipants().size());
             return eventProfileDTO;
         };
@@ -92,7 +92,7 @@ public class UserProfileHelper {
             Set<PingPongEvent> events = organizationRepoManager.
                     eventsWithParticipantsByOrganizationIdAndUserIdWithPaginationByDate(sharedOrganization, requestUser.getId(), datePattern);
 
-            List<EventProfileDTO> eventProfileDTOStream = events.stream().map(setEventProfileDTO()).toList();
+            List<EventProfileDTO> eventProfileDTOStream = events.stream().map(setEventProfileDTO(sharedOrganization)).toList();
             eventList.addAll(eventProfileDTOStream);
         }
         return eventList;
