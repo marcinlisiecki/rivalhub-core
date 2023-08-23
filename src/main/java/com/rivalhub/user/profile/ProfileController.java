@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequiredArgsConstructor
@@ -19,5 +20,15 @@ public class ProfileController {
     @GetMapping("/users/{id}/events")
     private ResponseEntity<?> sharedOrganizationEvents(@PathVariable Long id){
         return ResponseEntity.ok(profileService.getSharedOrganizationEvents(id));
+    }
+
+    @GetMapping("/users/events")
+    private ResponseEntity<?> getAllEventsByRequestUserAndMonth(@RequestParam("date") String date){
+        return ResponseEntity.ok(profileService.getAllEventsByRequestUserAndMonth(date));
+    }
+
+    @GetMapping("/users/reservations")
+    private ResponseEntity<?> getAllReservationsByRequestUserAndMonth(@RequestParam("date") String date){
+        return ResponseEntity.ok(profileService.getAllReservationsByRequestUserAndMonth(date));
     }
 }

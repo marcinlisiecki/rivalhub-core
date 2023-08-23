@@ -1,4 +1,4 @@
-package com.rivalhub.reservation;
+package com.rivalhub.common.exception;
 
 import com.rivalhub.common.ErrorMessages;
 
