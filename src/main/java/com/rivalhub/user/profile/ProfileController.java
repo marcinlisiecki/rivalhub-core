@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequiredArgsConstructor
@@ -25,9 +26,20 @@ public class ProfileController {
     }
 
     @PatchMapping("/users")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     private ResponseEntity<?> updateUser(@RequestBody JsonMergePatch patch)
             throws JsonPatchException, JsonProcessingException {
         return ResponseEntity.ok(profileService.updateProfile(patch));
+    }
+
+    @PostMapping("/users/image")
+    private ResponseEntity<?> updateImage(@RequestParam(name = "thumbnail", required = false)
+                                              MultipartFile multipartFile){
+        return ResponseEntity.ok(profileService.updateImage(multipartFile));
+    }
+
+    @DeleteMapping("/users")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void deleteUser(){
+        profileService.deleteProfile();
     }
 }

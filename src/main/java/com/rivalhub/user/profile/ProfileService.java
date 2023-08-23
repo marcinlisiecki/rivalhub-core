@@ -4,19 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.common.AutoMapper;
+import com.rivalhub.common.FileUploadUtil;
 import com.rivalhub.common.MergePatcher;
-import com.rivalhub.organization.OrganizationDTO;
-import com.rivalhub.organization.OrganizationMapper;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
-import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.security.SecurityUtils;
-import com.rivalhub.user.UserAlreadyExistsException;
-import com.rivalhub.user.UserData;
-import com.rivalhub.user.UserDetailsDto;
-import com.rivalhub.user.UserRepository;
+import com.rivalhub.user.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Set;
 
@@ -28,6 +22,7 @@ public class ProfileService {
 
     private final MergePatcher<UserDetailsDto> userDetailsDtoMergePatcher;
     private final AutoMapper autoMapper;
+    private final FileUploadUtil fileUploadUtil;
     Set<ReservationInProfileDTO> getSharedOrganizationReservations(Long id) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
         UserData viewedUser = userRepository.findById(id)
@@ -47,10 +42,24 @@ public class ProfileService {
     public UserDetailsDto updateProfile(JsonMergePatch patch) throws JsonPatchException, JsonProcessingException {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
 
-        UserDetailsDto userDTO = autoMapper.mapToUserDetails(requestUser);
-        UserDetailsDto userDetailsDto = userDetailsDtoMergePatcher.patch(patch, userDTO, UserDetailsDto.class);
-        userRepository.save(autoMapper.mapToUserData(userDetailsDto));
+        UserDetailsDto userDetailsToPatch = autoMapper.mapToUserDetails(requestUser);
+        UserDetailsDto userDetailsDto = userDetailsDtoMergePatcher.patch(patch, userDetailsToPatch, UserDetailsDto.class);
 
+        userRepository.save(UserMapper.mapUserDetailsDtoToUserData(userDetailsDto, requestUser));
         return userDetailsDto;
+    }
+
+    public void deleteProfile() {
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        userRepository.deleteById(requestUser.getId());
+    }
+
+    public UserDetailsDto updateImage(MultipartFile multipartFile) {
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+
+        fileUploadUtil.updateUserImage(requestUser, multipartFile);
+        userRepository.save(requestUser);
+
+        return UserMapper.map(requestUser);
     }
 }

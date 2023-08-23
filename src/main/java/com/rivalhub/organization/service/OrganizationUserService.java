@@ -111,8 +111,7 @@ public class OrganizationUserService {
                         u.getId(),
                         u.getName(),
                         u.getEmail(),
-                        u.getProfilePictureUrl(),
-                        u.getActivationTime()
+                        u.getProfilePictureUrl()
                 ))
                 .collect(Collectors.toList());
     }
