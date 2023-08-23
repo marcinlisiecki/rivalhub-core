@@ -50,10 +50,12 @@ public class FileUploadUtil {
         String fileName = "avatar" + multipartFile.getOriginalFilename()
                 .substring(multipartFile.getOriginalFilename().lastIndexOf("."));
 
-        String uploadDir = organizationImgCatalog + organization.getName() + LocalDateTime.now()
+        LocalDateTime timestamps = LocalDateTime.now();
+
+        String uploadDir = organizationImgCatalog + organization.getName() + timestamps
                 .toString().replace(":", "-");
 
-        String imgPath = organizationImgPath + organization.getName() + LocalDateTime.now()
+        String imgPath = organizationImgPath + organization.getName() + timestamps
                 .toString().replace(":", "-");
 
         try {
