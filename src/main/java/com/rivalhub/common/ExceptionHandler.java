@@ -26,7 +26,8 @@ public class ExceptionHandler {
             MatchNotFoundException.class,
             IOException.class,
             MatchNotFoundException.class,
-            InvalidPathParamException.class
+            InvalidPathParamException.class,
+            ImpossibleToAddUser.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessageDto handleExceptions(Exception e) {
