@@ -6,6 +6,7 @@ import com.rivalhub.user.UserDetailsDto;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Objects;
 
 @Data
 public class ReservationInProfileDTO {
@@ -15,4 +16,16 @@ public class ReservationInProfileDTO {
     private String endTime;
     private UserDetailsDto user;
     private OrganizationDTO organization;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ReservationInProfileDTO that)) return false;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

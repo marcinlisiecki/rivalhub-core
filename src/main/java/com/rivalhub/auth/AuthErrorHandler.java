@@ -1,6 +1,7 @@
 package com.rivalhub.auth;
 
 import com.rivalhub.common.dto.ErrorMessageDto;
+import com.rivalhub.common.exception.UserNotAuthenticatedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -1,8 +1,8 @@
 package com.rivalhub.organization.validator;
 
+import com.rivalhub.common.exception.ImpossibleToAddUser;
 import com.rivalhub.organization.Organization;
-import com.rivalhub.organization.exception.AlreadyInOrganizationException;
-import com.rivalhub.organization.exception.InsufficientPermissionsException;
+import com.rivalhub.common.exception.InsufficientPermissionsException;
 import com.rivalhub.user.UserData;
 
 public class OrganizationSettingsValidator {
@@ -16,6 +16,6 @@ public class OrganizationSettingsValidator {
     }
 
     public static void throwIfUserIsInOrganization(Organization organization, UserData userToAdd) {
-        if(organization.getUserList().stream().anyMatch(userToAdd::equals)) throw new AlreadyInOrganizationException();
+        if(organization.getUserList().stream().anyMatch(userToAdd::equals)) throw new ImpossibleToAddUser();
     }
 }

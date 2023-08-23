@@ -1,8 +1,8 @@
 package com.rivalhub.event.pingpong.match;
 
-import com.rivalhub.event.EventNotFoundException;
+import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventType;
-import com.rivalhub.event.MatchNotFoundException;
+import com.rivalhub.common.exception.MatchNotFoundException;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.MatchServiceInterface;
 import com.rivalhub.event.match.ViewMatchDto;
@@ -11,7 +11,7 @@ import com.rivalhub.event.pingpong.PingPongEventRepository;
 import com.rivalhub.event.pingpong.match.result.PingPongSet;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;

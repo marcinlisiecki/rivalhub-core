@@ -5,13 +5,13 @@ import com.rivalhub.common.PaginationHelper;
 import com.rivalhub.email.EmailService;
 import com.rivalhub.organization.OrganizationDTO;
 import com.rivalhub.organization.OrganizationRepository;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
-import com.rivalhub.organization.exception.AlreadyInOrganizationException;
-import com.rivalhub.organization.exception.WrongInvitationException;
+import com.rivalhub.common.exception.AlreadyInOrganizationException;
+import com.rivalhub.common.exception.WrongInvitationException;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserDetailsDto;
-import com.rivalhub.user.UserNotFoundException;
+import com.rivalhub.common.exception.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -62,8 +62,10 @@ public class OrganizationUserService {
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
 
-        var userToAdd = userRepository.findByEmail(email).get();
-        OrganizationSettingsValidator.throwIfUserIsInOrganization(organization, userToAdd);
+        userRepository.findByEmail(email)
+                .stream().findFirst()
+                .ifPresent(user ->
+                        OrganizationSettingsValidator.throwIfUserIsInOrganization(organization, user));
 
         emailService.sendEmailWithInvitationToOrganization(email, organization);
         return autoMapper.mapToOrganizationDto(organization);
@@ -111,8 +113,7 @@ public class OrganizationUserService {
                         u.getId(),
                         u.getName(),
                         u.getEmail(),
-                        u.getProfilePictureUrl(),
-                        u.getActivationTime()
+                        u.getProfilePictureUrl()
                 ))
                 .collect(Collectors.toList());
     }
