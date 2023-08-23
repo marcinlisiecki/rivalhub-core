@@ -25,10 +25,10 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class FileUploadUtil {
     @Value("${app.organization.img.catalog}")
-    private String organizationImgCatalog;
+    private String organizationImgCatalogPath;
 
     @Value("${app.organization.img.path}")
-    private String organizationImgPath;
+    private String organizationImgApiPath;
 
     private void saveFile(String uploadDir, String fileName,
                                 MultipartFile multipartFile) throws IOException {
@@ -50,13 +50,10 @@ public class FileUploadUtil {
         String fileName = "avatar" + multipartFile.getOriginalFilename()
                 .substring(multipartFile.getOriginalFilename().lastIndexOf("."));
 
-        LocalDateTime timestamps = LocalDateTime.now();
+        LocalDateTime timestamp = LocalDateTime.now();
 
-        String uploadDir = organizationImgCatalog + organization.getName() + timestamps
-                .toString().replace(":", "-");
-
-        String imgPath = organizationImgPath + organization.getName() + timestamps
-                .toString().replace(":", "-");
+        String uploadDir = createImgPath(organizationImgCatalogPath, organization.getName(), timestamp);
+        String imgPath = createImgPath(organizationImgApiPath, organization.getName(), timestamp);
 
         try {
             saveFile(uploadDir, fileName, multipartFile);
@@ -64,5 +61,9 @@ public class FileUploadUtil {
             throw new RuntimeException(e);
         }
         return imgPath + "/" + fileName;
+    }
+
+    private String createImgPath(String path, String organizationName, LocalDateTime timestamp) {
+        return path + organizationName + timestamp.toString().replace(":", "-");
     }
 }
