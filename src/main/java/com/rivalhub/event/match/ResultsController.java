@@ -2,6 +2,7 @@ package com.rivalhub.event.match;
 
 import com.rivalhub.event.pingpong.match.PingPongMatchService;
 import com.rivalhub.event.pingpong.match.result.PingPongSet;
+import com.rivalhub.event.pullups.match.PullUpMatchService;
 import com.rivalhub.event.tablefootball.match.TableFootballMatchService;
 import com.rivalhub.event.tablefootball.match.result.TableFootballMatchSet;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.List;
 public class ResultsController {
     private final PingPongMatchService pingPongMatchService;
     private final TableFootballMatchService tableFootballMatchService;
+    private final PullUpMatchService pullUpMatchService;
     @PostMapping("/{matchId}/pingpong")
     private ResponseEntity<?> addResultsPingPong(@PathVariable Long eventId,
                                          @PathVariable Long matchId,
@@ -33,5 +35,12 @@ public class ResultsController {
         return ResponseEntity.ok(tableFootballMatchService.addResult(eventId, matchId, setList));
     }
 
+
+    @PostMapping("/{matchId}/pullups")
+    private ResponseEntity<?> addResultsPullUps(@PathVariable Long eventId,
+                                                      @PathVariable Long matchId,
+                                                      @RequestBody List<TableFootballMatchSet> setList) {
+        return ResponseEntity.ok(tableFootballMatchService.addResult(eventId, matchId, setList));
+    }
 
 }

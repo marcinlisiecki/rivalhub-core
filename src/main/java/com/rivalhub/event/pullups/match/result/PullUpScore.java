@@ -9,7 +9,8 @@ import lombok.Data;
 public class PullUpScore {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
     @ManyToOne
-    UserData user;
+    private UserData user;
+    private Long score;
 }

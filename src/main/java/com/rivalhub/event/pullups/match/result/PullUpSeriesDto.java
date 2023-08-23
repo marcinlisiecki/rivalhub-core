@@ -6,5 +6,5 @@ import java.util.List;
 
 @Data
 public class PullUpSeriesDto {
-    List<PullUpScoreDto> pullUpScoreDtoList;
+    private List<PullUpScoreDto> pullUpScoreDtoList;
 }

@@ -10,8 +10,8 @@ import java.util.List;
 public class PullUpSeries {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @OneToMany
-    List<PullUpScore> pullUpScoreList;
+    private List<PullUpScore> pullUpScoreList;
 }
