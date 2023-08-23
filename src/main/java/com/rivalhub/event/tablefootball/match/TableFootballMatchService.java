@@ -4,7 +4,7 @@ import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventType;
 import com.rivalhub.common.exception.MatchNotFoundException;
 import com.rivalhub.event.match.MatchDto;
-import com.rivalhub.event.match.MatchServiceInterface;
+import com.rivalhub.event.match.MatchService;
 import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.event.tablefootball.TableFootballEvent;
 import com.rivalhub.event.tablefootball.TableFootballEventRepository;
@@ -22,7 +22,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-public class TableFootballMatchService implements MatchServiceInterface {
+public class TableFootballMatchService implements MatchService {
 
     private final OrganizationRepository organizationRepository;
     private final TableFootballEventRepository tableFootballEventRepository;

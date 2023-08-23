@@ -1,5 +1,8 @@
 package com.rivalhub.event.darts.match;
 
+import com.rivalhub.event.darts.match.result.Leg;
+import com.rivalhub.event.darts.match.result.variables.DartFormat;
+import com.rivalhub.event.darts.match.result.variables.DartMode;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -14,12 +17,19 @@ public class DartMatch {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToMany
-    private List<UserData> team1 = new ArrayList<>();
-    @ManyToMany
-    private List<UserData> team2 = new ArrayList<>();
-    //      TODO jakie dane z meczu chcemy??????
 
-    private boolean team1Approval;
-    private boolean team2Approval;
+
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<Leg> legList = new ArrayList<>();
+
+    private DartFormat dartFormat;
+    private DartMode dartMode;
+
+    @ManyToMany
+    private List<UserData> participants = new ArrayList<>();
+
+    private boolean approvalFirstPlace;
+    private boolean approvalSecondPlace;
+    private boolean approvalThirdPlace;
+
 }

@@ -11,4 +11,7 @@ public class MatchDto {
     private List<Long> team2Ids;
     private boolean team1Approval;
     private boolean team2Approval;
+    private boolean team3Approval;
+    private String dartFormat;
+    private String dartMode;
 }
