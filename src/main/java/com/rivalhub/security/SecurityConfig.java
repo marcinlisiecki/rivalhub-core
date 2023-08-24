@@ -31,18 +31,6 @@ class SecurityConfig implements WebMvcConfigurer {
     @Value("${app.frontUrl}")
     private String frontUrl;
 
-    @Value("${app.organization.img.catalog}")
-    private String organizationImgCatalog;
-
-    @Value("${app.user.img.catalog}")
-    private String userImgCatalog;
-
-    @Value("${app.img.path}")
-    private String imgPath;
-
-    @Value("${app.img.catalog}")
-    private String imgCatalog;
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable());
@@ -77,11 +65,5 @@ class SecurityConfig implements WebMvcConfigurer {
                 .addMapping("/**")
                 .allowedMethods("*")
                 .allowedOrigins(frontUrl);
-    }
-
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler(imgPath + "**")
-                .addResourceLocations("file:" + imgCatalog);
     }
 }
