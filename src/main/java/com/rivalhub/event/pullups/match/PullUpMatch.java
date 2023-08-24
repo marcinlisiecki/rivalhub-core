@@ -19,6 +19,7 @@ public class PullUpMatch {
     @OneToMany
     private List<PullUpSeries> pullUpSeries;
 
+
     private boolean approvalFirstPlace;
     private boolean approvalSecondPlace;
     private boolean approvalThirdPlace;

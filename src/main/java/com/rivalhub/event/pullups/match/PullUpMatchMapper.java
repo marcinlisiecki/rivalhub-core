@@ -70,10 +70,10 @@ public class PullUpMatchMapper {
                 .map(this::getScore)
                 .toList();
         pullUpMatch.getParticipants()
-                .stream()
                 .forEach(participant -> overalScoreMap.put(participant.getId(), 0));
-        singleUserScoreList.stream()
+        singleUserScoreList
                 .forEach(score-> overalScoreMap.put(score.getId(),score.getScore()+ overalScoreMap.get(score.getId())));
+
         int numberOfPlayersWithAssignedPlaces = 0;
         for(int iteration = 0; iteration < overalScoreMap.keySet().size(); iteration++){
             int numberOfPlayersWithAssignedPlaceInThisIteration = 0;
