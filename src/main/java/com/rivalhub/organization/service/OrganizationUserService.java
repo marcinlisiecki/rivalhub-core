@@ -13,6 +13,7 @@ import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserDetailsDto;
 import com.rivalhub.common.exception.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
+import com.rivalhub.user.UserSearchDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -76,7 +77,8 @@ public class OrganizationUserService {
                 .stream().map(u -> new UserDetailsDto(u.get(0, Long.class),
                                                       u.get(1, String.class),
                                                       u.get(2, String.class),
-                                                      u.get(3, String.class)))
+                                                      u.get(3, String.class),
+                        u.get(4, LocalDateTime.class)))
                 .collect(Collectors.toSet());
     }
 
@@ -95,21 +97,22 @@ public class OrganizationUserService {
         organizationRepository.save(organization);
     }
 
-    public List<UserDetailsDto> findUsersByNamePhrase(Long id, String namePhrase) {
+    public List<UserSearchDto> findUsersByNamePhrase(Long id, String namePhrase) {
         return userRepository.findByNamePhraseAndOrganizationId(id, "%" + namePhrase + "%")
-                .stream().map(u -> new UserDetailsDto(u.get(0, Long.class),
+                .stream().map(u -> new UserSearchDto(u.get(0, Long.class),
                         u.get(1, String.class),
                         u.get(2, String.class),
-                        u.get(3, String.class)))
+                        u.get(3, String.class)
+                        ))
                 .collect(Collectors.toList());
     }
 
-    public List<UserDetailsDto> findAdminUsersByOrganization(Long id) {
+    public List<UserSearchDto> findAdminUsersByOrganization(Long id) {
         var organization = organizationRepository.findById(id)
                 .orElseThrow(OrganizationNotFoundException::new);
         var adminUsers = organization.getAdminUsers();
         return adminUsers
-                .stream().map(u -> new UserDetailsDto(
+                .stream().map(u -> new UserSearchDto(
                         u.getId(),
                         u.getName(),
                         u.getEmail(),

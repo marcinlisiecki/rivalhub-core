@@ -84,7 +84,7 @@ public class Organization {
             cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     List<PingPongEvent> pingPongEvents = new ArrayList<>();
 
-    private String colorForDefaultImage;
+    private String color;
 
     @OneToMany(fetch = FetchType.EAGER,
             cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
