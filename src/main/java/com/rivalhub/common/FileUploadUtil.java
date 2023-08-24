@@ -78,7 +78,14 @@ public class FileUploadUtil {
 
     private void deleteFileIfExists(Organization organization) {
         if (organization.getImageUrl() == null) return;
-        deleteFile(organization.getImageUrl());
+
+        String fullUrl = organization.getImageUrl();
+        deleteFile(fullUrl);
+
+        String fileName = fullUrl.substring(fullUrl.lastIndexOf("/"));
+        String directoryForImage = fullUrl.replace(fileName, "");
+        deleteFile(directoryForImage);
+
         organization.setImageUrl(null);
     }
 
@@ -111,13 +118,7 @@ public class FileUploadUtil {
 
         try {
             Files.delete(imagesPath);
-            System.out.println("File "
-                    + imagesPath.toAbsolutePath()
-                    + " successfully removed");
         } catch (IOException e) {
-            System.err.println("Unable to delete "
-                    + imagesPath.toAbsolutePath()
-                    + " due to...");
             e.printStackTrace();
         }
     }
@@ -142,6 +143,5 @@ public class FileUploadUtil {
         return typeName + multipartFile.getOriginalFilename()
                 .substring(multipartFile.getOriginalFilename().lastIndexOf("."));
     }
-
 }
 
