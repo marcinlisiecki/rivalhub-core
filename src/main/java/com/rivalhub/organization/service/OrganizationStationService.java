@@ -61,7 +61,7 @@ public class OrganizationStationService {
 
         if (onlyAvailable && start != null && end != null)
             return StationAvailabilityFinder
-                    .getAvailableStations(organization, start, end, type, requestUser);
+                    .getAvailableStations(organization, start, end, type);
 
         if (showInactive) return StationAvailabilityFinder.filterForTypeIn(organization.getStationList(), type);
         return StationAvailabilityFinder.filterForActiveStationsAndTypeIn(organization, type);
@@ -138,14 +138,14 @@ public class OrganizationStationService {
 
         if (type != null) {
             List<Station> availableStations = StationAvailabilityFinder
-                    .getAvailableStations(organization, start, end, type, requestUser);
+                    .getAvailableStations(organization, start, end, type);
             eventStations.add(getEventTypeStation(type, availableStations, organization, timeNeeded));
             return eventStations;
         }
 
         for (EventType eventType : EventType.values()) {
             List<Station> availableStations = StationAvailabilityFinder
-                    .getAvailableStations(organization, start, end, eventType, requestUser);
+                    .getAvailableStations(organization, start, end, eventType);
             eventStations.add(getEventTypeStation(eventType, availableStations, organization, timeNeeded));
         }
 
