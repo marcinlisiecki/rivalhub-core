@@ -6,12 +6,13 @@ import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.common.MergePatcher;
+import com.rivalhub.common.exception.StationNotFoundException;
 import com.rivalhub.event.EventType;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepoManager;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.station.*;
 import com.rivalhub.user.UserData;
@@ -60,7 +61,7 @@ public class OrganizationStationService {
 
         if (onlyAvailable && start != null && end != null)
             return StationAvailabilityFinder
-                    .getAvailableStations(organization, start, end, type, requestUser);
+                    .getAvailableStations(organization, start, end, type);
 
         if (showInactive) return StationAvailabilityFinder.filterForTypeIn(organization.getStationList(), type);
         return StationAvailabilityFinder.filterForActiveStationsAndTypeIn(organization, type);
@@ -137,14 +138,14 @@ public class OrganizationStationService {
 
         if (type != null) {
             List<Station> availableStations = StationAvailabilityFinder
-                    .getAvailableStations(organization, start, end, type, requestUser);
+                    .getAvailableStations(organization, start, end, type);
             eventStations.add(getEventTypeStation(type, availableStations, organization, timeNeeded));
             return eventStations;
         }
 
         for (EventType eventType : EventType.values()) {
             List<Station> availableStations = StationAvailabilityFinder
-                    .getAvailableStations(organization, start, end, eventType, requestUser);
+                    .getAvailableStations(organization, start, end, eventType);
             eventStations.add(getEventTypeStation(eventType, availableStations, organization, timeNeeded));
         }
 

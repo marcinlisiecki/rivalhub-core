@@ -16,10 +16,9 @@ public class UserDetailsDto {
     private String profilePictureUrl;
     private LocalDateTime activationTime;
 
-    public UserDetailsDto(long id, String name, String email, String profilePictureUrl) {
+    public UserDetailsDto(long id, String name, String email) {
         this.id = id;
         this.name = name;
         this.email = email;
-        this.profilePictureUrl = profilePictureUrl;
     }
 }

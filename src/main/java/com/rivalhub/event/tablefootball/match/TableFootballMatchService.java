@@ -1,21 +1,17 @@
 package com.rivalhub.event.tablefootball.match;
 
-import com.rivalhub.event.EventNotFoundException;
+import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventType;
-import com.rivalhub.event.MatchNotFoundException;
+import com.rivalhub.common.exception.MatchNotFoundException;
 import com.rivalhub.event.match.MatchDto;
-import com.rivalhub.event.match.MatchServiceInterface;
+import com.rivalhub.event.match.MatchService;
 import com.rivalhub.event.match.ViewMatchDto;
-import com.rivalhub.event.pingpong.PingPongEvent;
-import com.rivalhub.event.pingpong.match.PingPongMatch;
-import com.rivalhub.event.pingpong.match.PingPongMatchMapper;
-import com.rivalhub.event.pingpong.match.result.PingPongSet;
 import com.rivalhub.event.tablefootball.TableFootballEvent;
 import com.rivalhub.event.tablefootball.TableFootballEventRepository;
 import com.rivalhub.event.tablefootball.match.result.TableFootballMatchSet;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +22,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-public class TableFootballMatchService implements MatchServiceInterface {
+public class TableFootballMatchService implements MatchService {
 
     private final OrganizationRepository organizationRepository;
     private final TableFootballEventRepository tableFootballEventRepository;

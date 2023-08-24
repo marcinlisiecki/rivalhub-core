@@ -4,15 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.common.AutoMapper;
+import com.rivalhub.common.FileUploadUtil;
 import com.rivalhub.common.InvitationHelper;
 import com.rivalhub.common.MergePatcher;
+import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.*;
-import com.rivalhub.common.FileUploadUtil;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
 import com.rivalhub.security.SecurityUtils;
-import lombok.RequiredArgsConstructor;
 import com.rivalhub.user.UserData;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -92,5 +92,17 @@ public class OrganizationService {
     private String createInvitationHash(Organization organization){
         String valueToHash = organization.getName() + LocalDateTime.now();
         return String.valueOf(valueToHash.hashCode() & 0x7fffffff);
+    }
+
+    public Object saveCustomImage(MultipartFile multipartFile,String keepAvatar, Long id) {
+        boolean deleteAvatar = !Boolean.parseBoolean(keepAvatar);
+
+        Organization organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+
+        OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
+        fileUploadUtil.updateOrganizationImage(multipartFile,deleteAvatar, organization);
+
+        return autoMapper.mapToOrganizationDto(organizationRepository.save(organization));
     }
 }

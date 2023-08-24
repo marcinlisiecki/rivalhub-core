@@ -2,10 +2,8 @@ package com.rivalhub.reservation;
 
 import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.organization.Organization;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
-import com.rivalhub.organization.exception.ReservationIsNotPossible;
+import com.rivalhub.common.exception.ReservationIsNotPossible;
 import com.rivalhub.station.Station;
-import com.rivalhub.user.UserData;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Instant;

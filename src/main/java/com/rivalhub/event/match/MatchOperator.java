@@ -13,10 +13,10 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class MatchOperator {
-    private final List<MatchServiceInterface> listOfImplementations;
+    private final List<MatchService> listOfImplementations;
 
 
-    public MatchServiceInterface useStrategy(String strategy) {
+    public MatchService useStrategy(String strategy) {
         return listOfImplementations.stream()
                 .filter(implementation -> implementation.matchStrategy(strategy))
                 .findFirst()

@@ -5,7 +5,7 @@ public class ErrorMessages {
 
     private ErrorMessages() {}
 
-
+    public static final String IMPOSSIBLE_TO_ADD_USER = "Nie można zaprosić użytkownika, który już jest w organizacji";
     public static final String COULD_NOT_SAVE_FILE = "Nie można zapisać pliku o nazwie";
     public static final String DEFAULT_ERROR = "Wystąpił błąd";
 
@@ -51,5 +51,6 @@ public class ErrorMessages {
     public static final String RESERVATION_NOT_FOUND = "Nie znaleziono rezerwacji";
     public static final String INSUFFICIENT_PERMISSIONS = "Nie masz wymaganych uprawnien.";
     public static final String MATCH_NOT_FOUND = "Nie znaleziono meczu";
+    public static final String USER_ALREADY_ACTIVATED = "Konto już zostało potwierdzone.";
 
 }

@@ -2,11 +2,11 @@ package com.rivalhub.event.darts;
 
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.event.EventDto;
-import com.rivalhub.event.EventNotFoundException;
+import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
 import com.rivalhub.organization.OrganizationRepository;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.common.exception.OrganizationNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

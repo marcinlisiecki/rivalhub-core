@@ -5,18 +5,20 @@ import com.rivalhub.common.PaginationHelper;
 import com.rivalhub.email.EmailService;
 import com.rivalhub.organization.OrganizationDTO;
 import com.rivalhub.organization.OrganizationRepository;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
-import com.rivalhub.organization.exception.AlreadyInOrganizationException;
-import com.rivalhub.organization.exception.WrongInvitationException;
+import com.rivalhub.common.exception.AlreadyInOrganizationException;
+import com.rivalhub.common.exception.WrongInvitationException;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserDetailsDto;
-import com.rivalhub.user.UserNotFoundException;
+import com.rivalhub.common.exception.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
+import com.rivalhub.user.UserSearchDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -60,8 +62,13 @@ public class OrganizationUserService {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
-        emailService.sendEmailWithInvitationToOrganization(email, organization);
 
+        userRepository.findByEmail(email)
+                .stream().findFirst()
+                .ifPresent(user ->
+                        OrganizationSettingsValidator.throwIfUserIsInOrganization(organization, user));
+
+        emailService.sendEmailWithInvitationToOrganization(email, organization);
         return autoMapper.mapToOrganizationDto(organization);
     }
 
@@ -70,7 +77,8 @@ public class OrganizationUserService {
                 .stream().map(u -> new UserDetailsDto(u.get(0, Long.class),
                                                       u.get(1, String.class),
                                                       u.get(2, String.class),
-                                                      u.get(3, String.class)))
+                                                      u.get(3, String.class),
+                        u.get(4, LocalDateTime.class)))
                 .collect(Collectors.toSet());
     }
 
@@ -89,27 +97,26 @@ public class OrganizationUserService {
         organizationRepository.save(organization);
     }
 
-    public List<UserDetailsDto> findUsersByNamePhrase(Long id, String namePhrase) {
+    public List<UserSearchDto> findUsersByNamePhrase(Long id, String namePhrase) {
         return userRepository.findByNamePhraseAndOrganizationId(id, "%" + namePhrase + "%")
-                .stream().map(u -> new UserDetailsDto(u.get(0, Long.class),
+                .stream().map(u -> new UserSearchDto(u.get(0, Long.class),
                         u.get(1, String.class),
                         u.get(2, String.class),
-                        u.get(3, String.class),
-                        u.get(4, LocalDateTime.class)))
+                        u.get(3, String.class)
+                        ))
                 .collect(Collectors.toList());
     }
 
-    public List<UserDetailsDto> findAdminUsersByOrganization(Long id) {
+    public List<UserSearchDto> findAdminUsersByOrganization(Long id) {
         var organization = organizationRepository.findById(id)
                 .orElseThrow(OrganizationNotFoundException::new);
         var adminUsers = organization.getAdminUsers();
         return adminUsers
-                .stream().map(u -> new UserDetailsDto(
+                .stream().map(u -> new UserSearchDto(
                         u.getId(),
                         u.getName(),
                         u.getEmail(),
-                        u.getProfilePictureUrl(),
-                        u.getActivationTime()
+                        u.getProfilePictureUrl()
                 ))
                 .collect(Collectors.toList());
     }

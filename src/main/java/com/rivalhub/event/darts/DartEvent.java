@@ -15,6 +15,7 @@ import java.util.List;
 @Entity
 @Data
 public class DartEvent extends Event {
+
     @OneToMany
     List<DartMatch> dartsMatch;
     private EventType eventType = EventType.DARTS;
