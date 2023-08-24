@@ -19,10 +19,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class FileUploadUtil {
     @Value("${app.organization.img.catalog}")
-    private String organizationImgCatalogPath;
-
-    @Value("${app.organization.img.path}")
-    private String organizationImgApiPath;
+    private String organizationImgCatalog;
 
     @Value("${app.organization.img.name}")
     private String organizationImgName;
@@ -33,6 +30,9 @@ public class FileUploadUtil {
     @Value("${app.user.img.name}")
     private String userImgName;
 
+    @Value("${app.img.catalog}")
+    private String imgCatalog;
+
     public String saveOrganizationImage(MultipartFile multipartFile, Organization organization) {
         String fileName = createFileName(multipartFile, organizationImgName);
         String uploadDir = getUploadDir(organization, multipartFile);
@@ -42,7 +42,7 @@ public class FileUploadUtil {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return uploadDir + "/"+fileName;
+        return uploadDir + "/" + fileName;
     }
 
     public void updateUserImage(UserData requestUser, MultipartFile multipartFile) {
@@ -61,6 +61,7 @@ public class FileUploadUtil {
         }
         requestUser.setProfilePictureUrl(uploadDir + "/" + fileName);
     }
+
     public void updateOrganizationImage(MultipartFile multipartFile, boolean deleteAvatar, Organization organization) {
         if (multipartFile == null && deleteAvatar) {
             deleteFileIfExists(organization);
@@ -98,21 +99,31 @@ public class FileUploadUtil {
         userData.setProfilePictureUrl(null);
     }
 
-
-
     private String getUploadDir(Organization organization, MultipartFile multipartFile) {
         if (organization.getImageUrl() == null)
-            return organizationImgCatalog + organization.getName().replace(" ", "_") + LocalDateTime.now().toString().replace(":", "-");
+            return imgCatalog
+                    + organizationImgCatalog
+                    + organization.getName().replace(" ", "_")
+                    + LocalDateTime.now().toString().replace(":", "-");
 
-        String avatarUrl = organizationImgName + multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf("."));
+        String avatarUrl = organizationImgName + multipartFile
+                .getOriginalFilename()
+                .substring(multipartFile.getOriginalFilename().lastIndexOf("."));
+
         return organization.getImageUrl().replace("/" + avatarUrl, "");
     }
 
     private String getUploadDir(UserData userData, MultipartFile multipartFile) {
         if (userData.getProfilePictureUrl() == null)
-            return userImgCatalog + userData.getEmail() + LocalDateTime.now().toString().replace(":", "-");
+            return imgCatalog
+                    + userImgCatalog
+                    + userData.getEmail()
+                    + LocalDateTime.now().toString().replace(":", "-");
 
-        String avatarUrl = userImgName + multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf("."));
+        String avatarUrl = userImgName + multipartFile
+                .getOriginalFilename()
+                .substring(multipartFile.getOriginalFilename().lastIndexOf("."));
+
         return userData.getProfilePictureUrl().replace("/" + avatarUrl, "");
     }
 
@@ -127,7 +138,7 @@ public class FileUploadUtil {
     }
 
     private void saveFile(String uploadDir, String fileName,
-                                MultipartFile multipartFile) throws IOException {
+                          MultipartFile multipartFile) throws IOException {
         Path uploadPath = Paths.get(uploadDir);
 
         if (!Files.exists(uploadPath)) {
@@ -145,26 +156,5 @@ public class FileUploadUtil {
     private String createFileName(MultipartFile multipartFile, String typeName) {
         return typeName + multipartFile.getOriginalFilename()
                 .substring(multipartFile.getOriginalFilename().lastIndexOf("."));
-    }
-
-    public String saveOrganizationImage(MultipartFile multipartFile, Organization organization){
-        String fileName = "avatar" + multipartFile.getOriginalFilename()
-                .substring(multipartFile.getOriginalFilename().lastIndexOf("."));
-
-        LocalDateTime timestamp = LocalDateTime.now();
-
-        String uploadDir = createImgPath(organizationImgCatalogPath, organization.getName(), timestamp);
-        String imgPath = createImgPath(organizationImgApiPath, organization.getName(), timestamp);
-
-        try {
-            saveFile(uploadDir, fileName, multipartFile);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return imgPath + "/" + fileName;
-    }
-
-    private String createImgPath(String path, String organizationName, LocalDateTime timestamp) {
-        return path + organizationName + timestamp.toString().replace(":", "-");
     }
 }

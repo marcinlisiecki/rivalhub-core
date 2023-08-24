@@ -32,10 +32,16 @@ class SecurityConfig implements WebMvcConfigurer {
     private String frontUrl;
 
     @Value("${app.organization.img.catalog}")
-    private String imagesCatalog;
+    private String organizationImgCatalog;
 
-    @Value("${app.organization.img.path}")
-    private String imagesPath;
+    @Value("${app.user.img.catalog}")
+    private String userImgCatalog;
+
+    @Value("${app.img.path}")
+    private String imgPath;
+
+    @Value("${app.img.catalog}")
+    private String imgCatalog;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -75,7 +81,7 @@ class SecurityConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/" + imagesPath + "**")
-                .addResourceLocations("file:" + imagesCatalog);
+        registry.addResourceHandler(imgPath + "**")
+                .addResourceLocations("file:" + imgCatalog);
     }
 }
