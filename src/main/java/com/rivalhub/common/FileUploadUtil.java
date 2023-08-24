@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -29,8 +30,7 @@ public class FileUploadUtil {
     @Value("${app.user.img.name}")
     private String userImgName;
 
-
-    public String saveOrganizationImage(MultipartFile multipartFile, Organization organization){
+    public String saveOrganizationImage(MultipartFile multipartFile, Organization organization) {
         String fileName = createFileName(multipartFile, organizationImgName);
         String uploadDir = getUploadDir(organization, multipartFile);
 
@@ -42,7 +42,28 @@ public class FileUploadUtil {
         return uploadDir;
     }
 
+    public void updateUserImage(UserData requestUser, MultipartFile multipartFile) {
+        if (multipartFile == null) {
+            deleteFileIfExists(requestUser);
+            return;
+        }
+        String fileName = createFileName(multipartFile, userImgName);
+        String uploadDir = getUploadDir(requestUser, multipartFile);
+
+        if (requestUser.getProfilePictureUrl() != null) deleteFile(uploadDir);
+        try {
+            saveFile(uploadDir, fileName, multipartFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        requestUser.setProfilePictureUrl(uploadDir + "/" + fileName);
+    }
     public void updateOrganizationImage(MultipartFile multipartFile, Organization organization) {
+        if (multipartFile == null) {
+            deleteFileIfExists(organization);
+            return;
+        }
+
         String fileName = createFileName(multipartFile, organizationImgName);
         String uploadDir = getUploadDir(organization, multipartFile);
 
@@ -55,24 +76,25 @@ public class FileUploadUtil {
         organization.setImageUrl(uploadDir + "/" + fileName);
     }
 
-    public void updateUserImage(UserData requestUser, MultipartFile multipartFile) {
-        String fileName = createFileName(multipartFile, userImgName);
-        String uploadDir = getUploadDir(requestUser, multipartFile);
-
-        if (requestUser.getProfilePictureUrl() != null) deleteFile(uploadDir);
-        try {
-            saveFile(uploadDir, fileName, multipartFile);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        requestUser.setProfilePictureUrl(uploadDir + "/" + fileName);
+    private void deleteFileIfExists(Organization organization) {
+        if (organization.getImageUrl() == null) return;
+        deleteFile(organization.getImageUrl());
+        organization.setImageUrl(null);
     }
+
+    private void deleteFileIfExists(UserData userData) {
+        if (userData.getProfilePictureUrl() == null) return;
+        deleteFile(userData.getProfilePictureUrl());
+        userData.setProfilePictureUrl(null);
+    }
+
+
 
     private String getUploadDir(Organization organization, MultipartFile multipartFile) {
         if (organization.getImageUrl() == null)
             return organizationImgCatalog + organization.getName() + LocalDateTime.now().toString().replace(":", "-");
 
-        String avatarUrl =  organizationImgName + multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf("."));
+        String avatarUrl = organizationImgName + multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf("."));
         return organization.getImageUrl().replace("/" + avatarUrl, "");
     }
 
@@ -80,11 +102,11 @@ public class FileUploadUtil {
         if (userData.getProfilePictureUrl() == null)
             return userImgCatalog + userData.getEmail() + LocalDateTime.now().toString().replace(":", "-");
 
-        String avatarUrl =  userImgName + multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf("."));
+        String avatarUrl = userImgName + multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf("."));
         return userData.getProfilePictureUrl().replace("/" + avatarUrl, "");
     }
 
-    private void deleteFile(String uploadDir){
+    private void deleteFile(String uploadDir) {
         Path imagesPath = Path.of(uploadDir);
 
         try {
@@ -120,4 +142,6 @@ public class FileUploadUtil {
         return typeName + multipartFile.getOriginalFilename()
                 .substring(multipartFile.getOriginalFilename().lastIndexOf("."));
     }
+
 }
+

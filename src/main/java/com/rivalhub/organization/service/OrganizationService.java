@@ -1,6 +1,8 @@
 package com.rivalhub.organization.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.common.AutoMapper;
@@ -72,12 +74,18 @@ public class OrganizationService {
         var organization = organizationRepository.findById(id)
                 .orElseThrow(OrganizationNotFoundException::new);
 
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode patchJson = objectMapper.valueToTree(patch);
+        System.out.println("Patch JSON: " + patchJson.toString());
+
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
 
         OrganizationDTO organizationDTO = autoMapper.mapToOrganizationDto(organization);
         OrganizationDTO patchedOrganizationDto = organizationMergePatcher.patch(patch, organizationDTO, OrganizationDTO.class);
 
-        organizationRepository.save(OrganizationMapper.map(patchedOrganizationDto, organization));
+        System.out.println(patchedOrganizationDto.getColor());
+        Organization map = OrganizationMapper.map(patchedOrganizationDto, organization);
+        organizationRepository.save(map);
     }
 
     private void setOrganizationSettings(UserData user, Organization organization){
