@@ -74,18 +74,12 @@ public class OrganizationService {
         var organization = organizationRepository.findById(id)
                 .orElseThrow(OrganizationNotFoundException::new);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode patchJson = objectMapper.valueToTree(patch);
-        System.out.println("Patch JSON: " + patchJson.toString());
-
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
 
         OrganizationDTO organizationDTO = autoMapper.mapToOrganizationDto(organization);
         OrganizationDTO patchedOrganizationDto = organizationMergePatcher.patch(patch, organizationDTO, OrganizationDTO.class);
 
-        System.out.println(patchedOrganizationDto.getColor());
-        Organization map = OrganizationMapper.map(patchedOrganizationDto, organization);
-        organizationRepository.save(map);
+        organizationRepository.save(OrganizationMapper.map(patchedOrganizationDto, organization));
     }
 
     private void setOrganizationSettings(UserData user, Organization organization){
