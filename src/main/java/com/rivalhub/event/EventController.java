@@ -1,11 +1,13 @@
 package com.rivalhub.event;
 
+import com.rivalhub.user.UserDetailsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 
 @RestController
@@ -18,6 +20,11 @@ public class EventController {
     @GetMapping("/events/{eventId}")
     private ResponseEntity<?> findEvent(@PathVariable Long eventId, @RequestParam(name = "type") String type) {
         return ResponseEntity.ok(eventStrategyResolver.findEvent(eventId, type));
+    }
+
+    @GetMapping("/events/{eventId}/participants")
+    ResponseEntity<List<UserDetailsDto>> findEventParticipants(@PathVariable Long eventId, @RequestParam(name = "type") String type) {
+        return ResponseEntity.ok(eventStrategyResolver.findEventParticipants(eventId, type));
     }
 
     @PostMapping("/{id}/events")

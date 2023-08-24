@@ -1,5 +1,6 @@
 package com.rivalhub.event;
 
+import com.rivalhub.user.UserDetailsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,10 @@ public class EventStrategyResolver {
 
     EventDto addEvent(Long id, EventDto eventDto, String type) {
         return eventOperator.useStrategy(type).addEvent(id,eventDto);
+    }
+
+    List<UserDetailsDto> findEventParticipants(long id, String type) {
+        return eventOperator.useStrategy(type).findAllParticipants(id);
     }
 
     List<EventDto> findAllEvents(Long id, String type) {
