@@ -99,7 +99,7 @@ public class FileUploadUtil {
 
     private String getUploadDir(Organization organization, MultipartFile multipartFile) {
         if (organization.getImageUrl() == null)
-            return organizationImgCatalog + organization.getName() + LocalDateTime.now().toString().replace(":", "-");
+            return organizationImgCatalog + organization.getName().replace(" ", "_") + LocalDateTime.now().toString().replace(":", "-");
 
         String avatarUrl = organizationImgName + multipartFile.getOriginalFilename().substring(multipartFile.getOriginalFilename().lastIndexOf("."));
         return organization.getImageUrl().replace("/" + avatarUrl, "");
