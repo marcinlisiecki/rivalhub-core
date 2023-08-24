@@ -10,7 +10,7 @@ import java.util.List;
 
 @Data
 public class PullUpSeriesDto {
-    private UserDetailsDto userId;
+    private Long userId;
     private Long score;
     private Long seriesID;
 }

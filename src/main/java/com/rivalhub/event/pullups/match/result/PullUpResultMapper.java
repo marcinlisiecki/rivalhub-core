@@ -10,23 +10,13 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class PullUpResultMapper {
-    public PullUpSeries map(PullUpSeriesDto pullUpSeriesDto){
-        PullUpSeries pullUpSeries = new PullUpSeries();
-        pullUpSeries.setSeriesID(pullUpSeries.getSeriesID());
-        pullUpSeries.setScore((pullUpSeries.getScore()));
 
-        UserData userData = new UserData();
-        UserMapper.mapUserDetailsDtoToUserData(pullUpSeriesDto.getUserId(),userData);
-        pullUpSeries.setUser(userData);
-        return  pullUpSeries;
-    }
 
     public PullUpSeriesDto map(PullUpSeries pullUpSeries){
         PullUpSeriesDto pullUpSeriesDto = new PullUpSeriesDto();
         pullUpSeriesDto.setSeriesID(pullUpSeries.getSeriesID());
         pullUpSeriesDto.setScore((pullUpSeries.getScore()));
-
-        pullUpSeriesDto.setUserId(UserMapper.map(pullUpSeries.getUser()));
+        pullUpSeriesDto.setUserId(pullUpSeries.getUser().getId());
         return  pullUpSeriesDto;
     }
 
