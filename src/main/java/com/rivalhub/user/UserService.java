@@ -56,7 +56,7 @@ public class UserService {
                         .id(u.get(0, Long.class))
                         .name(u.get(1, String.class))
                         .imageUrl(u.get(2, String.class))
-                        .colorForDefaultImage(u.get(3, String.class))
+                        .color(u.get(3, String.class))
                         .build())
                         .collect(Collectors.toList());
     }
