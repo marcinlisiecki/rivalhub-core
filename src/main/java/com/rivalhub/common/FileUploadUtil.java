@@ -39,7 +39,7 @@ public class FileUploadUtil {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return uploadDir;
+        return uploadDir + "/"+fileName;
     }
 
     public void updateUserImage(UserData requestUser, MultipartFile multipartFile) {
