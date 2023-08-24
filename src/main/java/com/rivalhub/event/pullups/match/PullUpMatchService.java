@@ -1,18 +1,15 @@
 package com.rivalhub.event.pullups.match;
 
-import com.rivalhub.event.EventNotFoundException;
+import com.rivalhub.common.exception.EventNotFoundException;
+import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.MatchService;
-import com.rivalhub.event.match.MatchServiceInterface;
 import com.rivalhub.event.match.ViewMatchDto;
-import com.rivalhub.event.pingpong.PingPongEvent;
-import com.rivalhub.event.pingpong.match.PingPongMatch;
-import com.rivalhub.event.pingpong.match.PingPongMatchService;
+
 import com.rivalhub.event.pullups.PullUpEvent;
 import com.rivalhub.event.pullups.PullUpEventRepository;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,10 +18,11 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class PullUpMatchService implements MatchServiceInterface {
+public class PullUpMatchService implements MatchService {
 
     private final OrganizationRepository organizationRepository;
     private final PullUpEventRepository pullUpEventRepository;
+    private final PullUpMatchMapper pullUpMatchMapper;
 
     @Override
     public boolean setResultApproval(Long eventId, Long matchId, boolean approve) {
@@ -41,9 +39,10 @@ public class PullUpMatchService implements MatchServiceInterface {
         PullUpEvent pullUpEvent = pullUpEventRepository.findById(eventId)
                 .orElseThrow(EventNotFoundException::new);
 
-        PullUpMatch pullUpMatch = pingPongMatchMapper.map(MatchDTO, organization);
+        PullUpMatch pullUpMatch = pullUpMatchMapper.map(MatchDTO, organization);
 
-        return save(requestUser, pullUpEvent, pullUpMatch);
+       // return save(requestUser, pullUpEvent, pullUpMatch);
+        return new MatchDto();
     }
 
     @Override

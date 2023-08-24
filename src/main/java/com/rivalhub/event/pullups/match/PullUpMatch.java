@@ -15,7 +15,11 @@ public class PullUpMatch {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToMany
-    List<UserData> participants;
+    private List<UserData> participants;
     @OneToMany
-    List<PullUpSeries> pullUpSeries;
+    private List<PullUpSeries> pullUpSeries;
+
+    private boolean approvalFirstPlace;
+    private boolean approvalSecondPlace;
+    private boolean approvalThirdPlace;
 }

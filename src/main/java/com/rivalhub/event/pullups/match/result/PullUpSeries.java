@@ -1,5 +1,6 @@
 package com.rivalhub.event.pullups.match.result;
 
+import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -12,6 +13,8 @@ public class PullUpSeries {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany
-    private List<PullUpScore> pullUpScoreList;
+    @ManyToOne
+    private UserData user;
+    private Long score;
+    private Long seriesID;
 }
