@@ -39,7 +39,7 @@ public class FileUploadUtil {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return uploadDir;
+        return uploadDir + "/"+fileName;
     }
 
     public void updateUserImage(UserData requestUser, MultipartFile multipartFile) {
@@ -58,11 +58,11 @@ public class FileUploadUtil {
         }
         requestUser.setProfilePictureUrl(uploadDir + "/" + fileName);
     }
-    public void updateOrganizationImage(MultipartFile multipartFile, Organization organization) {
-        if (multipartFile == null) {
+    public void updateOrganizationImage(MultipartFile multipartFile, boolean deleteAvatar, Organization organization) {
+        if (multipartFile == null && deleteAvatar) {
             deleteFileIfExists(organization);
             return;
-        }
+        } else if (multipartFile == null) return;
 
         String fileName = createFileName(multipartFile, organizationImgName);
         String uploadDir = getUploadDir(organization, multipartFile);
