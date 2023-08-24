@@ -4,6 +4,7 @@ import com.rivalhub.auth.AuthService;
 import com.rivalhub.auth.JwtTokenDto;
 import com.rivalhub.auth.LoginRequestDto;
 import com.rivalhub.common.AutoMapper;
+import com.rivalhub.common.exception.UserAlreadyActivated;
 import com.rivalhub.common.exception.UserAlreadyExistsException;
 import com.rivalhub.common.exception.UserNotFoundException;
 import com.rivalhub.email.EmailService;
@@ -64,6 +65,7 @@ public class UserService {
     public void confirmUserEmail(String hash) {
         UserData user = userRepository.findByActivationHash(hash)
                 .orElseThrow(UserNotFoundException::new);
+        if (user.getActivationTime() != null) throw new UserAlreadyActivated();
         user.setActivationTime(LocalDateTime.now());
     }
 

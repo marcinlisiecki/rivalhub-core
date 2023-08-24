@@ -1,8 +1,9 @@
 package com.rivalhub.event.darts.match;
 
-import com.rivalhub.event.EventNotFoundException;
+import com.rivalhub.common.exception.EventNotFoundException;
+import com.rivalhub.common.exception.MatchNotFoundException;
+import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.event.EventType;
-import com.rivalhub.event.MatchNotFoundException;
 import com.rivalhub.event.darts.DartEvent;
 import com.rivalhub.event.darts.DartEventRepository;
 import com.rivalhub.event.darts.match.result.*;
@@ -12,10 +13,8 @@ import com.rivalhub.event.match.MatchService;
 import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
