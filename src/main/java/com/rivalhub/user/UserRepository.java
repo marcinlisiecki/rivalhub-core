@@ -66,4 +66,13 @@ public interface UserRepository extends CrudRepository<UserData, Long>, PagingAn
             WHERE ORGANIZATION_ID=:id AND REPLACE(LOWER(NAME), ' ', '') LIKE REPLACE(LOWER(:namePhrase), ' ', '')
             """, nativeQuery = true)
     Set<Tuple> findByNamePhraseAndOrganizationId(Long id, String namePhrase);
+
+
+    @Query(value = """
+        SELECT u
+        FROM UserData u
+        JOIN u.notifications n
+        WHERE u.id = ?1
+            """)
+    UserData findUserWithNotifications(Long id);
 }

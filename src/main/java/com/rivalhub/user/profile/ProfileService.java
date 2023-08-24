@@ -11,6 +11,7 @@ import com.rivalhub.common.exception.UserAlreadyExistsException;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
 import com.rivalhub.user.*;
+import com.rivalhub.user.notification.Notification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,10 +24,10 @@ import java.util.Set;
 public class ProfileService {
     private final UserRepository userRepository;
     private final UserProfileHelper userProfileHelper;
-
     private final MergePatcher<UserDetailsDto> userDetailsDtoMergePatcher;
     private final AutoMapper autoMapper;
     private final FileUploadUtil fileUploadUtil;
+
     Set<ReservationInProfileDTO> getSharedOrganizationReservations(Long id) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
         UserData viewedUser = userRepository.findById(id)
@@ -75,5 +76,17 @@ public class ProfileService {
         userRepository.save(requestUser);
 
         return UserMapper.map(requestUser);
+    }
+
+    public List<Notification> getNotifications() {
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        var userWithNotifications = userRepository.findUserWithNotifications(requestUser.getId());
+
+        return userWithNotifications.getNotifications()
+                .stream().filter(
+                        notification -> notification.getStatus()
+                                .equals(Notification.Status.NOT_CONFIRMED))
+                .toList();
+
     }
 }

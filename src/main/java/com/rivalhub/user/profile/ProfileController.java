@@ -38,6 +38,11 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.getAllReservationsByRequestUserAndMonth(date));
     }
 
+    @GetMapping("/users/notifications")
+    private ResponseEntity<?> getNotifications(){
+        return ResponseEntity.ok(profileService.getNotifications());
+    }
+
     @PatchMapping("/users")
     private ResponseEntity<?> updateUser(@RequestBody JsonMergePatch patch)
             throws JsonPatchException, JsonProcessingException {

@@ -95,8 +95,6 @@ public class FileUploadUtil {
         userData.setProfilePictureUrl(null);
     }
 
-
-
     private String getUploadDir(Organization organization, MultipartFile multipartFile) {
         if (organization.getImageUrl() == null)
             return organizationImgCatalog + organization.getName() + LocalDateTime.now().toString().replace(":", "-");

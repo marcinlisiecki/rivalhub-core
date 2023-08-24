@@ -1,6 +1,7 @@
 package com.rivalhub.event.pingpong.match;
 
 import com.rivalhub.common.exception.EventNotFoundException;
+import com.rivalhub.common.exception.UserNotFoundException;
 import com.rivalhub.event.EventType;
 import com.rivalhub.common.exception.MatchNotFoundException;
 import com.rivalhub.event.match.MatchDto;
@@ -14,6 +15,8 @@ import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
+import com.rivalhub.user.UserRepository;
+import com.rivalhub.user.notification.Notification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +30,7 @@ public class PingPongMatchService implements MatchService {
     private final PingPongEventRepository pingPongEventRepository;
     private final PingPongMatchRepository pingPongMatchRepository;
     private final PingPongMatchMapper pingPongMatchMapper;
-
+    private final UserRepository userRepository;
 
 
     public MatchDto createMatch(Long organizationId, Long eventId, MatchDto MatchDTO) {
@@ -96,26 +99,49 @@ public class PingPongMatchService implements MatchService {
     }
 
     private MatchDto save(UserData loggedUser, PingPongEvent pingPongEvent,
-                              PingPongMatch pingPongMatch){
-        boolean loggedUserInTeam1 = pingPongMatch.getTeam1()
-                .stream().anyMatch(loggedUser::equals);
-
-        if (loggedUserInTeam1) pingPongMatch.setTeam1Approval(true);
-
-        boolean loggedUserInTeam2 = pingPongMatch.getTeam2()
-                .stream().anyMatch(loggedUser::equals);
-
-        if (loggedUserInTeam2) pingPongMatch.setTeam2Approval(true);
+                          PingPongMatch pingPongMatch) {
 
         addPingPongMatch(pingPongEvent, pingPongMatch);
-
         PingPongMatch savedMatch = pingPongMatchRepository.save(pingPongMatch);
+
+        setApproveAndNotifications(loggedUser, savedMatch, pingPongEvent.getEventId());
+
         pingPongEventRepository.save(pingPongEvent);
 
         return pingPongMatchMapper.mapToMatchDto(savedMatch);
     }
 
-    private void addPingPongMatch(PingPongEvent pingPongEvent,PingPongMatch pingPongMatch){
+    //todo dac do innej klasy gdzie bedzie korzystac w innych eventach
+    private void setApproveAndNotifications(UserData loggedUser, PingPongMatch pingPongMatch, Long eventId) {
+        boolean loggedUserInTeam1 = pingPongMatch.getTeam1()
+                .stream().anyMatch(loggedUser::equals);
+
+        if (loggedUserInTeam1) {
+            pingPongMatch.setTeam1Approval(true);
+        } else {
+            saveNotification(pingPongMatch.getTeam1(), EventType.PING_PONG, pingPongMatch.getId(), eventId);
+        }
+
+        boolean loggedUserInTeam2 = pingPongMatch.getTeam2()
+                .stream().anyMatch(loggedUser::equals);
+
+        if (loggedUserInTeam2) {
+            pingPongMatch.setTeam2Approval(true);
+        } else {
+            saveNotification(pingPongMatch.getTeam2(), EventType.PING_PONG, pingPongMatch.getId(), eventId);
+        }
+    }
+
+    private void saveNotification(List<UserData> team, EventType type, Long matchId, Long eventId) {
+        team.forEach(
+                userData -> {
+                    userData.getNotifications().add(
+                            new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED));
+                    userRepository.save(userData);
+                });
+    }
+
+    private void addPingPongMatch(PingPongEvent pingPongEvent, PingPongMatch pingPongMatch) {
         pingPongEvent.getPingPongMatchList().add(pingPongMatch);
     }
 
@@ -124,15 +150,39 @@ public class PingPongMatchService implements MatchService {
                 .stream().filter(match -> match.getId().equals(matchId))
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
-
-        if(pingPongMatch.getTeam1().stream().anyMatch(loggedUser::equals)) pingPongMatch.setTeam1Approval(approve);
-        if(pingPongMatch.getTeam2().stream().anyMatch(loggedUser::equals)) pingPongMatch.setTeam2Approval(approve);
+        setApprove(loggedUser, approve, pingPongMatch);
 
         pingPongMatchRepository.save(pingPongMatch);
         return approve;
     }
 
-    private PingPongMatch findMatchInEvent(PingPongEvent pingPongEvent, Long matchId){
+    //todo ctrl+v do innych eventów
+    private void setApprove(UserData loggedUser, boolean approve, PingPongMatch pingPongMatch) {
+        if (pingPongMatch.getTeam1().stream().anyMatch(loggedUser::equals)) {
+            pingPongMatch.setTeam1Approval(approve);
+            findNotificationToDisActivate(pingPongMatch.getTeam1(), pingPongMatch.getId());
+        }
+
+        if (pingPongMatch.getTeam2().stream().anyMatch(loggedUser::equals)) {
+            pingPongMatch.setTeam2Approval(approve);
+            findNotificationToDisActivate(pingPongMatch.getTeam1(), pingPongMatch.getId());
+        }
+    }
+
+    private void findNotificationToDisActivate(List<UserData> team, Long matchId) {
+        team.forEach(
+                userData -> {
+                    userData.getNotifications()
+                            .stream().filter(
+                                    notification -> notification.getMatchId().equals(matchId))
+                            .findFirst()
+                            .orElseThrow(UserNotFoundException::new)
+                            .setStatus(Notification.Status.CONFIRMED);
+                }
+        );
+    }
+
+    private PingPongMatch findMatchInEvent(PingPongEvent pingPongEvent, Long matchId) {
         return pingPongEvent.getPingPongMatchList()
                 .stream().filter(match -> match.getId().equals(matchId))
                 .findFirst()
