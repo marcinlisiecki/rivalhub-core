@@ -3,11 +3,11 @@ package com.rivalhub.event.pullups.match;
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.event.EventUtils;
 import com.rivalhub.event.match.MatchDto;
-import com.rivalhub.event.pullups.match.result.PullUpScore;
-import com.rivalhub.event.pullups.match.result.ViewPullUpMatchDto;
+import com.rivalhub.event.pullups.match.result.*;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PullUpMatchMapper {
     private final AutoMapper autoMapper;
+    private final PullUpResultMapper pullUpResultMapper;
 
     PullUpMatch map(MatchDto matchDto, Organization organization){
         PullUpMatch pullUpMatch = new PullUpMatch();
@@ -25,8 +26,6 @@ public class PullUpMatchMapper {
         List<UserData> participants = organization.getUserList().stream()
                 .filter(EventUtils.getUserFromOrganization(matchDto.getTeam1Ids()))
                 .toList();
-
-
         pullUpMatch.setParticipants(participants);
         return pullUpMatch;
     }
@@ -55,59 +54,59 @@ public class PullUpMatchMapper {
         List<UserDetailsDto> team1 = pullUpMatch.getParticipants()
                 .stream().map(autoMapper::mapToUserDetails)
                 .toList();
-
-
-
         viewPullUpMatchDto.setUserDetailsDtos(team1);
-        viewPullUpMatchDto.setScores(getScores(pullUpMatch));
 
-        viewPullUpMatchDto.setPlaces(getPlaces(viewPullUpMatchDto.getScores()));
-
+        viewPullUpMatchDto.setScores(pullUpMatch.getPullUpSeries().stream().map(pullUpResultMapper::map).toList());
+        viewPullUpMatchDto.setPlaces(getPlaces(pullUpMatch));
 
         return viewPullUpMatchDto;
     }
 
-
-    List<List<Long>> getScores(PullUpMatch pullUpMatch){
-        List<List<Long>> series = new ArrayList<>();
-
-        for(int round = 0 ; round < pullUpMatch.getPullUpSeries().size(); round++ ){
-             List<Long> scores = pullUpMatch.getPullUpSeries()
-                     .get(round)
-                     .getPullUpScoreList()
-                     .stream()
-                     .map(PullUpScore::getScore)
-                     .toList();
-             series.add(scores);
-        }
-
-        return series;
-    };
-
-    List<Integer> getPlaces(List<List<Long>> scores) {
-        int numberOfParticipants = scores.get(0).size();
-        List<Integer> places = Arrays.asList(new Integer[numberOfParticipants]);
-        List<Integer> scoreSortedIndexes = Arrays.asList(new Integer[numberOfParticipants]);
-        List<Long> overallScore = Arrays.asList(new Long[numberOfParticipants]);
-
-
-        for (int playerNumber = 0;playerNumber<numberOfParticipants;playerNumber++) {
-            overallScore.set(playerNumber,0L);
-            scoreSortedIndexes.set(playerNumber, playerNumber);
-        }
-
-        for(int round = 0; round < scores.size();round++) {
-            for(int playerNumber = 0;playerNumber<numberOfParticipants;playerNumber++){
-                overallScore.set(playerNumber,overallScore.get(playerNumber)+scores.get(round).get(playerNumber));
+    Map<Long,Integer> getPlaces(PullUpMatch pullUpMatch) {
+        Map<Long, Integer> overalScoreMap = new HashMap<>();
+        Map<Long, Integer> placesMap = new HashMap<>();
+        List<SingleUserScore> singleUserScoreList = pullUpMatch.getPullUpSeries()
+                .stream()
+                .map(this::getScore)
+                .toList();
+        pullUpMatch.getParticipants()
+                .stream()
+                .forEach(participant -> overalScoreMap.put(participant.getId(), 0));
+        singleUserScoreList.stream()
+                .forEach(score-> overalScoreMap.put(score.getId(),score.getScore()+ overalScoreMap.get(score.getId())));
+        int numberOfPlayersWithAssignedPlaces = 0;
+        for(int iteration = 0; iteration < overalScoreMap.keySet().size(); iteration++){
+            int numberOfPlayersWithAssignedPlaceInThisIteration = 0;
+            int highestScore = 0;
+            List<Long> IdOfUsersThatGonnaHaveAssignedPlaceInThisIteration = new ArrayList<>();
+            for(Long key: overalScoreMap.keySet()){
+                if(highestScore == overalScoreMap.get(key)){
+                    IdOfUsersThatGonnaHaveAssignedPlaceInThisIteration.add(key);
+                    continue;
+                }
+                if(highestScore < overalScoreMap.get(key)){
+                    IdOfUsersThatGonnaHaveAssignedPlaceInThisIteration.clear();
+                    IdOfUsersThatGonnaHaveAssignedPlaceInThisIteration.add(key);
+                    highestScore = overalScoreMap.get(key);
+                }
             }
-        }
-        Collections.sort(scoreSortedIndexes, Comparator.comparingLong(overallScore::get));
-        for (int playerNumber = 0;playerNumber<numberOfParticipants;playerNumber++) {
-            overallScore.
+            for (Long idOfUser: IdOfUsersThatGonnaHaveAssignedPlaceInThisIteration) {
+                placesMap.put(idOfUser,numberOfPlayersWithAssignedPlaces+1);
+                numberOfPlayersWithAssignedPlaceInThisIteration++;
+            }
+            numberOfPlayersWithAssignedPlaces += numberOfPlayersWithAssignedPlaceInThisIteration;
         }
 
-        return scoreSortedIndexes;
+        return placesMap;
     }
 
-    public
+
+    SingleUserScore getScore(PullUpSeries pullUpSeries){
+        SingleUserScore singleUserScore = new SingleUserScore();
+        singleUserScore.setScore(Math.toIntExact(pullUpSeries.getScore()));
+        singleUserScore.setId(pullUpSeries.getUser().getId());
+        return  singleUserScore;
+    };
+
+
 }

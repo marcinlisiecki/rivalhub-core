@@ -5,11 +5,12 @@ import com.rivalhub.user.UserDetailsDto;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class ViewPullUpMatchDto implements ViewMatchDto {
     private List<UserDetailsDto> userDetailsDtos;
-    private List<List<Long>> scores;
-    private List<Integer> places;
+    private List<PullUpSeriesDto> scores;
+    private Map<Long,Integer> places;
 
 }
