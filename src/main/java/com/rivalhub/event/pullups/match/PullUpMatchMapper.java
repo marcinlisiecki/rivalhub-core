@@ -75,7 +75,7 @@ public class PullUpMatchMapper {
                 .forEach(score-> overalScoreMap.put(score.getId(),score.getScore()+ overalScoreMap.get(score.getId())));
 
         int numberOfPlayersWithAssignedPlaces = 0;
-        for(int iteration = 0; iteration < overalScoreMap.keySet().size(); iteration++){
+        for(int iteration = 0; iteration < pullUpMatch.getParticipants().size(); iteration++){
             int numberOfPlayersWithAssignedPlaceInThisIteration = 0;
             int highestScore = 0;
             List<Long> IdOfUsersThatGonnaHaveAssignedPlaceInThisIteration = new ArrayList<>();
@@ -93,6 +93,7 @@ public class PullUpMatchMapper {
             for (Long idOfUser: IdOfUsersThatGonnaHaveAssignedPlaceInThisIteration) {
                 placesMap.put(idOfUser,numberOfPlayersWithAssignedPlaces+1);
                 numberOfPlayersWithAssignedPlaceInThisIteration++;
+                overalScoreMap.remove(idOfUser);
             }
             numberOfPlayersWithAssignedPlaces += numberOfPlayersWithAssignedPlaceInThisIteration;
         }
