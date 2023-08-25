@@ -23,7 +23,7 @@ public class EventController {
     }
 
     @GetMapping("/events/{eventId}/participants")
-    ResponseEntity<List<UserDetailsDto>> findEventParticipants(@PathVariable Long eventId, @RequestParam(name = "type") String type) {
+    ResponseEntity<List<UserDetailsDto>> findEventParticipants(@PathVariable Long eventId, @RequestParam String type) {
         return ResponseEntity.ok(eventStrategyResolver.findEventParticipants(eventId, type));
     }
 
