@@ -71,6 +71,7 @@ public class OrganizationRepoManager {
         organization.setStationList(stationListWithReservations);
         return organization;
     }
+
     public Organization getOrganizationWithUsersById(Long organizationId) {
         return entityManager.createQuery("""
                             select distinct o
@@ -83,13 +84,14 @@ public class OrganizationRepoManager {
                 .findFirst()
                 .orElseThrow(OrganizationNotFoundException::new);
     }
+
     private Organization pingPongEventsByOrganizationId(Long id) {
         return entityManager.createQuery("""
-                select distinct o
-                from Organization o
-                join fetch o.pingPongEvents p
-                where o.id = :id
-                """, Organization.class)
+                        select distinct o
+                        from Organization o
+                        join fetch o.pingPongEvents p
+                        where o.id = :id
+                        """, Organization.class)
                 .setParameter("id", id)
                 .getResultStream()
                 .findFirst()
@@ -117,7 +119,8 @@ public class OrganizationRepoManager {
                 .setParameter("userId", userId)
                 .setParameter("pingPongEvents", pingPongEvents)
                 .getResultStream()
-                .toList();;
+                .toList();
+        ;
 
         return new HashSet<>(pingPongEventsWithParticipants);
     }
@@ -137,36 +140,53 @@ public class OrganizationRepoManager {
                 .stream().map(u -> u.get(0, Long.class))
                 .toList();
     }
-    public Set<PingPongEvent> eventsWithParticipantsByOrganizationIdAndUserIdWithPaginationByDate(Organization organization, Long userId, LocalDateTime date) {
+
+    public Set<PingPongEvent> eventsWithParticipantsByOrganizationIdAndUserIdFilteredByDate(Organization organization, Long userId, LocalDateTime date) {
         List<PingPongEvent> pingPongEvents = entityManager.createQuery("""
                          select distinct e
                           from Organization o
                           join o.pingPongEvents e
                           where o = :organization
-                          and (YEAR(e.startTime) = YEAR(:date) and MONTH(e.startTime) = MONTH(:date))
-                                 or (YEAR(e.endTime) = YEAR(:date) and MONTH(e.endTime) = MONTH(:date))
                         """, PingPongEvent.class)
                 .setParameter("organization", organization)
-                .setParameter("date", date)
                 .getResultStream()
                 .toList();
 
         List<PingPongEvent> pingPongEventsWithParticipants = entityManager.createQuery("""
-                                                select distinct e
-                                                from PingPongEvent e
-                                                join e.participants p
-                                                where p.id in :userId
-                                                and e in :pingPongEvents
+                            select distinct e
+                            from PingPongEvent e
+                            join e.participants p
+                            where p.id = :userId
+                            and e in :pingPongEvents
                         """, PingPongEvent.class)
                 .setParameter("userId", userId)
                 .setParameter("pingPongEvents", pingPongEvents)
                 .getResultStream()
-                .toList();;
+                .toList();
 
-        return new HashSet<>(pingPongEventsWithParticipants);
+        List<PingPongEvent> filteredByDate = pingPongEventsWithParticipants.stream()
+                .filter(pingPongEvent -> {
+                            return pingPongEvent.getStartTime().getYear() == date.getYear()
+                                    && pingPongEvent.getStartTime().getMonth() == date.getMonth()
+                                    ||
+                                    pingPongEvent.getEndTime().getYear() == date.getYear()
+                                            && pingPongEvent.getEndTime().getMonth() == date.getMonth();
+                        }
+                ).toList();
+
+
+        return new HashSet<>(filteredByDate);
     }
 
-    public Set<Reservation> reservationsByOrganizationIdAndUserIdFilterByDate(Long organizationId, Long userId, LocalDateTime dateTime){
-        return reservationRepository.reservationsWithParticipantsByOrganizationIdAndUserIdWithFilterByDate(organizationId, userId, dateTime);
+    public Set<Reservation> reservationsByOrganizationIdAndUserIdFilterByDate(Long organizationId, Long userId, LocalDateTime date) {
+        Set<Reservation> reservations = reservationRepository.reservationsWithParticipantsByOrganizationIdAndUserIdWithFilterByDate(organizationId, userId);
+        return reservations.stream()
+                .filter(reservation -> {
+                    return reservation.getStartTime().getYear() == date.getYear()
+                            && reservation.getStartTime().getMonth() == date.getMonth()
+                            ||
+                            reservation.getEndTime().getYear() == date.getYear()
+                                    && reservation.getEndTime().getMonth() == date.getMonth();
+                }).collect(Collectors.toSet());
     }
 }

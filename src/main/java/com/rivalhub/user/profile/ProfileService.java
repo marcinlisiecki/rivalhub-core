@@ -68,10 +68,10 @@ public class ProfileService {
         userRepository.deleteById(requestUser.getId());
     }
 
-    public UserDetailsDto updateImage(MultipartFile multipartFile) {
+    public UserDetailsDto updateImage(MultipartFile multipartFile, boolean keepAvatar) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
 
-        fileUploadUtil.updateUserImage(requestUser, multipartFile);
+        fileUploadUtil.updateUserImage(requestUser, multipartFile, keepAvatar);
         userRepository.save(requestUser);
 
         return UserMapper.map(requestUser);

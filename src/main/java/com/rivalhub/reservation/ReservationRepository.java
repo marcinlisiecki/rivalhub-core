@@ -28,8 +28,6 @@ public interface ReservationRepository extends PagingAndSortingRepository<Reserv
             JOIN ORGANIZATION_STATION_LIST ON ORGANIZATION_STATION_LIST.STATION_LIST_ID = STATION_ID\s
             JOIN USER_RESERVATIONS ON ID = USER_RESERVATIONS.RESERVATION_ID\s
             WHERE ORGANIZATION_ID = :organizationId AND USER_ID = :userId
-            AND (YEAR(START_TIME) = YEAR(:date) AND MONTH(START_TIME) = MONTH(:date))
-            OR (YEAR(END_TIME) = YEAR(:date) AND MONTH(END_TIME) = MONTH(:date))
-                        """, nativeQuery = true)
-    Set<Reservation> reservationsWithParticipantsByOrganizationIdAndUserIdWithFilterByDate(@Param("organizationId") Long organizationId, @Param("userId") Long userId, @Param("date") LocalDateTime date);
+            """, nativeQuery = true)
+    Set<Reservation> reservationsWithParticipantsByOrganizationIdAndUserIdWithFilterByDate(@Param("organizationId") Long organizationId, @Param("userId") Long userId);
 }
