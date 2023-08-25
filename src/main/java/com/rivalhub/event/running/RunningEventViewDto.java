@@ -7,9 +7,8 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class RunningEventViewDto extends EventDto {
+public class RunningEventViewDto  {
     private List<UserDetailsDto> userDetailsDtos;
     private List<UserTimesViewDto> userTimesViewDtoList;
-
 
 }
