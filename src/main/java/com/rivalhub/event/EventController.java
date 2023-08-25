@@ -2,6 +2,7 @@ package com.rivalhub.event;
 
 import com.rivalhub.user.UserDetailsDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -18,7 +19,7 @@ public class EventController {
     private final EventStrategyResolver eventStrategyResolver;
 
     @GetMapping("/events/{eventId}")
-    private ResponseEntity<?> findEvent(@PathVariable Long eventId, @RequestParam(name = "type") String type) {
+    private ResponseEntity<?> findEvent(@PathVariable Long eventId, @RequestParam String type) {
         return ResponseEntity.ok(eventStrategyResolver.findEvent(eventId, type));
     }
 
@@ -40,7 +41,13 @@ public class EventController {
     }
 
     @GetMapping("/{id}/events")
-    private ResponseEntity<?> findAllEvents(@PathVariable Long id, @RequestParam(name = "type") String type) {
+    private ResponseEntity<?> findAllEvents(@PathVariable Long id, @RequestParam String type) {
         return ResponseEntity.ok(eventStrategyResolver.findAllEvents(id, type));
+    }
+
+    @GetMapping("/{id}/events/join")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void joinPublicEvent(@PathVariable Long id, @RequestParam String type) {
+        eventStrategyResolver.joinPublicEvent(id, type);
     }
 }

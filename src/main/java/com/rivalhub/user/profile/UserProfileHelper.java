@@ -86,15 +86,13 @@ public class UserProfileHelper {
         LocalDateTime datePattern = LocalDateTime.parse(date, FormatterHelper.formatter());
 
         Set<EventProfileDTO> eventList = new HashSet<>();
+
         //TODO DODAĆ RESZTĘ EVENTÓW JAK BĘDĄ JUŻ DZIAŁAĆ
         for (Organization sharedOrganization : userOrganizations) {
             Set<PingPongEvent> events = organizationRepoManager.
-                    eventsWithParticipantsByOrganizationIdAndUserIdFilteredByDate
-                            (sharedOrganization, requestUser.getId(), datePattern);
+                    eventsWithParticipantsByOrganizationIdAndUserIdWithPaginationByDate(sharedOrganization, requestUser.getId(), datePattern);
 
-            List<EventProfileDTO> eventProfileDTOStream = events
-                    .stream().map(setEventProfileDTO(sharedOrganization))
-                    .toList();
+            List<EventProfileDTO> eventProfileDTOStream = events.stream().map(setEventProfileDTO(sharedOrganization)).toList();
             eventList.addAll(eventProfileDTOStream);
         }
         return eventList;

@@ -39,4 +39,6 @@ public class Event {
 
     @ManyToMany
     private List<UserData> participants = new ArrayList<>();
+
+    private boolean isEventPublic = false;
 }
