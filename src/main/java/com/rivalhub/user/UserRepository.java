@@ -1,8 +1,9 @@
 package com.rivalhub.user;
 
-import com.rivalhub.organization.Organization;
 import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -10,7 +11,6 @@ import org.springframework.data.repository.CrudRepository;
 import java.time.LocalDateTime;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 import java.util.Set;
@@ -28,6 +28,13 @@ public interface UserRepository extends CrudRepository<UserData, Long>, PagingAn
             """, nativeQuery = true)
     void deleteInactiveUsers(LocalDateTime time);
 
+    @Query("""
+            SELECT u
+            FROM Organization o
+            JOIN o.userList u
+            WHERE o.id = :id
+            """)
+    Page<UserData> findByOrganizationId(Long id, Pageable pageable);
 
     @Query(value = """
             SELECT USER_DATA.USER_ID, NAME, EMAIL, PROFILE_PICTURE_URL, ACTIVATION_TIME FROM USER_DATA
