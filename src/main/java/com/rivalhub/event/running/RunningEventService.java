@@ -26,8 +26,7 @@ public class RunningEventService implements EventService {
     private final RunningEventSaver runningEventSaver;
     private final EventCommonService eventCommonService;
     private final RunningResultsMapper runningResultsMapper;
-    private final RunningEventMapper runningEventMapper;
-    private final UserTimeRepository userTimeRepository;
+    private final RunningResultSaver runningResultSaver;
 
 
     @Override
@@ -76,14 +75,7 @@ public class RunningEventService implements EventService {
     }
 
     public RunningEventViewDto addRunningResults(Long eventId, List<UserTimesAddDto> userTimesAddDtos){
-        RunningEvent runningEvent = runningEventRepository
-                .findById(eventId)
-                .orElseThrow(EventNotFoundException::new);
-        List<UserTime> userTimeList = new ArrayList<>();
-        userTimesAddDtos.forEach(userTimesAddDto ->  userTimeList.add(runningResultsMapper.map(userTimesAddDto,runningEvent)));
-        userTimeRepository.saveAll(userTimeList);
-        runningEvent.setUserTimeList(userTimeList);
-        return runningEventMapper.map(runningEventRepository.save(runningEvent));
+        return runningResultSaver.save(eventId,userTimesAddDtos);
     }
 
     public List<UserTimesViewDto> getRunningResults(Long eventId) {
