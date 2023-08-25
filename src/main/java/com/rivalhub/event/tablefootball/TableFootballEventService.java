@@ -5,8 +5,10 @@ import com.rivalhub.event.EventDto;
 import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
+import com.rivalhub.event.common.EventCommonService;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
+import com.rivalhub.user.UserDetailsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +23,7 @@ public class TableFootballEventService implements EventService {
     private final OrganizationRepository organizationRepository;
     private final TableFootballEventRepository tableFootballEventRepository;
     private final TableFootballEventSaver tableFootballEventSaver;
-
+    private final EventCommonService eventCommonService;
 
     @Override
     public EventDto addEvent(Long organizationId, EventDto eventDto) {
@@ -54,6 +56,11 @@ public class TableFootballEventService implements EventService {
                 .map(autoMapper::mapToEventDto)
                 .orElseThrow(EventNotFoundException::new);
 
+    }
+
+    @Override
+    public List<UserDetailsDto> findAllParticipants(long id) {
+        return eventCommonService.findAllParticipants(tableFootballEventRepository, id);
     }
 
     @Override

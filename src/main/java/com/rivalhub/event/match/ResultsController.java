@@ -6,6 +6,10 @@ import com.rivalhub.event.darts.match.result.Leg;
 import com.rivalhub.event.darts.match.result.LegAddDto;
 import com.rivalhub.event.pingpong.match.PingPongMatchService;
 import com.rivalhub.event.pingpong.match.result.PingPongSet;
+import com.rivalhub.event.pullups.match.PullUpMatchService;
+import com.rivalhub.event.pullups.match.result.PullUpSeries;
+import com.rivalhub.event.pullups.match.result.PullUpSeriesAddDto;
+import com.rivalhub.event.pullups.match.result.PullUpSeriesDto;
 import com.rivalhub.event.tablefootball.match.TableFootballMatchService;
 import com.rivalhub.event.tablefootball.match.result.TableFootballMatchSet;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,7 @@ public class ResultsController {
     private final PingPongMatchService pingPongMatchService;
     private final DartMatchService dartMatchService;
     private final TableFootballMatchService tableFootballMatchService;
+    private final PullUpMatchService pullUpMatchService;
     @PostMapping("/{matchId}/pingpong")
     private ResponseEntity<?> addResultsPingPong(@PathVariable Long eventId,
                                          @PathVariable Long matchId,
@@ -35,6 +40,13 @@ public class ResultsController {
         return ResponseEntity.ok(tableFootballMatchService.addResult(eventId, matchId, setList));
     }
 
+
+    @PostMapping("/{matchId}/pullups")
+    private ResponseEntity<?> addResultsPullUps(@PathVariable Long eventId,
+                                                      @PathVariable Long matchId,
+                                                      @RequestBody List<PullUpSeriesAddDto> pullUpSeries) {
+        return ResponseEntity.ok(pullUpMatchService.addResult(eventId, matchId, pullUpSeries));
+    }
 
 
     @PostMapping("/{matchId}/dart")

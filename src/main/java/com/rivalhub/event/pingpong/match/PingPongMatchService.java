@@ -90,7 +90,6 @@ public class PingPongMatchService implements MatchService {
 
         addPingPongSetsIn(pingPongMatch, sets);
         PingPongMatch savedMatch = pingPongMatchRepository.save(pingPongMatch);
-
         return savedMatch.getSets();
     }
 
