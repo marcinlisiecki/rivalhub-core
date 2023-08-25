@@ -6,10 +6,12 @@ import com.rivalhub.event.EventDto;
 import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
+import com.rivalhub.event.common.EventCommonService;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepoManager;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
+import com.rivalhub.user.UserDetailsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,7 @@ public class PingPongService implements EventService {
     private final PingPongEventRepository pingPongEventRepository;
     private final PingPongEventSaver pingPongEventSaver;
     private final OrganizationRepoManager organizationRepoManager;
+    private final EventCommonService eventCommonService;
 
     @Override
     public EventDto addEvent(Long organizationId, EventDto eventDto) {
@@ -70,6 +73,11 @@ public class PingPongService implements EventService {
                 .findById(eventId)
                 .map(autoMapper::mapToEventDto)
                 .orElseThrow(EventNotFoundException::new);
+    }
+
+    @Override
+    public List<UserDetailsDto> findAllParticipants(long id) {
+        return eventCommonService.findAllParticipants(pingPongEventRepository, id);
     }
 
     @Override

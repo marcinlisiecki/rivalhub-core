@@ -71,7 +71,7 @@ public class StationAvailabilityFinder {
 
 
     public static List<Station> getAvailableStations(Organization organization, String startTime,
-                                                     String endTime, EventType type, UserData user) {
+                                                     String endTime, EventType type) {
         List<Station> availableStations = new ArrayList<>();
         List<Station> stationList = filterForActiveStationsAndTypeIn(organization, type);
 

@@ -40,8 +40,9 @@ public class OrganizationController {
 
     @PostMapping("{id}/image")
     private ResponseEntity<?> saveCustomImage(@RequestParam(name = "thumbnail", required = false) MultipartFile multipartFile,
+                                              @RequestParam(name = "keepAvatar", required = false) String keepAvatar,
                                               @PathVariable Long id){
-        return ResponseEntity.ok(organizationService.saveCustomImage(multipartFile, id));
+        return ResponseEntity.ok(organizationService.saveCustomImage(multipartFile,keepAvatar, id));
     }
 
     @PatchMapping("/{id}")

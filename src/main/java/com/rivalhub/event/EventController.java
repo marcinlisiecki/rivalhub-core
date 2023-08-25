@@ -2,6 +2,7 @@ package com.rivalhub.event;
 
 import com.rivalhub.event.running.RunningEventService;
 import com.rivalhub.event.running.UserTimesAddDto;
+import com.rivalhub.user.UserDetailsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,11 @@ public class EventController {
     @GetMapping("/events/{eventId}")
     private ResponseEntity<?> findEvent(@PathVariable Long eventId, @RequestParam(name = "type") String type) {
         return ResponseEntity.ok(eventStrategyResolver.findEvent(eventId, type));
+    }
+
+    @GetMapping("/events/{eventId}/participants")
+    ResponseEntity<List<UserDetailsDto>> findEventParticipants(@PathVariable Long eventId, @RequestParam String type) {
+        return ResponseEntity.ok(eventStrategyResolver.findEventParticipants(eventId, type));
     }
 
     @PostMapping("/{id}/events")

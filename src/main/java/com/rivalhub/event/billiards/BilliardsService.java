@@ -5,8 +5,10 @@ import com.rivalhub.event.EventDto;
 import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
+import com.rivalhub.event.common.EventCommonService;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
+import com.rivalhub.user.UserDetailsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +18,12 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class BilliardsService implements EventService {
+
     private final AutoMapper autoMapper;
     private final OrganizationRepository organizationRepository;
     private final BilliardsEventRepository billiardsEventRepository;
     private final BilliardsEventSaver billiardsEventSaver;
+    private final EventCommonService eventCommonService;
 
 
     @Override
@@ -50,6 +54,11 @@ public class BilliardsService implements EventService {
                 .findById(eventId)
                 .map(autoMapper::mapToEventDto)
                 .orElseThrow(EventNotFoundException::new);
+    }
+
+    @Override
+    public List<UserDetailsDto> findAllParticipants(long id) {
+        return eventCommonService.findAllParticipants(billiardsEventRepository, id);
     }
 
     @Override
