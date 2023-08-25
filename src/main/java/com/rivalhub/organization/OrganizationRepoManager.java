@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -177,7 +178,15 @@ public class OrganizationRepoManager {
         return new HashSet<>(filteredByDate);
     }
 
-    public Set<Reservation> reservationsByOrganizationIdAndUserIdFilterByDate(Long organizationId, Long userId, LocalDateTime dateTime) {
-        return reservationRepository.reservationsWithParticipantsByOrganizationIdAndUserIdWithFilterByDate(organizationId, userId, dateTime);
+    public Set<Reservation> reservationsByOrganizationIdAndUserIdFilterByDate(Long organizationId, Long userId, LocalDateTime date) {
+        Set<Reservation> reservations = reservationRepository.reservationsWithParticipantsByOrganizationIdAndUserIdWithFilterByDate(organizationId, userId);
+        return reservations.stream()
+                .filter(reservation -> {
+                    return reservation.getStartTime().getYear() == date.getYear()
+                            && reservation.getStartTime().getMonth() == date.getMonth()
+                            ||
+                            reservation.getEndTime().getYear() == date.getYear()
+                                    && reservation.getEndTime().getMonth() == date.getMonth();
+                }).collect(Collectors.toSet());
     }
 }
