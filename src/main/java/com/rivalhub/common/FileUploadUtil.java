@@ -45,11 +45,13 @@ public class FileUploadUtil {
         return uploadDir + "/" + fileName;
     }
 
-    public void updateUserImage(UserData requestUser, MultipartFile multipartFile) {
-        if (multipartFile == null) {
+    public void updateUserImage(UserData requestUser, MultipartFile multipartFile, boolean deleteAvatar) {
+
+        if (multipartFile == null && deleteAvatar) {
             deleteFileIfExists(requestUser);
             return;
-        }
+        } else if (multipartFile==null) return;
+
         String fileName = createFileName(multipartFile, userImgName);
         String uploadDir = getUploadDir(requestUser, multipartFile);
 
