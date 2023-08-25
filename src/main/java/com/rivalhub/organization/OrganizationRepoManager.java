@@ -175,8 +175,6 @@ public class OrganizationRepoManager {
         return new HashSet<>(filteredByDate);
     }
 
-    public Set<Reservation> reservationsByOrganizationIdAndUserIdFilterByDate(Long organizationId, Long userId, LocalDateTime dateTime){
-        return reservationRepository.reservationsWithParticipantsByOrganizationIdAndUserIdWithFilterByDate(organizationId, userId, dateTime);
     public Set<Reservation> reservationsByOrganizationIdAndUserIdFilterByDate(Long organizationId, Long userId, LocalDateTime date) {
         Set<Reservation> reservations = reservationRepository.reservationsWithParticipantsByOrganizationIdAndUserIdWithFilterByDate(organizationId, userId);
         return reservations.stream()
