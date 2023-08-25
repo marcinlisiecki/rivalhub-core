@@ -41,4 +41,12 @@ public class Event {
     private List<UserData> participants = new ArrayList<>();
 
     private boolean isEventPublic = false;
+
+    public boolean isEventPublic() {
+        return isEventPublic;
+    }
+
+    public void setIsEventPublic(boolean eventPublic) {
+        isEventPublic = eventPublic;
+    }
 }
