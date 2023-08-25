@@ -5,6 +5,10 @@ public class ErrorMessages {
 
     private ErrorMessages() {}
 
+    public static final String YOU_ARE_ALREADY_PARTICIPANT = "Już jesteś uczestnikiem tego wydarzenia";
+
+    public static final String EVENT_IS_NOT_PUBLIC = "Nie można dołączyć do prywatnego eventu";
+
     public static final String IMPOSSIBLE_TO_ADD_USER = "Nie można zaprosić użytkownika, który już jest w organizacji";
     public static final String COULD_NOT_SAVE_FILE = "Nie można zapisać pliku o nazwie";
     public static final String DEFAULT_ERROR = "Wystąpił błąd";

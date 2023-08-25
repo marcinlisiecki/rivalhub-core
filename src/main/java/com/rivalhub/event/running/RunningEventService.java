@@ -75,4 +75,9 @@ public class RunningEventService implements EventService {
     public boolean matchStrategy(String eventType) {
         return eventType.equalsIgnoreCase(EventType.RUNNING.name());
     }
+
+    @Override
+    public void joinPublicEvent(Long id) {
+        eventCommonService.joinPublicEvent(runningEventRepository, id);
+    }
 }

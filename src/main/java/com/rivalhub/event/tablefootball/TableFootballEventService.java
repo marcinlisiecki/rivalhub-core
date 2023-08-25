@@ -75,4 +75,9 @@ public class TableFootballEventService implements EventService {
     public boolean matchStrategy(String eventType) {
         return eventType.equalsIgnoreCase(EventType.TABLE_FOOTBALL.name());
     }
+
+    @Override
+    public void joinPublicEvent(Long id) {
+        eventCommonService.joinPublicEvent(tableFootballEventRepository, id);
+    }
 }

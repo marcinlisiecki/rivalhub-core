@@ -28,7 +28,9 @@ public class ExceptionHandler {
             MatchNotFoundException.class,
             InvalidPathParamException.class,
             ImpossibleToAddUser.class,
-            UserAlreadyActivated.class
+            UserAlreadyActivated.class,
+            EventIsNotPublicException.class,
+            AlreadyEventParticipantException.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessageDto handleExceptions(Exception e) {
