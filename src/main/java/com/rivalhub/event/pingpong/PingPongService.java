@@ -47,7 +47,7 @@ public class PingPongService implements EventService {
         return organization.getPingPongEvents()
                 .stream()
                 .map(mapEventToDTO(organization))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Function<PingPongEvent, EventDto> mapEventToDTO(Organization organization) {
@@ -55,15 +55,7 @@ public class PingPongService implements EventService {
             EventDto eventDto = autoMapper.mapToEventDto(pingPongEvent);
             eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
 
-            if (pingPongEvent.getEndTime().isAfter(LocalDateTime.now())
-                    &&
-                    pingPongEvent.getStartTime().isAfter(LocalDateTime.now())
-            ) eventDto.setStatus("Incoming");
-            else if (pingPongEvent.getStartTime().isBefore(LocalDateTime.now())
-                    &&
-                    pingPongEvent.getEndTime().isBefore(LocalDateTime.now())) eventDto.setStatus("Historical");
-            else eventDto.setStatus("Active");
-
+            eventCommonService.setStatusForEvent(pingPongEvent, eventDto);
             return eventDto;
         };
     }
