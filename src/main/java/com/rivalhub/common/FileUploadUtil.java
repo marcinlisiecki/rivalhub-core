@@ -45,9 +45,9 @@ public class FileUploadUtil {
         return uploadDir + "/" + fileName;
     }
 
-    public void updateUserImage(UserData requestUser, MultipartFile multipartFile, boolean deleteAvatar) {
+    public void updateUserImage(UserData requestUser, MultipartFile multipartFile, boolean keepAvatar) {
 
-        if (multipartFile == null && deleteAvatar) {
+        if (multipartFile == null && !keepAvatar) {
             deleteFileIfExists(requestUser);
             return;
         } else if (multipartFile==null) return;

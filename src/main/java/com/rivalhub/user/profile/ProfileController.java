@@ -46,7 +46,7 @@ public class ProfileController {
 
     @PostMapping("/users/image")
     private ResponseEntity<?> updateImage(@RequestParam(name = "thumbnail", required = false)
-                                              MultipartFile multipartFile, @RequestParam(name = "keepAvatar", required = false) String keepAvatar){
+                                              MultipartFile multipartFile, @RequestParam(name = "keepAvatar", required = false) boolean keepAvatar){
         return ResponseEntity.ok(profileService.updateImage(multipartFile,keepAvatar));
     }
 
