@@ -1,7 +1,6 @@
 package com.rivalhub.organization.service;
 
 import com.rivalhub.common.AutoMapper;
-import com.rivalhub.common.PaginationHelper;
 import com.rivalhub.email.EmailService;
 import com.rivalhub.organization.OrganizationDTO;
 import com.rivalhub.organization.OrganizationRepository;
