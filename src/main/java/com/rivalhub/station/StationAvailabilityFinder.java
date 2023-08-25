@@ -45,6 +45,10 @@ public class StationAvailabilityFinder {
             for (int i = 0; i < reservations.size(); i++) {
                 Reservation currentReservation = reservations.get(i);
 
+                if (currentReservation.getEndTime().isBefore(LocalDateTime.now())) {
+                    continue;
+                }
+
                 if (i + 1 >= reservations.size()) {
                     currentStationFirstAvailable = currentReservation.getEndTime().plusMinutes(1);
                     break;
