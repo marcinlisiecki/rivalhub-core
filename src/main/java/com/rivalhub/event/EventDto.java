@@ -20,6 +20,6 @@ public class EventDto {
     private EventType eventType;
     private String name;
     private String description;
-
     private String status;
+    private double distance;
 }

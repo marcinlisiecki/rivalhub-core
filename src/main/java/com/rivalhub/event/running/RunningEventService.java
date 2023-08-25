@@ -10,6 +10,7 @@ import com.rivalhub.common.exception.OrganizationNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,9 @@ public class RunningEventService implements EventService {
     private final OrganizationRepository organizationRepository;
     private final RunningEventRepository runningEventRepository;
     private final RunningEventSaver runningEventSaver;
+    private final RunningResultsMapper runningResultsMapper;
+    private final RunningEventMapper runningEventMapper;
+    private final UserTimeRepository userTimeRepository;
 
 
     @Override
@@ -56,8 +60,28 @@ public class RunningEventService implements EventService {
                 .orElseThrow(EventNotFoundException::new);
     }
 
+
+
     @Override
     public boolean matchStrategy(String eventType) {
         return eventType.equalsIgnoreCase(EventType.RUNNING.name());
+    }
+
+    public RunningEventViewDto addRunningResults(Long eventId, List<UserTimesAddDto> userTimesAddDtos){
+        RunningEvent runningEvent = runningEventRepository
+                .findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+        List<UserTime> userTimeList = new ArrayList<>();
+        userTimesAddDtos.forEach(userTimesAddDto ->  userTimeList.add(runningResultsMapper.map(userTimesAddDto,runningEvent)));
+        userTimeRepository.saveAll(userTimeList);
+        runningEvent.setUserTimeList(userTimeList);
+        return runningEventMapper.map(runningEventRepository.save(runningEvent));
+    }
+
+    public List<UserTimesViewDto> getRunningResults(Long eventId) {
+        RunningEvent runningEvent = runningEventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
+        List<UserTimesViewDto> userViewTimeList = new ArrayList<>();
+        runningEvent.getUserTimeList().forEach(userTime ->  userViewTimeList.add(runningResultsMapper.map(userTime,runningEvent)));
+        return userViewTimeList;
     }
 }

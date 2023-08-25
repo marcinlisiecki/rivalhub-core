@@ -16,8 +16,8 @@ import java.util.List;
 @Data
 public class RunningEvent extends Event {
     @OneToMany
-    List<UserTimes> userTimesList;
-    Double distance;
+    private List<UserTime> userTimeList;
+    private Double distance;
 
     private EventType eventType = EventType.RUNNING;
 
