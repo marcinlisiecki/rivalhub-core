@@ -90,7 +90,7 @@ public class UserProfileHelper {
         //TODO DODAĆ RESZTĘ EVENTÓW JAK BĘDĄ JUŻ DZIAŁAĆ
         for (Organization sharedOrganization : userOrganizations) {
             Set<PingPongEvent> events = organizationRepoManager.
-                    eventsWithParticipantsByOrganizationIdAndUserIdWithPaginationByDate(sharedOrganization, requestUser.getId(), datePattern);
+                    eventsWithParticipantsByOrganizationIdAndUserIdFilteredByDate(sharedOrganization, requestUser.getId(), datePattern);
 
             List<EventProfileDTO> eventProfileDTOStream = events.stream().map(setEventProfileDTO(sharedOrganization)).toList();
             eventList.addAll(eventProfileDTOStream);
