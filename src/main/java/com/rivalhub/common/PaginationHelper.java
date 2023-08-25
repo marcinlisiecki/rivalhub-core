@@ -14,6 +14,7 @@ public class PaginationHelper {
         int start = (int) pageRequest.getOffset();
         int end = Math.min((start + pageRequest.getPageSize()), list.size());
 
+
         List<?> pageContent = list.subList(start, end);
         return new PageImpl<>(pageContent, pageRequest, list.size());
     }

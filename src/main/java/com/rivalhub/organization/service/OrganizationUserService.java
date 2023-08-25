@@ -16,9 +16,9 @@ import com.rivalhub.user.UserRepository;
 import com.rivalhub.user.UserSearchDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -36,10 +36,8 @@ public class OrganizationUserService {
         var organization = organizationRepository.findById(id)
                 .orElseThrow(OrganizationNotFoundException::new);
 
-        List<UserDetailsDto> allUsers = organization.getUserList()
-                .stream().map(autoMapper::mapToUserDisplayDTO)
-                .toList();
-        return PaginationHelper.toPage(page, size, allUsers);
+        PageRequest pageable = PageRequest.of(page, size);
+        return userRepository.findByOrganizationId(organization.getId(), pageable);
     }
 
     public OrganizationDTO addUser(Long id, String hash) {
