@@ -28,14 +28,17 @@ public class EventCommonService {
                 .toList();
     }
 
-    public <T extends Event> void setStatusForEvent(T event, EventDto eventDto){
-        if (event.getEndTime().isAfter(LocalDateTime.now())
-                &&
-                event.getStartTime().isAfter(LocalDateTime.now())
-        ) eventDto.setStatus("Incoming");
-        else if (event.getStartTime().isBefore(LocalDateTime.now())
-                &&
-                event.getEndTime().isBefore(LocalDateTime.now())) eventDto.setStatus("Historical");
-        else eventDto.setStatus("Active");
+    public <T extends Event> void setStatusForEvent(T event, EventDto eventDto) {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (event.getEndTime().isAfter(now) && event.getStartTime().isAfter(now)) {
+            eventDto.setStatus("Incoming");
+            return;
+        }
+        if (event.getStartTime().isBefore(now) && event.getEndTime().isBefore(now)) {
+            eventDto.setStatus("Historical");
+            return;
+        }
+        eventDto.setStatus("Active");
     }
 }
