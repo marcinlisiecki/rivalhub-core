@@ -41,7 +41,7 @@ public class PullUpMatchService implements MatchService {
     private final PullUpSeriesRepository pullUpSeriesRepository;
 
     @Override
-    public boolean setResultApproval(Long eventId, Long matchId, boolean approve) {
+    public boolean setResultApproval(Long eventId, Long matchId) {
         throw new NotImplementedException();
     }
 

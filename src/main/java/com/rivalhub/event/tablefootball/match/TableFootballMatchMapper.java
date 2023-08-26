@@ -47,8 +47,8 @@ public class TableFootballMatchMapper {
         tableFootballMatchDto.setId(tableFootballMatch.getId());
         tableFootballMatchDto.setTeam1Ids(team1.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
         tableFootballMatchDto.setTeam2Ids(team2.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
-        tableFootballMatchDto.setTeam1Approval(tableFootballMatch.isTeam1Approval());
-        tableFootballMatchDto.setTeam2Approval(tableFootballMatch.isTeam2Approval());
+//        tableFootballMatchDto.setTeam1Approval(tableFootballMatch.isTeam1Approval());
+//        tableFootballMatchDto.setTeam2Approval(tableFootballMatch.isTeam2Approval());
 
         return tableFootballMatchDto;
     }
@@ -67,8 +67,8 @@ public class TableFootballMatchMapper {
         viewTableFootballMatchDTO.setTeam1(team1);
         viewTableFootballMatchDTO.setTeam2(team2);
         viewTableFootballMatchDTO.setSets(tableFootballMatch.getSets());
-        viewTableFootballMatchDTO.setTeam1Approval(tableFootballMatch.isTeam1Approval());
-        viewTableFootballMatchDTO.setTeam2Approval(tableFootballMatch.isTeam2Approval());
+//        viewTableFootballMatchDTO.setTeam1Approval(tableFootballMatch.isTeam1Approval());
+//        viewTableFootballMatchDTO.setTeam2Approval(tableFootballMatch.isTeam2Approval());
 
         return viewTableFootballMatchDTO;
     }

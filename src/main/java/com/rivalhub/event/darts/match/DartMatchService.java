@@ -38,7 +38,7 @@ public class DartMatchService implements MatchService {
     final DartRoundRepository dartRoundRepository;
     final SinglePlayerInRoundRepository singlePlayerInRoundRepository;
     @Override
-    public boolean setResultApproval(Long eventId, Long matchId, boolean approve) {
+    public boolean setResultApproval(Long eventId, Long matchId) {
         throw new NotImplementedException();
     }
 

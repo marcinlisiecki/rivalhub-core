@@ -48,9 +48,9 @@ public class DartMatchMapper {
 
         dartMatchDTO.setId(dartMatch.getId());
         dartMatchDTO.setTeam1Ids(participants.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
-        dartMatchDTO.setTeam1Approval(dartMatch.isApprovalFirstPlace());
-        dartMatchDTO.setTeam2Approval(dartMatch.isApprovalSecondPlace());
-        dartMatchDTO.setTeam3Approval(dartMatch.isApprovalThirdPlace());
+//        dartMatchDTO.setTeam1Approval(dartMatch.isApprovalFirstPlace());
+//        dartMatchDTO.setTeam2Approval(dartMatch.isApprovalSecondPlace());
+//        dartMatchDTO.setTeam3Approval(dartMatch.isApprovalThirdPlace());
 
         return dartMatchDTO;
     }

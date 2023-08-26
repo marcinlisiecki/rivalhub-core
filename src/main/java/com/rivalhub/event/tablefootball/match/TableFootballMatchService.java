@@ -30,19 +30,16 @@ public class TableFootballMatchService implements MatchService {
     private final TableFootballMatchMapper tableFootballMatchMapper;
 
     @Override
-    public boolean setResultApproval(Long eventId, Long matchId, boolean approve) {
-        var requestUser = SecurityUtils.getUserFromSecurityContext();
-        TableFootballEvent tableFootballEvent = tableFootballEventRepository
-                .findById(eventId)
-                .orElseThrow(EventNotFoundException::new);
+    public boolean setResultApproval(Long eventId, Long matchId) {
 
-        return setResultApproval(requestUser, tableFootballEvent, matchId, approve);
+
+        return false;
 
     }
 
     @Override
     public MatchDto createMatch(Long organizationId, Long eventId, MatchDto MatchDTO) {
-        var requestUser = SecurityUtils.getUserFromSecurityContext();
+
         Organization organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
@@ -51,7 +48,7 @@ public class TableFootballMatchService implements MatchService {
 
         TableFootballMatch tableFootballMatch = tableFootballMatchMapper.map(MatchDTO, organization);
 
-        return save(requestUser, tableFootballEvent, tableFootballMatch);
+        return save(tableFootballEvent, tableFootballMatch);
     }
 
     @Override
@@ -96,17 +93,8 @@ public class TableFootballMatchService implements MatchService {
 
 
 
-    private MatchDto save(UserData loggedUser, TableFootballEvent tableFootballEvent,
+    private MatchDto save(TableFootballEvent tableFootballEvent,
                           TableFootballMatch tableFootballMatch){
-        boolean loggedUserInTeam1 = tableFootballMatch.getTeam1()
-                .stream().anyMatch(loggedUser::equals);
-
-        if (loggedUserInTeam1) tableFootballMatch.setTeam1Approval(true);
-
-        boolean loggedUserInTeam2 = tableFootballMatch.getTeam2()
-                .stream().anyMatch(loggedUser::equals);
-
-        if (loggedUserInTeam2) tableFootballMatch.setTeam2Approval(true);
 
         addTableFootballMatch(tableFootballEvent, tableFootballMatch);
 
@@ -125,8 +113,6 @@ public class TableFootballMatchService implements MatchService {
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
 
-        if(tableFootballMatch.getTeam1().stream().anyMatch(loggedUser::equals)) tableFootballMatch.setTeam1Approval(approve);
-        if(tableFootballMatch.getTeam2().stream().anyMatch(loggedUser::equals)) tableFootballMatch.setTeam2Approval(approve);
 
         tableFootballMatchRepository.save(tableFootballMatch);
         return approve;

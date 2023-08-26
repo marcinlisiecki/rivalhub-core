@@ -40,9 +40,9 @@ public class PullUpMatchMapper {
 
         pullUpMatchDTO.setId(pullUpMatch.getId());
         pullUpMatchDTO.setTeam1Ids(team1.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
-        pullUpMatchDTO.setTeam1Approval(pullUpMatch.isApprovalFirstPlace());
-        pullUpMatchDTO.setTeam2Approval(pullUpMatch.isApprovalSecondPlace());
-        pullUpMatchDTO.setTeam3Approval(pullUpMatch.isApprovalThirdPlace());
+//        pullUpMatchDTO.setTeam1Approval(pullUpMatch.isApprovalFirstPlace());
+//        pullUpMatchDTO.setTeam2Approval(pullUpMatch.isApprovalSecondPlace());
+//        pullUpMatchDTO.setTeam3Approval(pullUpMatch.isApprovalThirdPlace());
 
         return pullUpMatchDTO;
     }

@@ -9,7 +9,7 @@ import java.util.List;
 
 public class BilliardsMatchService implements MatchService {
     @Override
-    public boolean setResultApproval(Long eventId, Long matchId, boolean approve) {
+    public boolean setResultApproval(Long eventId, Long matchId) {
         throw new NotImplementedException();
     }
 
