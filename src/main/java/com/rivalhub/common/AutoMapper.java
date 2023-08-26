@@ -1,6 +1,7 @@
 package com.rivalhub.common;
 
 import com.rivalhub.auth.LoginRequestDto;
+import com.rivalhub.event.Event;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.event.billiards.BilliardsEvent;
 import com.rivalhub.event.darts.DartEvent;

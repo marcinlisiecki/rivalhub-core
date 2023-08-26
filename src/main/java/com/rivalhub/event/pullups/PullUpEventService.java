@@ -67,4 +67,9 @@ public class PullUpEventService implements EventService {
         return eventType.equalsIgnoreCase(EventType.PULL_UPS.name());
     }
 
+    @Override
+    public void joinPublicEvent(Long id) {
+        eventCommonService.joinPublicEvent(pullUpEventRepository, id);
+    }
+
 }

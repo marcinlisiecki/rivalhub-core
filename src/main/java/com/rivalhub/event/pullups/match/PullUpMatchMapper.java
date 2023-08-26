@@ -51,6 +51,7 @@ public class PullUpMatchMapper {
     ViewPullUpMatchDto map(PullUpMatch pullUpMatch){
         ViewPullUpMatchDto viewPullUpMatchDto = new ViewPullUpMatchDto();
 
+        viewPullUpMatchDto.setId(pullUpMatch.getId());
         List<UserDetailsDto> team1 = pullUpMatch.getParticipants()
                 .stream().map(autoMapper::mapToUserDetails)
                 .toList();

@@ -10,6 +10,8 @@ import java.util.Map;
 
 @Data
 public class ViewPullUpMatchDto implements ViewMatchDto {
+
+    private Long id;
     private List<UserDetailsDto> userDetailsDtos;
     private List<PullUpSeriesDto> scores;
     private Map<Long,Integer> places;
