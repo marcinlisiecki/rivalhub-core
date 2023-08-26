@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -72,7 +73,13 @@ public class BilliardsMatchService implements MatchService {
 
     @Override
     public List<ViewMatchDto> findMatches(Long eventId) {
-        throw new NotImplementedException();
+        BilliardsEvent billiardsEvent = billiardsEventRepository.
+                findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+
+        List<BilliardsMatch> billiardsMatchList = billiardsEvent.getBilliardsMatches();
+
+        return new ArrayList<ViewMatchDto>(billiardsMatchList.stream().map(billiardsMatchMapper::map).toList());
     }
 
     @Override
