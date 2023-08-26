@@ -22,6 +22,8 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
+import com.rivalhub.user.UserRepository;
+import com.rivalhub.user.notification.Notification;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
@@ -39,16 +41,50 @@ public class PullUpMatchService implements MatchService {
     private final PullUpMatchMapper pullUpMatchMapper;
     private final PullUpResultMapper pullUpResultMapper;
     private final PullUpSeriesRepository pullUpSeriesRepository;
-
+    private final UserRepository userRepository;
     @Override
     public boolean setResultApproval(Long eventId, Long matchId) {
-        throw new NotImplementedException();
+            var requestUser = SecurityUtils.getUserFromSecurityContext();
+            PullUpEvent pullUpEvent = pullUpEventRepository
+                    .findById(eventId)
+                    .orElseThrow(EventNotFoundException::new);
+
+            return setResultApproval(requestUser, pullUpEvent, matchId);
+    }
+
+    private boolean setResultApproval(UserData loggedUser, PullUpEvent pullUpEvent, Long matchId) {
+        PullUpMatch pullUpMatch = pullUpEvent.getPullUpMatchList()
+                .stream().filter(match -> match.getId().equals(matchId))
+                .findFirst()
+                .orElseThrow(MatchNotFoundException::new);
+        setApprove(loggedUser, pullUpMatch);
+        pullUpMatchRepository.save(pullUpMatch);
+        return pullUpMatch.getUserApprovalMap().get(loggedUser.getId());
+    }
+
+    private void setApprove(UserData loggedUser, PullUpMatch pullUpMatch) {
+        pullUpMatch.getUserApprovalMap().replace(loggedUser.getId(), !(pullUpMatch.getUserApprovalMap().get(loggedUser.getId())));
+    }
+
+    private void setApproveAndNotifications(UserData loggedUser, PullUpMatch pullUpMatch, Long eventId) {
+        pullUpMatch.getUserApprovalMap().put(loggedUser.getId(),true);
+        pullUpMatch.getParticipants()
+                .stream()
+                .filter(userData -> userData.getId() != loggedUser.getId())
+                .forEach(userData -> saveNotification(userData,EventType.PING_PONG, pullUpMatch.getId(), eventId));
+    }
+
+
+
+    private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
+        userData.getNotifications().add(
+                new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED));
+        userRepository.save(userData);
     }
 
     @Override
     public MatchDto createMatch(Long organizationId, Long eventId, MatchDto MatchDTO) {
 
-        var requestUser = SecurityUtils.getUserFromSecurityContext();
         Organization organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
@@ -57,11 +93,11 @@ public class PullUpMatchService implements MatchService {
 
         PullUpMatch pullUpMatch = pullUpMatchMapper.map(MatchDTO, organization);
 
-        return save(requestUser, pullUpEvent, pullUpMatch);
+        return save( pullUpEvent, pullUpMatch);
 
     }
 
-    private MatchDto save(UserData loggedUser, PullUpEvent pullUpEvent,
+    private MatchDto save(PullUpEvent pullUpEvent,
                           PullUpMatch pullUpMatch){
 
         addPullUpMatch(pullUpEvent, pullUpMatch);
@@ -111,6 +147,7 @@ public class PullUpMatchService implements MatchService {
     }
 
     public ViewMatchDto addResult(Long eventId, Long matchId, List<PullUpSeriesAddDto> pullUpSeriesAddDto) {
+        var loggedUser = SecurityUtils.getUserFromSecurityContext();
         PullUpEvent pullUpEvent = pullUpEventRepository
                 .findById(eventId)
                 .orElseThrow(EventNotFoundException::new);
@@ -119,8 +156,7 @@ public class PullUpMatchService implements MatchService {
         pullUpSeriesAddDto.stream().forEach(pullUpSeriesDto -> pullUpSeries.add(pullUpResultMapper.map(pullUpSeriesDto,pullUpMatch)));
         pullUpSeries.stream().forEach(pullUpSerie -> pullUpSeriesRepository.save(pullUpSerie));
         pullUpMatch.setPullUpSeries(pullUpSeries);
-
-
+        setApproveAndNotifications(loggedUser, pullUpMatch,eventId);
         PullUpMatch savedMatch = pullUpMatchRepository.save(pullUpMatch);
 
         return pullUpMatchMapper.map(savedMatch);

@@ -10,7 +10,7 @@ import java.util.List;
 public class MatchStrategyResolver {
 
     private final MatchOperator matchOperator;
-    public boolean setResultApproval(Long eventId, Long matchId, boolean approve , String type){
+    public boolean setResultApproval(Long eventId, Long matchId, String type){
         return matchOperator.useStrategy(type).setResultApproval(eventId,matchId);
     }
 

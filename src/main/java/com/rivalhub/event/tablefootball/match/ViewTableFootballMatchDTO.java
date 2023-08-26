@@ -6,7 +6,9 @@ import com.rivalhub.event.tablefootball.match.result.TableFootballMatchSet;
 import com.rivalhub.user.UserDetailsDto;
 import lombok.Data;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class ViewTableFootballMatchDTO implements ViewMatchDto {
@@ -15,6 +17,5 @@ public class ViewTableFootballMatchDTO implements ViewMatchDto {
     private List<UserDetailsDto> team1;
     private List<UserDetailsDto> team2;
     private List<TableFootballMatchSet> sets;
-    boolean team1Approval;
-    boolean team2Approval;
+    private Map<Long, Boolean> userApprovalMap = new HashMap<>();
 }

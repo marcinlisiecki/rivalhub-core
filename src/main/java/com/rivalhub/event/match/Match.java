@@ -21,7 +21,8 @@ public class Match {
     @ManyToMany
     private List<UserData> team2 = new ArrayList<>();
 
-
+    @ElementCollection
+    private Map<Long, Boolean> userApprovalMap = new HashMap<>();
 
 
 }

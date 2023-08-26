@@ -8,7 +8,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Data
@@ -27,6 +29,8 @@ public class DartMatch {
 
     @ManyToMany
     private List<UserData> participants = new ArrayList<>();
+    @ElementCollection
+    private Map<Long, Boolean> userApprovalMap = new HashMap<>();
 
     private boolean approvalFirstPlace;
     private boolean approvalSecondPlace;

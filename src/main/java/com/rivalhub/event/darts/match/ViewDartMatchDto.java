@@ -6,7 +6,9 @@ import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.user.UserDetailsDto;
 import lombok.Data;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class ViewDartMatchDto implements ViewMatchDto {
@@ -21,6 +23,7 @@ public class ViewDartMatchDto implements ViewMatchDto {
     private List<List<Integer>> bounceOutsInLeg;
     private List<List<Integer>> bestRoundScoresInLeg;
     private List<List<Integer>> numberOfRoundsPlayedInLeg;
+    private Map<Long, Boolean> userApprovalMap = new HashMap<>();
 
 
 

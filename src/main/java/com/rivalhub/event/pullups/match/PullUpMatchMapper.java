@@ -2,6 +2,7 @@ package com.rivalhub.event.pullups.match;
 
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.event.EventUtils;
+import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.pullups.match.result.*;
 import com.rivalhub.organization.Organization;
@@ -27,6 +28,7 @@ public class PullUpMatchMapper {
                 .filter(EventUtils.getUserFromOrganization(matchDto.getTeam1Ids()))
                 .toList();
         pullUpMatch.setParticipants(participants);
+        pullUpMatch.setUserApprovalMap(MatchApprovalService.prepareApprovalMap(matchDto));
         return pullUpMatch;
     }
 
@@ -40,9 +42,7 @@ public class PullUpMatchMapper {
 
         pullUpMatchDTO.setId(pullUpMatch.getId());
         pullUpMatchDTO.setTeam1Ids(team1.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
-//        pullUpMatchDTO.setTeam1Approval(pullUpMatch.isApprovalFirstPlace());
-//        pullUpMatchDTO.setTeam2Approval(pullUpMatch.isApprovalSecondPlace());
-//        pullUpMatchDTO.setTeam3Approval(pullUpMatch.isApprovalThirdPlace());
+        pullUpMatchDTO.setUserApprovalMap(pullUpMatch.getUserApprovalMap());
 
         return pullUpMatchDTO;
     }
@@ -58,7 +58,7 @@ public class PullUpMatchMapper {
 
         viewPullUpMatchDto.setScores(pullUpMatch.getPullUpSeries().stream().map(pullUpResultMapper::map).toList());
         viewPullUpMatchDto.setPlaces(getPlaces(pullUpMatch));
-
+        viewPullUpMatchDto.setUserApprovalMap(pullUpMatch.getUserApprovalMap());
         return viewPullUpMatchDto;
     }
 

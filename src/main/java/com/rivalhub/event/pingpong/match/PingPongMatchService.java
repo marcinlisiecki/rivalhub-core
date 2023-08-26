@@ -91,7 +91,7 @@ public class PingPongMatchService implements MatchService {
                 .orElseThrow(EventNotFoundException::new);
 
         PingPongMatch pingPongMatch = findMatchInEvent(pingPongEvent, matchId);
-        setApproveAndNotifications(loggedUser, pingPongMatch, pingPongEvent.getEventId());
+        setApproveAndNotifications(loggedUser, pingPongMatch, eventId);
 
         addPingPongSetsIn(pingPongMatch, sets);
         PingPongMatch savedMatch = pingPongMatchRepository.save(pingPongMatch);
@@ -109,7 +109,7 @@ public class PingPongMatchService implements MatchService {
         pingPongEventRepository.save(pingPongEvent);
         return pingPongMatchMapper.mapToMatchDto(savedMatch);
     }
-    
+
     private void setApproveAndNotifications(UserData loggedUser, PingPongMatch pingPongMatch, Long eventId) {
         pingPongMatch.getUserApprovalMap().put(loggedUser.getId(),true);
         pingPongMatch.getTeam1()

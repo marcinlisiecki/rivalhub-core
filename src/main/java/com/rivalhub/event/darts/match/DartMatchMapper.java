@@ -8,6 +8,7 @@ import com.rivalhub.event.darts.match.result.Leg;
 import com.rivalhub.event.darts.match.result.SinglePlayerScoreInRound;
 import com.rivalhub.event.darts.match.result.variables.DartFormat;
 import com.rivalhub.event.darts.match.result.variables.DartMode;
+import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.user.UserData;
@@ -34,9 +35,8 @@ public class DartMatchMapper {
         dartMatch.setParticipants(players);
         dartMatch.setDartFormat(DartFormat.valueOf(matchDto.getDartFormat()));
         dartMatch.setDartMode(DartMode.valueOf(matchDto.getDartMode()));
+        dartMatch.setUserApprovalMap(MatchApprovalService.prepareApprovalMap(matchDto));
         return dartMatch;
-
-
     }
 
     public MatchDto mapToMatchDto(DartMatch dartMatch) {
@@ -48,10 +48,7 @@ public class DartMatchMapper {
 
         dartMatchDTO.setId(dartMatch.getId());
         dartMatchDTO.setTeam1Ids(participants.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
-//        dartMatchDTO.setTeam1Approval(dartMatch.isApprovalFirstPlace());
-//        dartMatchDTO.setTeam2Approval(dartMatch.isApprovalSecondPlace());
-//        dartMatchDTO.setTeam3Approval(dartMatch.isApprovalThirdPlace());
-
+        dartMatchDTO.setUserApprovalMap(dartMatch.getUserApprovalMap());
         return dartMatchDTO;
     }
 
@@ -66,6 +63,7 @@ public class DartMatchMapper {
         viewDartMatch.setDateFormat(dartMatch.getDartFormat());
         viewDartMatch.setDartMode(dartMatch.getDartMode());
         dartMatchResultCalculator.calculateResults(viewDartMatch,dartMatch);
+        viewDartMatch.setUserApprovalMap(viewDartMatch.getUserApprovalMap());
         return viewDartMatch;
     }
 }
