@@ -10,4 +10,6 @@ public interface EventService {
     EventDto findEvent(long eventId);
     List<UserDetailsDto> findAllParticipants(long id);
     boolean matchStrategy(String eventType);
+
+    void joinPublicEvent(Long id);
 }
