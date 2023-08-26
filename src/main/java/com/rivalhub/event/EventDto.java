@@ -20,6 +20,15 @@ public class EventDto {
     private EventType eventType;
     private String name;
     private String description;
-
+    private boolean isEventPublic;
     private String status;
+
+
+    public boolean isEventPublic() {
+        return isEventPublic;
+    }
+
+    public void setIsEventPublic(boolean eventPublic) {
+        isEventPublic = eventPublic;
+    }
 }

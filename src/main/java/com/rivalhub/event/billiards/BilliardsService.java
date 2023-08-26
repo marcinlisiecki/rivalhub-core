@@ -1,6 +1,7 @@
 package com.rivalhub.event.billiards;
 
 import com.rivalhub.common.AutoMapper;
+import com.rivalhub.common.exception.EventIsNotPublicException;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventService;
@@ -8,6 +9,7 @@ import com.rivalhub.event.EventType;
 import com.rivalhub.event.common.EventCommonService;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
+import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserDetailsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -64,5 +66,10 @@ public class BilliardsService implements EventService {
     @Override
     public boolean matchStrategy(String eventType) {
         return eventType.equalsIgnoreCase(EventType.BILLIARDS.name());
+    }
+
+    @Override
+    public void joinPublicEvent(Long id) {
+        eventCommonService.joinPublicEvent(billiardsEventRepository, id);
     }
 }
