@@ -54,6 +54,7 @@ public class EventUtils {
 
         event.getParticipants().addAll(participants);
         event.setHost(EventUtils.getHost(organization, eventDto.getHost()));
+        event.setDescription(eventDto.getDescription());
 
         event.setIsEventPublic(eventDto.isEventPublic());
         event.setStartTime(LocalDateTime.parse(eventDto.getStartTime(), FormatterHelper.formatter()));
