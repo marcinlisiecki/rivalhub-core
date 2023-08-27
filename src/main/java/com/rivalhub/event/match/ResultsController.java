@@ -78,8 +78,8 @@ public class ResultsController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     private void deletePullUpSeries(@PathVariable Long eventId,
                                                 @PathVariable Long matchId,
-                                                @RequestBody PullUpSeriesAddDto pullUpSerie) {
-        pullUpMatchService.deletePullUpSeries(eventId, matchId, pullUpSerie);
+                                                @RequestBody Long seriesId) {
+        pullUpMatchService.deletePullUpSeries(eventId, matchId, seriesId);
     }
 
     @PostMapping("/{matchId}/dart")

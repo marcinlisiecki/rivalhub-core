@@ -157,7 +157,9 @@ public class TableFootballMatchService implements MatchService {
 
         match.getSets()
                 .forEach(set -> {
-                    if (set.getSetNr() != 1) set.setSetNr(set.getSetNr() - 1);
+                    if (set.getSetNr() > tableFootballSet.getSetNr()) {
+                        set.setSetNr(set.getSetNr() - 1);
+                    }
                 });
 
         tableFootballMatchRepository.save(match);

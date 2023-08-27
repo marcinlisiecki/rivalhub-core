@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -128,17 +129,22 @@ public class PullUpMatchService implements MatchService {
         return pullUpMatchMapper.map(savedMatch);
     }
 
-    public void deletePullUpSeries(Long eventId, Long matchId, PullUpSeriesAddDto pullUpSerie) {
+    public void deletePullUpSeries(Long eventId, Long matchId, Long seriesId) {
         PullUpEvent pullUpEvent = pullUpEventRepository.findById(eventId)
                 .orElseThrow(EventNotFoundException::new);
         PullUpMatch match = findMatchInEvent(pullUpEvent, matchId);
 
         if (match.getPullUpSeries().isEmpty()) return;
-        if (!match.isApprovalFirstPlace() || !match.isApprovalSecondPlace() || !match.isApprovalThirdPlace()) match.getPullUpSeries().remove(pullUpSerie);
+        if (!match.isApprovalFirstPlace() || !match.isApprovalSecondPlace() || !match.isApprovalThirdPlace()) {
+            List<PullUpSeries> seriesToDelete = match.getPullUpSeries().stream().filter(s -> s.getSeriesID().equals(seriesId)).toList();
+            match.getPullUpSeries().removeAll(seriesToDelete);
+        }
 
         match.getPullUpSeries()
                 .forEach(set -> {
-                    if (set.getSeriesID() != 1) set.setSeriesID(set.getSeriesID() - 1);
+                    if (set.getSeriesID() > seriesId) {
+                        set.setSeriesID(set.getSeriesID() - 1);
+                    }
                 });
 
         pullUpMatchRepository.save(match);
