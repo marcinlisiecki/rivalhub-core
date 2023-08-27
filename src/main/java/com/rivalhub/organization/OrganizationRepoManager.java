@@ -84,6 +84,7 @@ public class OrganizationRepoManager {
                 .findFirst()
                 .orElseThrow(OrganizationNotFoundException::new);
     }
+
     private Organization pingPongEventsByOrganizationId(Long id) {
         return entityManager.createQuery("""
                 select distinct o
@@ -120,6 +121,7 @@ public class OrganizationRepoManager {
                 .getResultStream()
                 .toList();
 
+
         return new HashSet<>(pingPongEventsWithParticipants);
     }
 
@@ -138,7 +140,8 @@ public class OrganizationRepoManager {
                 .stream().map(u -> u.get(0, Long.class))
                 .toList();
     }
-    public Set<PingPongEvent> eventsWithParticipantsByOrganizationIdAndUserIdWithPaginationByDate(Organization organization, Long userId, LocalDateTime date) {
+
+    public Set<PingPongEvent> eventsWithParticipantsByOrganizationIdAndUserIdFilteredByDate(Organization organization, Long userId, LocalDateTime date) {
         List<PingPongEvent> pingPongEvents = entityManager.createQuery("""
                          select distinct e
                           from Organization o
@@ -150,11 +153,11 @@ public class OrganizationRepoManager {
                 .toList();
 
         List<PingPongEvent> pingPongEventsWithParticipants = entityManager.createQuery("""
-                                                select distinct e
-                                                from PingPongEvent e
-                                                join e.participants p
-                                                where p.id in :userId
-                                                and e in :pingPongEvents
+                            select distinct e
+                            from PingPongEvent e
+                            join e.participants p
+                            where p.id = :userId
+                            and e in :pingPongEvents
                         """, PingPongEvent.class)
                 .setParameter("userId", userId)
                 .setParameter("pingPongEvents", pingPongEvents)

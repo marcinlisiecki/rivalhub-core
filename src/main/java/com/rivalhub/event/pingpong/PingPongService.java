@@ -54,6 +54,7 @@ public class PingPongService implements EventService {
     private Function<PingPongEvent, EventDto> mapEventToDTO(Organization organization) {
         return pingPongEvent -> {
             EventDto eventDto = autoMapper.mapToEventDto(pingPongEvent);
+            eventDto.setIsEventPublic(pingPongEvent.isEventPublic());
             eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
 
             eventCommonService.setStatusForEvent(pingPongEvent, eventDto);
