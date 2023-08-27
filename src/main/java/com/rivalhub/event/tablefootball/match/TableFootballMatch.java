@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 public class TableFootballMatch extends Match {
 
-    @OneToMany(orphanRemoval = true,cascade = CascadeType.REMOVE)
+    @OneToMany(orphanRemoval = true,cascade = CascadeType.ALL)
     private List<TableFootballMatchSet> sets = new ArrayList<>();
 
 }
