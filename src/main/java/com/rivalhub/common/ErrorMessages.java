@@ -41,6 +41,8 @@ public class ErrorMessages {
 
     public static final String USER_ALREADY_EXISTS = "api.error.USER_ALREADY_EXISTS";
 
+    public static final String USER_ALREADY_IN_EVENT = "api.error.USER_ALREADY_IN_EVENT";
+
     public static final String EMAIL_NOT_SENT = "api.error.EMAIL_NOT_SENT";
 
 

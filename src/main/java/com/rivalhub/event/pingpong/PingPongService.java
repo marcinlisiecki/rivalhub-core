@@ -4,6 +4,7 @@ package com.rivalhub.event.pingpong;
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.exception.HostRemoveException;
 import com.rivalhub.common.exception.UserNotFoundException;
+import com.rivalhub.event.Event;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventService;
@@ -68,10 +69,14 @@ public class PingPongService implements EventService {
     }
 
     public EventDto findEvent(long eventId) {
-        return pingPongEventRepository
+        PingPongEvent event = pingPongEventRepository
                 .findById(eventId)
-                .map(autoMapper::mapToEventDto)
                 .orElseThrow(EventNotFoundException::new);
+
+        EventDto eventDto = autoMapper.mapToEventDto(event);
+        eventDto.setIsEventPublic(event.isEventPublic());
+
+        return eventDto;
     }
 
     @Override
@@ -86,7 +91,12 @@ public class PingPongService implements EventService {
 
     @Override
     public List<UserDetailsDto> deleteUserFromEvent(Long eventId, Long userId) {
-        return eventCommonService.deleteUserFromEvent(pingPongEventRepository,eventId,userId);
+        return eventCommonService.deleteUserFromEvent(pingPongEventRepository, eventId, userId);
+    }
+
+    @Override
+    public List<UserDetailsDto> addUserToEvent(Long eventId, Long userId) {
+        return eventCommonService.addUserToEvent(pingPongEventRepository, eventId, userId);
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
+import com.rivalhub.user.UserRepository;
 import com.rivalhub.user.profile.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.CrudRepository;
@@ -22,6 +23,7 @@ import java.util.List;
 public class EventCommonService {
 
     private final AutoMapper autoMapper;
+    private final UserRepository userRepository;
 
     public <T extends Event> List<UserDetailsDto> findAllParticipants(CrudRepository<T, Long> repository, long id) {
         return repository
@@ -74,6 +76,25 @@ public class EventCommonService {
             throw new HostRemoveException();
         event.getParticipants().remove(user);
         repository.save(event);
+        return event.getParticipants().stream().map(UserMapper::map).toList();
+    }
+
+    public <T extends Event> List<UserDetailsDto> addUserToEvent(CrudRepository<T, Long> repository, long eventId, long userId) {
+        T event = repository
+                .findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+
+        UserData user = userRepository
+                .findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        if (event.getParticipants().contains(user)) {
+            throw new UserAlreadyInEventException();
+        }
+
+        event.getParticipants().add(user);
+        repository.save(event);
+
         return event.getParticipants().stream().map(UserMapper::map).toList();
     }
 }
