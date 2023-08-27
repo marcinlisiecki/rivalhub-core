@@ -30,7 +30,8 @@ public class ExceptionHandler {
             ImpossibleToAddUser.class,
             UserAlreadyActivated.class,
             EventIsNotPublicException.class,
-            AlreadyEventParticipantException.class
+            AlreadyEventParticipantException.class,
+            HostRemoveException.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessageDto handleExceptions(Exception e) {

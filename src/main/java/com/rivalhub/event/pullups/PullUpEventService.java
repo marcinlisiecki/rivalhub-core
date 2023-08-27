@@ -68,6 +68,11 @@ public class PullUpEventService implements EventService {
     }
 
     @Override
+    public List<UserDetailsDto> deleteUserFromEvent(Long eventId, Long userId) {
+        return eventCommonService.deleteUserFromEvent(pullUpEventRepository,eventId,userId);
+    }
+
+    @Override
     public void joinPublicEvent(Long id) {
         eventCommonService.joinPublicEvent(pullUpEventRepository, id);
     }

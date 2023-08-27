@@ -23,6 +23,11 @@ public class EventController {
         return ResponseEntity.ok(eventStrategyResolver.findEvent(eventId, type));
     }
 
+    @DeleteMapping ("/events/{eventId}/participants")
+    private ResponseEntity<?> deleteUserFromEvent(@PathVariable Long eventId,@RequestBody Long userId, @RequestParam String type) {
+        return ResponseEntity.ok(eventStrategyResolver.deleteUserFromEvent(eventId,userId,type));
+    }
+
     @GetMapping("/events/{eventId}/participants")
     ResponseEntity<List<UserDetailsDto>> findEventParticipants(@PathVariable Long eventId, @RequestParam String type) {
         return ResponseEntity.ok(eventStrategyResolver.findEventParticipants(eventId, type));

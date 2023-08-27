@@ -28,6 +28,9 @@ public class EventStrategyResolver {
         return eventOperator.useStrategy(type).findAllEvents(id);
     }
 
+    List<UserDetailsDto> deleteUserFromEvent(Long eventId,Long userId, String type) {
+        return eventOperator.useStrategy(type).deleteUserFromEvent(eventId,userId);
+    }
     void joinPublicEvent(Long id, String type) {
         eventOperator.useStrategy(type).joinPublicEvent(id);
     }

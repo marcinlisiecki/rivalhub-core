@@ -71,6 +71,11 @@ public class DartEventService implements EventService {
     }
 
     @Override
+    public List<UserDetailsDto> deleteUserFromEvent(Long eventId, Long userId) {
+        return null;
+    }
+
+    @Override
     public void joinPublicEvent(Long id) {
        eventCommonService.joinPublicEvent(dartEventRepository, id);
     }
