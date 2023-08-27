@@ -35,7 +35,7 @@ public class EventController {
 
     @PostMapping("/{id}/events")
     private ResponseEntity<?> addEvent(@PathVariable Long id, @RequestBody EventDto eventDto,
-                                       @RequestParam(name = "type") String type) {
+                                       @RequestParam String type) {
         EventDto savedEvent = eventStrategyResolver.addEvent(id, eventDto, type);
         URI savedEventUri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/events/{eventId}")

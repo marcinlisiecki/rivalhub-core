@@ -1,6 +1,8 @@
 package com.rivalhub.event.pingpong.match;
 
+import com.rivalhub.common.MergePatcher;
 import com.rivalhub.common.exception.EventNotFoundException;
+import com.rivalhub.common.exception.SetNotFoundException;
 import com.rivalhub.event.EventType;
 import com.rivalhub.common.exception.MatchNotFoundException;
 import com.rivalhub.event.match.MatchDto;
@@ -137,4 +139,38 @@ public class PingPongMatchService implements MatchService {
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
     }
+
+    public PingPongSet editPingPongSet(Long eventId, Long matchId, PingPongSet pingPongSet) {
+        PingPongEvent pingPongEvent = pingPongEventRepository.findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+        PingPongMatch match = findMatchInEvent(pingPongEvent, matchId);
+
+        PingPongSet setToUpdate = match.getSets().stream()
+                .filter(set -> set.getId().equals(pingPongSet.getId()))
+                .findFirst()
+                .orElseThrow(SetNotFoundException::new);
+
+        match.getSets().remove(setToUpdate);
+        match.getSets().add(pingPongSet);
+
+        pingPongMatchRepository.save(match);
+        return pingPongSet;
+    }
+
+    public void deletePingPongSet(Long eventId, Long matchId, PingPongSet pingPongSet) {
+        PingPongEvent pingPongEvent = pingPongEventRepository.findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+        PingPongMatch match = findMatchInEvent(pingPongEvent, matchId);
+
+        if(match.getSets().isEmpty()) return;
+        if (!match.isTeam1Approval() || !match.isTeam2Approval()) match.getSets().remove(pingPongSet);
+
+        match.getSets()
+                .forEach(set -> {
+                    if( set.getSetNr() != 1) set.setSetNr(set.getSetNr() - 1);
+                });
+
+        pingPongMatchRepository.save(match);
+    }
+
 }

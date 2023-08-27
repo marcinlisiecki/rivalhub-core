@@ -5,6 +5,8 @@ public class ErrorMessages {
 
     private ErrorMessages() {}
 
+    public static final String SET_NOT_FOUND = "Nie znaleziono setu";
+
     public static final String YOU_ARE_ALREADY_PARTICIPANT = "Już jesteś uczestnikiem tego wydarzenia";
 
     public static final String EVENT_IS_NOT_PUBLIC = "Nie można dołączyć do prywatnego eventu";

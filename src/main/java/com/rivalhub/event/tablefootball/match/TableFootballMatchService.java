@@ -6,6 +6,8 @@ import com.rivalhub.common.exception.MatchNotFoundException;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.MatchService;
 import com.rivalhub.event.match.ViewMatchDto;
+import com.rivalhub.event.pingpong.PingPongEvent;
+import com.rivalhub.event.pingpong.match.PingPongMatch;
 import com.rivalhub.event.tablefootball.TableFootballEvent;
 import com.rivalhub.event.tablefootball.TableFootballEventRepository;
 import com.rivalhub.event.tablefootball.match.result.TableFootballMatchSet;
@@ -95,9 +97,8 @@ public class TableFootballMatchService implements MatchService {
     }
 
 
-
     private MatchDto save(UserData loggedUser, TableFootballEvent tableFootballEvent,
-                          TableFootballMatch tableFootballMatch){
+                          TableFootballMatch tableFootballMatch) {
         boolean loggedUserInTeam1 = tableFootballMatch.getTeam1()
                 .stream().anyMatch(loggedUser::equals);
 
@@ -115,6 +116,7 @@ public class TableFootballMatchService implements MatchService {
 
         return tableFootballMatchMapper.mapToMatchDto(savedMatch);
     }
+
     private void addTableFootballSetsIn(TableFootballMatch tableFootballMatch, List<TableFootballMatchSet> sets) {
         tableFootballMatch.getSets().addAll(sets);
     }
@@ -125,22 +127,40 @@ public class TableFootballMatchService implements MatchService {
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
 
-        if(tableFootballMatch.getTeam1().stream().anyMatch(loggedUser::equals)) tableFootballMatch.setTeam1Approval(approve);
-        if(tableFootballMatch.getTeam2().stream().anyMatch(loggedUser::equals)) tableFootballMatch.setTeam2Approval(approve);
+        if (tableFootballMatch.getTeam1().stream().anyMatch(loggedUser::equals))
+            tableFootballMatch.setTeam1Approval(approve);
+        if (tableFootballMatch.getTeam2().stream().anyMatch(loggedUser::equals))
+            tableFootballMatch.setTeam2Approval(approve);
 
         tableFootballMatchRepository.save(tableFootballMatch);
         return approve;
     }
 
-    private void addTableFootballMatch(TableFootballEvent tableFootballEvent,TableFootballMatch tableFootballMatch){
+    private void addTableFootballMatch(TableFootballEvent tableFootballEvent, TableFootballMatch tableFootballMatch) {
         tableFootballEvent.getTableFootballMatch().add(tableFootballMatch);
     }
 
-    private TableFootballMatch findMatchInEvent(TableFootballEvent tableFootballEvent, Long matchId){
+    private TableFootballMatch findMatchInEvent(TableFootballEvent tableFootballEvent, Long matchId) {
         return tableFootballEvent.getTableFootballMatch()
                 .stream().filter(match -> match.getId().equals(matchId))
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
+    }
+
+    public void deleteTableFootballSet(Long eventId, Long matchId, TableFootballMatchSet tableFootballSet) {
+        TableFootballEvent tableFootballEvent = tableFootballEventRepository.findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+        TableFootballMatch match = findMatchInEvent(tableFootballEvent, matchId);
+
+        if (match.getSets().isEmpty()) return;
+        if (!match.isTeam1Approval() || !match.isTeam2Approval()) match.getSets().remove(tableFootballSet);
+
+        match.getSets()
+                .forEach(set -> {
+                    if (set.getSetNr() != 1) set.setSetNr(set.getSetNr() - 1);
+                });
+
+        tableFootballMatchRepository.save(match);
     }
 
 }
