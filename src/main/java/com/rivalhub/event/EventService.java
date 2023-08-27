@@ -11,5 +11,9 @@ public interface EventService {
     List<UserDetailsDto> findAllParticipants(long id);
     boolean matchStrategy(String eventType);
 
+    List<UserDetailsDto> deleteUserFromEvent(Long eventId,Long userId);
+
     void joinPublicEvent(Long id);
+
+    void deleteEvent(Long organizationId, Long eventId);
 }

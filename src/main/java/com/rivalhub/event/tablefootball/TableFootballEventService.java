@@ -6,13 +6,16 @@ import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
 import com.rivalhub.event.common.EventCommonService;
+import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.user.UserDetailsDto;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,12 +44,18 @@ public class TableFootballEventService implements EventService {
                 .orElseThrow(OrganizationNotFoundException::new);
         return organization.getTableFootballEvents()
                 .stream()
-                .map(tableFootballEvent -> {
-                    EventDto eventDto = autoMapper.mapToEventDto(tableFootballEvent);
-                    eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
-                    return eventDto;
-                })
-                .collect(Collectors.toList());
+                .map(mapToDTO(organization))
+                .toList();
+    }
+
+    private Function<TableFootballEvent, EventDto> mapToDTO(Organization organization) {
+        return tableFootballEvent -> {
+            EventDto eventDto = autoMapper.mapToEventDto(tableFootballEvent);
+            eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
+
+            eventCommonService.setStatusForEvent(tableFootballEvent, eventDto);
+            return eventDto;
+        };
     }
 
     @Override
@@ -69,7 +78,21 @@ public class TableFootballEventService implements EventService {
     }
 
     @Override
+    public List<UserDetailsDto> deleteUserFromEvent(Long eventId, Long userId) {
+        return eventCommonService.deleteUserFromEvent(tableFootballEventRepository,eventId,userId);
+    }
+
+    @Override
     public void joinPublicEvent(Long id) {
         eventCommonService.joinPublicEvent(tableFootballEventRepository, id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteEvent(Long organizationId,Long eventId) {
+        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+        organization.getTableFootballEvents().remove(tableFootballEventRepository.findById(eventId)
+                .orElseThrow(EventNotFoundException::new));
+        tableFootballEventRepository.deleteById(eventId);
     }
 }

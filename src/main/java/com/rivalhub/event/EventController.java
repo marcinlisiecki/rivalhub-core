@@ -23,6 +23,17 @@ public class EventController {
         return ResponseEntity.ok(eventStrategyResolver.findEvent(eventId, type));
     }
 
+    @DeleteMapping ("/events/{eventId}/participants")
+    private ResponseEntity<?> deleteUserFromEvent(@PathVariable Long eventId,@RequestBody Long userId, @RequestParam String type) {
+        return ResponseEntity.ok(eventStrategyResolver.deleteUserFromEvent(eventId,userId,type));
+    }
+
+    @DeleteMapping ("{organizationId}/events/{eventId}")
+    private ResponseEntity<?> deleteEvent(@PathVariable Long organizationId, @PathVariable Long eventId, @RequestParam String type) {
+        eventStrategyResolver.deleteEvent(organizationId,eventId,type);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/events/{eventId}/participants")
     ResponseEntity<List<UserDetailsDto>> findEventParticipants(@PathVariable Long eventId, @RequestParam String type) {
         return ResponseEntity.ok(eventStrategyResolver.findEventParticipants(eventId, type));
@@ -30,7 +41,7 @@ public class EventController {
 
     @PostMapping("/{id}/events")
     private ResponseEntity<?> addEvent(@PathVariable Long id, @RequestBody EventDto eventDto,
-                                       @RequestParam(name = "type") String type) {
+                                       @RequestParam String type) {
         EventDto savedEvent = eventStrategyResolver.addEvent(id, eventDto, type);
         URI savedEventUri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/events/{eventId}")

@@ -27,19 +27,20 @@ public class OrganizationRepoManager {
     private final ReservationRepository reservationRepository;
 
 
-    public List<Organization> findAllOrganizationsByIds(List<Long> organizationIds){
+    public List<Organization> findAllOrganizationsByIds(List<Long> organizationIds) {
         return (List<Organization>) organizationRepository.findAllById(organizationIds);
     }
-    public Set<Reservation> reservationsByOrganizationIdAndUserId(Long organizationId, Long userId){
+
+    public Set<Reservation> reservationsByOrganizationIdAndUserId(Long organizationId, Long userId) {
         return reservationRepository.reservationsByOrganizationIdAndUserId(organizationId, userId);
     }
 
-    public List<Long> getSharedOrganizationIds(Long requestUserId, Long viewedUserId){
+    public List<Long> getSharedOrganizationIds(Long requestUserId, Long viewedUserId) {
         return userRepository.getSharedOrganizationsIds(requestUserId, viewedUserId)
                 .stream().map(id -> id.get(0, Long.class)).toList();
     }
 
-    public List<Long> getOrganizationIdsWhereUserIsAdmin(UserData requestUser){
+    public List<Long> getOrganizationIdsWhereUserIsAdmin(UserData requestUser) {
         return userRepository.getOrganizationIdsWhereUserIsAdmin(requestUser.getId())
                 .stream().map(orgId -> orgId.get(0, Long.class)).toList();
     }
@@ -120,12 +121,12 @@ public class OrganizationRepoManager {
                 .setParameter("pingPongEvents", pingPongEvents)
                 .getResultStream()
                 .toList();
-        ;
+
 
         return new HashSet<>(pingPongEventsWithParticipants);
     }
 
-    public Organization getOrganizationWithPingPongEventsById(Long id){
+    public Organization getOrganizationWithPingPongEventsById(Long id) {
         Organization organization = pingPongEventsByOrganizationId(id);
         return fetchReservationsFor(organization);
     }
@@ -135,7 +136,7 @@ public class OrganizationRepoManager {
         return fetchReservationsFor(organizationWithStationsById);
     }
 
-    public List<Long> getOrganizationsIdsByUser(Long id){
+    public List<Long> getOrganizationsIdsByUser(Long id) {
         return userRepository.getOrganizationsByUserId(id)
                 .stream().map(u -> u.get(0, Long.class))
                 .toList();

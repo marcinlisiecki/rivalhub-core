@@ -2,17 +2,23 @@ package com.rivalhub.event.pingpong;
 
 
 import com.rivalhub.common.AutoMapper;
+import com.rivalhub.common.exception.HostRemoveException;
+import com.rivalhub.common.exception.UserNotFoundException;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
+import com.rivalhub.event.billiards.BilliardsEvent;
 import com.rivalhub.event.common.EventCommonService;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepoManager;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
+import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
+import com.rivalhub.user.profile.UserMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +54,7 @@ public class PingPongService implements EventService {
         return organization.getPingPongEvents()
                 .stream()
                 .map(mapEventToDTO(organization))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Function<PingPongEvent, EventDto> mapEventToDTO(Organization organization) {
@@ -57,15 +63,7 @@ public class PingPongService implements EventService {
             eventDto.setIsEventPublic(pingPongEvent.isEventPublic());
             eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
 
-            if (pingPongEvent.getEndTime().isAfter(LocalDateTime.now())
-                    &&
-                    pingPongEvent.getStartTime().isAfter(LocalDateTime.now())
-            ) eventDto.setStatus("Incoming");
-            else if (pingPongEvent.getStartTime().isBefore(LocalDateTime.now())
-                    &&
-                    pingPongEvent.getEndTime().isBefore(LocalDateTime.now())) eventDto.setStatus("Historical");
-            else eventDto.setStatus("Active");
-
+            eventCommonService.setStatusForEvent(pingPongEvent, eventDto);
             return eventDto;
         };
     }
@@ -88,7 +86,21 @@ public class PingPongService implements EventService {
     }
 
     @Override
+    public List<UserDetailsDto> deleteUserFromEvent(Long eventId, Long userId) {
+        return eventCommonService.deleteUserFromEvent(pingPongEventRepository,eventId,userId);
+    }
+
+    @Override
     public void joinPublicEvent(Long id) {
         eventCommonService.joinPublicEvent(pingPongEventRepository, id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteEvent(Long organizationId,Long eventId) {
+        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+        organization.getPingPongEvents().remove(pingPongEventRepository.findById(eventId)
+                .orElseThrow(EventNotFoundException::new));
+        pingPongEventRepository.deleteById(eventId);
     }
 }

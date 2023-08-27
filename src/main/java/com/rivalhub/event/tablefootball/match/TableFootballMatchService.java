@@ -6,6 +6,8 @@ import com.rivalhub.common.exception.MatchNotFoundException;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.MatchService;
 import com.rivalhub.event.match.ViewMatchDto;
+import com.rivalhub.event.pingpong.PingPongEvent;
+import com.rivalhub.event.pingpong.match.PingPongMatch;
 import com.rivalhub.event.tablefootball.TableFootballEvent;
 import com.rivalhub.event.tablefootball.TableFootballEventRepository;
 import com.rivalhub.event.tablefootball.match.result.TableFootballMatchSet;
@@ -142,6 +144,7 @@ public class TableFootballMatchService implements MatchService {
 
         return tableFootballMatchMapper.mapToMatchDto(savedMatch);
     }
+
     private void addTableFootballSetsIn(TableFootballMatch tableFootballMatch, List<TableFootballMatchSet> sets) {
         tableFootballMatch.getSets().addAll(sets);
     }
@@ -156,6 +159,24 @@ public class TableFootballMatchService implements MatchService {
                 .stream().filter(match -> match.getId().equals(matchId))
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
+    }
+
+    public void deleteTableFootballSet(Long eventId, Long matchId, TableFootballMatchSet tableFootballSet) {
+        TableFootballEvent tableFootballEvent = tableFootballEventRepository.findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+        TableFootballMatch match = findMatchInEvent(tableFootballEvent, matchId);
+
+        if (match.getSets().isEmpty()) return;
+        if (match.getUserApprovalMap().containsValue(false));
+
+        match.getSets()
+                .forEach(set -> {
+                    if (set.getSetNr() > tableFootballSet.getSetNr()) {
+                        set.setSetNr(set.getSetNr() - 1);
+                    }
+                });
+
+        tableFootballMatchRepository.save(match);
     }
 
 }
