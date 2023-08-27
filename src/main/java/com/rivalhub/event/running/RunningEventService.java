@@ -6,6 +6,7 @@ import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
 import com.rivalhub.event.common.EventCommonService;
+import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.user.UserDetailsDto;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,12 +44,18 @@ public class RunningEventService implements EventService {
                 .orElseThrow(OrganizationNotFoundException::new);
         return organization.getRunningEvents()
                 .stream()
-                .map(runningEvent -> {
-                    EventDto eventDto = autoMapper.mapToEventDto(runningEvent);
-                    eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
-                    return eventDto;
-                })
-                .collect(Collectors.toList());
+                .map(mapToEventDTO(organization))
+                .toList();
+    }
+
+    private Function<RunningEvent, EventDto> mapToEventDTO(Organization organization) {
+        return runningEvent -> {
+            EventDto eventDto = autoMapper.mapToEventDto(runningEvent);
+            eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
+
+            eventCommonService.setStatusForEvent(runningEvent, eventDto);
+            return eventDto;
+        };
     }
 
     @Override

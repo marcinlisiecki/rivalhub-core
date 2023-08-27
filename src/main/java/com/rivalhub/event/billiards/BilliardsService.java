@@ -6,6 +6,7 @@ import com.rivalhub.event.EventDto;
 import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
 import com.rivalhub.event.common.EventCommonService;
+import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,12 +44,18 @@ public class BilliardsService implements EventService {
                 .orElseThrow(OrganizationNotFoundException::new);
         return organization.getBilliardsEvents()
                 .stream()
-                .map(billiardsEvent -> {
-                    EventDto eventDto = autoMapper.mapToEventDto(billiardsEvent);
-                    eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
-                    return eventDto;
-                })
-                .collect(Collectors.toList());
+                .map(mapToEventDTO(organization))
+                .toList();
+    }
+
+    private Function<BilliardsEvent, EventDto> mapToEventDTO(Organization organization) {
+        return billiardsEvent -> {
+            EventDto eventDto = autoMapper.mapToEventDto(billiardsEvent);
+            eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
+
+            eventCommonService.setStatusForEvent(billiardsEvent, eventDto);
+            return eventDto;
+        };
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
 import com.rivalhub.event.common.EventCommonService;
+import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.user.UserDetailsDto;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,12 +43,18 @@ public class TableFootballEventService implements EventService {
                 .orElseThrow(OrganizationNotFoundException::new);
         return organization.getTableFootballEvents()
                 .stream()
-                .map(tableFootballEvent -> {
-                    EventDto eventDto = autoMapper.mapToEventDto(tableFootballEvent);
-                    eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
-                    return eventDto;
-                })
-                .collect(Collectors.toList());
+                .map(mapToDTO(organization))
+                .toList();
+    }
+
+    private Function<TableFootballEvent, EventDto> mapToDTO(Organization organization) {
+        return tableFootballEvent -> {
+            EventDto eventDto = autoMapper.mapToEventDto(tableFootballEvent);
+            eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
+
+            eventCommonService.setStatusForEvent(tableFootballEvent, eventDto);
+            return eventDto;
+        };
     }
 
     @Override

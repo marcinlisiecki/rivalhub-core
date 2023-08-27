@@ -8,6 +8,7 @@ import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
 import com.rivalhub.event.billiards.BilliardsEvent;
 import com.rivalhub.event.common.EventCommonService;
+import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,12 +46,18 @@ public class DartEventService implements EventService {
                 .orElseThrow(OrganizationNotFoundException::new);
         return organization.getDartEvents()
                 .stream()
-                .map(dartEvent -> {
-                    EventDto eventDto = autoMapper.mapToEventDto(dartEvent);
-                    eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
-                    return eventDto;
-                })
-                .collect(Collectors.toList());
+                .map(mapToEventDTO(organization))
+                .toList();
+    }
+
+    private Function<DartEvent, EventDto> mapToEventDTO(Organization organization) {
+        return dartEvent -> {
+            EventDto eventDto = autoMapper.mapToEventDto(dartEvent);
+            eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
+
+            eventCommonService.setStatusForEvent(dartEvent, eventDto);
+            return eventDto;
+        };
     }
 
     @Override

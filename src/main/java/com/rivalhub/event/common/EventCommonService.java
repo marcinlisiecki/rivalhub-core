@@ -6,6 +6,7 @@ import com.rivalhub.event.Event;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.event.billiards.BilliardsEvent;
 import com.rivalhub.security.SecurityUtils;
+import com.rivalhub.event.EventDto;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
 import com.rivalhub.user.profile.UserMapper;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -29,6 +31,20 @@ public class EventCommonService {
                 .stream()
                 .map(autoMapper::mapToUserDetails)
                 .toList();
+    }
+
+    public <T extends Event> void setStatusForEvent(T event, EventDto eventDto) {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (event.getEndTime().isAfter(now) && event.getStartTime().isAfter(now)) {
+            eventDto.setStatus("Incoming");
+            return;
+        }
+        if (event.getStartTime().isBefore(now) && event.getEndTime().isBefore(now)) {
+            eventDto.setStatus("Historical");
+            return;
+        }
+        eventDto.setStatus("Active");
     }
 
     public <T extends Event> void joinPublicEvent(CrudRepository<T, Long> repository, long id) {
