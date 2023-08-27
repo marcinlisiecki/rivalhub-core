@@ -32,7 +32,7 @@ public class ExceptionHandler {
             EventIsNotPublicException.class,
             AlreadyEventParticipantException.class,
             HostRemoveException.class,
-            UserAlreadyInEventException.class
+            UserAlreadyInEventException.class,
             HostRemoveException.class,
             SetNotFoundException.class
     })
