@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 public class PingPongMatch extends Match {
 
-    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(orphanRemoval = true,cascade = CascadeType.REMOVE)
     private List<PingPongSet> sets = new ArrayList<>();
 
 }
