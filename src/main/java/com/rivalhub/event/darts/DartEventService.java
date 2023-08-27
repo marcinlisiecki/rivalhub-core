@@ -13,6 +13,7 @@ import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserDetailsDto;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -86,5 +87,14 @@ public class DartEventService implements EventService {
     @Override
     public void joinPublicEvent(Long id) {
        eventCommonService.joinPublicEvent(dartEventRepository, id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteEvent(Long organizationId,Long eventId) {
+        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+        organization.getDartEvents().remove(dartEventRepository.findById(eventId)
+                .orElseThrow(EventNotFoundException::new));
+        dartEventRepository.deleteById(eventId);
     }
 }

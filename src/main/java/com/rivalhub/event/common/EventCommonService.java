@@ -77,7 +77,4 @@ public class EventCommonService {
         repository.save(event);
         return event.getParticipants().stream().map(UserMapper::map).toList();
     }
-
-
-
 }

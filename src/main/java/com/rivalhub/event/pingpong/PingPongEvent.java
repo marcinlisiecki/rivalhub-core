@@ -25,7 +25,7 @@ import java.util.List;
 public class PingPongEvent extends Event {
 
 
-    @OneToMany
+    @OneToMany(orphanRemoval = true,cascade = CascadeType.REMOVE)
     private List<PingPongMatch> pingPongMatchList = new ArrayList<>();
 
     private EventType eventType = EventType.PING_PONG;

@@ -34,4 +34,8 @@ public class EventStrategyResolver {
     void joinPublicEvent(Long id, String type) {
         eventOperator.useStrategy(type).joinPublicEvent(id);
     }
+
+    public void deleteEvent(Long organizationId ,Long eventId, String type) {
+        eventOperator.useStrategy(type).deleteEvent(organizationId,eventId);
+    }
 }

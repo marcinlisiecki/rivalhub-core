@@ -4,6 +4,7 @@ import com.rivalhub.event.Event;
 import com.rivalhub.event.EventType;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import lombok.Data;
@@ -15,7 +16,7 @@ import java.util.List;
 @Entity
 @Data
 public class RunningEvent extends Event {
-    @OneToMany
+    @OneToMany(orphanRemoval = true,cascade = CascadeType.REMOVE)
     List<UserTimes> userTimesList;
     Double distance;
 
