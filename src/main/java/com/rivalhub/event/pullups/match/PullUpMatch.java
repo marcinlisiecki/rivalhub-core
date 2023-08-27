@@ -16,7 +16,7 @@ public class PullUpMatch {
     private Long id;
     @ManyToMany
     private List<UserData> participants;
-    @OneToMany(orphanRemoval = true,cascade = CascadeType.REMOVE)
+    @OneToMany
     private List<PullUpSeries> pullUpSeries;
 
 

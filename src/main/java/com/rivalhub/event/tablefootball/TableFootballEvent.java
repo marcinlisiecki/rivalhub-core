@@ -17,7 +17,7 @@ import java.util.List;
 @Data
 public class TableFootballEvent extends Event {
 
-    @OneToMany(orphanRemoval = true,cascade = CascadeType.REMOVE)
+    @OneToMany
     List<TableFootballMatch> tableFootballMatch;
 
     private EventType eventType = EventType.TABLE_FOOTBALL;
