@@ -83,6 +83,11 @@ public class TableFootballEventService implements EventService {
     }
 
     @Override
+    public List<UserDetailsDto> addUserToEvent(Long eventId, Long userId) {
+        return eventCommonService.addUserToEvent(tableFootballEventRepository, eventId, userId);
+    }
+
+    @Override
     public void joinPublicEvent(Long id) {
         eventCommonService.joinPublicEvent(tableFootballEventRepository, id);
     }

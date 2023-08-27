@@ -82,6 +82,11 @@ public class PullUpEventService implements EventService {
     }
 
     @Override
+    public List<UserDetailsDto> addUserToEvent(Long eventId, Long userId) {
+        return eventCommonService.addUserToEvent(pullUpEventRepository, eventId, userId);
+    }
+
+    @Override
     public void joinPublicEvent(Long id) {
         eventCommonService.joinPublicEvent(pullUpEventRepository, id);
     }
