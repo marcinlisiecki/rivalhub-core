@@ -5,6 +5,7 @@ import com.rivalhub.common.exception.*;
 import com.rivalhub.event.Event;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.event.billiards.BilliardsEvent;
+import com.rivalhub.event.billiards.BilliardsEventRepository;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.user.UserData;
@@ -76,4 +77,6 @@ public class EventCommonService {
         repository.save(event);
         return event.getParticipants().stream().map(UserMapper::map).toList();
     }
+
+
 }

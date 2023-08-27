@@ -18,6 +18,7 @@ import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
 import com.rivalhub.user.profile.UserMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -92,5 +93,14 @@ public class PingPongService implements EventService {
     @Override
     public void joinPublicEvent(Long id) {
         eventCommonService.joinPublicEvent(pingPongEventRepository, id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteEvent(Long organizationId,Long eventId) {
+        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+        organization.getPingPongEvents().remove(pingPongEventRepository.findById(eventId)
+                .orElseThrow(EventNotFoundException::new));
+        pingPongEventRepository.deleteById(eventId);
     }
 }

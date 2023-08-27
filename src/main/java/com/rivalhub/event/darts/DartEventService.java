@@ -87,4 +87,9 @@ public class DartEventService implements EventService {
     public void joinPublicEvent(Long id) {
        eventCommonService.joinPublicEvent(dartEventRepository, id);
     }
+
+    @Override
+    public void deleteEvent(Long organizationId,Long eventId) {
+
+    }
 }
