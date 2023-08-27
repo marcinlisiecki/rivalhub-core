@@ -72,7 +72,7 @@ public class DartEventService implements EventService {
 
     @Override
     public List<UserDetailsDto> deleteUserFromEvent(Long eventId, Long userId) {
-        return null;
+        return eventCommonService.deleteUserFromEvent(dartEventRepository,eventId,userId);
     }
 
     @Override
