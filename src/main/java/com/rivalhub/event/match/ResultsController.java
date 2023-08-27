@@ -15,6 +15,7 @@ import com.rivalhub.event.pullups.match.result.PullUpSeriesDto;
 import com.rivalhub.event.tablefootball.match.TableFootballMatchService;
 import com.rivalhub.event.tablefootball.match.result.TableFootballMatchSet;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +37,21 @@ public class ResultsController {
         return ResponseEntity.ok(pingPongMatchService.addResult(eventId, matchId, setList));
     }
 
+    @DeleteMapping("/{matchId}/pingpong")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void deletePingPongSet(@PathVariable Long eventId,
+                                                @PathVariable Long matchId,
+                                                @RequestBody PingPongSet pingPongSet){
+        pingPongMatchService.deletePingPongSet(eventId, matchId, pingPongSet);
+    }
+
+    @PatchMapping("/{matchId}/pingpong")
+    private ResponseEntity<?> editPingPongSet(@PathVariable Long eventId,
+                                              @PathVariable Long matchId,
+                                              @RequestBody PingPongSet pingPongSet){
+        return ResponseEntity.ok(pingPongMatchService.editPingPongSet(eventId, matchId, pingPongSet));
+    }
+
     @PostMapping("/{matchId}/tablefootball")
     private ResponseEntity<?> addResultsTableFootball(@PathVariable Long eventId,
                                          @PathVariable Long matchId,
@@ -43,6 +59,13 @@ public class ResultsController {
         return ResponseEntity.ok(tableFootballMatchService.addResult(eventId, matchId, setList));
     }
 
+    @DeleteMapping("/{matchId}/tablefootball")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void deleteTableFootballSet(@PathVariable Long eventId,
+                                                      @PathVariable Long matchId,
+                                                      @RequestBody TableFootballMatchSet tableFootballSet) {
+        tableFootballMatchService.deleteTableFootballSet(eventId, matchId, tableFootballSet);
+    }
 
     @PostMapping("/{matchId}/pullups")
     private ResponseEntity<?> addResultsPullUps(@PathVariable Long eventId,
@@ -51,6 +74,13 @@ public class ResultsController {
         return ResponseEntity.ok(pullUpMatchService.addResult(eventId, matchId, pullUpSeries));
     }
 
+    @DeleteMapping("/{matchId}/pullups")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void deletePullUpSeries(@PathVariable Long eventId,
+                                                @PathVariable Long matchId,
+                                                @RequestBody Long seriesId) {
+        pullUpMatchService.deletePullUpSeries(eventId, matchId, seriesId);
+    }
 
     @PostMapping("/{matchId}/dart")
     private ResponseEntity<?> addResultsDart(@PathVariable Long eventId,
