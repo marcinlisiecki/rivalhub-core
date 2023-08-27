@@ -12,6 +12,7 @@ import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
 import com.rivalhub.user.profile.UserMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -91,5 +92,14 @@ public class BilliardsService implements EventService {
     @Override
     public void joinPublicEvent(Long id) {
         eventCommonService.joinPublicEvent(billiardsEventRepository, id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteEvent(Long organizationId,Long eventId) {
+        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+        organization.getBilliardsEvents().remove(billiardsEventRepository.findById(eventId)
+                .orElseThrow(EventNotFoundException::new));
+        billiardsEventRepository.deleteById(eventId);
     }
 }

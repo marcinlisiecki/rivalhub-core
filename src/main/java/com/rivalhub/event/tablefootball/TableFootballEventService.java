@@ -10,6 +10,7 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.user.UserDetailsDto;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -89,5 +90,14 @@ public class TableFootballEventService implements EventService {
     @Override
     public void joinPublicEvent(Long id) {
         eventCommonService.joinPublicEvent(tableFootballEventRepository, id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteEvent(Long organizationId,Long eventId) {
+        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
+        organization.getTableFootballEvents().remove(tableFootballEventRepository.findById(eventId)
+                .orElseThrow(EventNotFoundException::new));
+        tableFootballEventRepository.deleteById(eventId);
     }
 }

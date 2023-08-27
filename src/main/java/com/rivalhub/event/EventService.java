@@ -20,4 +20,6 @@ public interface EventService {
     List<UserDetailsDto> addUserToEvent(Long eventId, Long userId);
 
     void joinPublicEvent(Long id);
+
+    void deleteEvent(Long organizationId, Long eventId);
 }
