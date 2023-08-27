@@ -18,6 +18,8 @@ import com.rivalhub.event.pingpong.match.PingPongMatch;
 import com.rivalhub.event.pullups.PullUpEvent;
 import com.rivalhub.event.pullups.PullUpEventRepository;
 import com.rivalhub.event.pullups.match.result.*;
+import com.rivalhub.event.tablefootball.TableFootballEvent;
+import com.rivalhub.event.tablefootball.match.TableFootballMatch;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.security.SecurityUtils;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -62,7 +65,7 @@ public class PullUpMatchService implements MatchService {
     }
 
     private MatchDto save(UserData loggedUser, PullUpEvent pullUpEvent,
-                          PullUpMatch pullUpMatch){
+                          PullUpMatch pullUpMatch) {
 
         addPullUpMatch(pullUpEvent, pullUpMatch);
 
@@ -116,7 +119,7 @@ public class PullUpMatchService implements MatchService {
                 .orElseThrow(EventNotFoundException::new);
         PullUpMatch pullUpMatch = findMatchInEvent(pullUpEvent, matchId);
         List<PullUpSeries> pullUpSeries = new ArrayList<>();
-        pullUpSeriesAddDto.stream().forEach(pullUpSeriesDto -> pullUpSeries.add(pullUpResultMapper.map(pullUpSeriesDto,pullUpMatch)));
+        pullUpSeriesAddDto.stream().forEach(pullUpSeriesDto -> pullUpSeries.add(pullUpResultMapper.map(pullUpSeriesDto, pullUpMatch)));
         pullUpSeries.stream().forEach(pullUpSerie -> pullUpSeriesRepository.save(pullUpSerie));
         pullUpMatch.setPullUpSeries(pullUpSeries);
 
@@ -124,5 +127,26 @@ public class PullUpMatchService implements MatchService {
         PullUpMatch savedMatch = pullUpMatchRepository.save(pullUpMatch);
 
         return pullUpMatchMapper.map(savedMatch);
+    }
+
+    public void deletePullUpSeries(Long eventId, Long matchId, Long seriesId) {
+        PullUpEvent pullUpEvent = pullUpEventRepository.findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+        PullUpMatch match = findMatchInEvent(pullUpEvent, matchId);
+
+        if (match.getPullUpSeries().isEmpty()) return;
+        if (!match.isApprovalFirstPlace() || !match.isApprovalSecondPlace() || !match.isApprovalThirdPlace()) {
+            List<PullUpSeries> seriesToDelete = match.getPullUpSeries().stream().filter(s -> s.getSeriesID().equals(seriesId)).toList();
+            match.getPullUpSeries().removeAll(seriesToDelete);
+        }
+
+        match.getPullUpSeries()
+                .forEach(set -> {
+                    if (set.getSeriesID() > seriesId) {
+                        set.setSeriesID(set.getSeriesID() - 1);
+                    }
+                });
+
+        pullUpMatchRepository.save(match);
     }
 }

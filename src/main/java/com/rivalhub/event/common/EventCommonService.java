@@ -5,6 +5,7 @@ import com.rivalhub.common.exception.*;
 import com.rivalhub.event.Event;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.event.billiards.BilliardsEvent;
+import com.rivalhub.event.match.Match;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.user.UserData;
@@ -51,7 +52,7 @@ public class EventCommonService {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
         var event = repository.findById(id).orElseThrow(EventNotFoundException::new);
 
-        if(event.getParticipants().contains(requestUser)) throw new AlreadyEventParticipantException();
+        if (event.getParticipants().contains(requestUser)) throw new AlreadyEventParticipantException();
 
         if (event.isEventPublic()) {
             event.getParticipants().add(requestUser);
@@ -65,15 +66,18 @@ public class EventCommonService {
         T event = repository
                 .findById(eventId)
                 .orElseThrow(EventNotFoundException::new);
-        UserData user =  event.getParticipants()
+        UserData user = event.getParticipants()
                 .stream()
                 .filter(userData -> userData.getId() == userId)
                 .findFirst()
                 .orElseThrow(UserNotFoundException::new);
-        if(event.getHost()==user)
+        if (event.getHost() == user)
             throw new HostRemoveException();
         event.getParticipants().remove(user);
         repository.save(event);
         return event.getParticipants().stream().map(UserMapper::map).toList();
     }
+
+
+
 }
