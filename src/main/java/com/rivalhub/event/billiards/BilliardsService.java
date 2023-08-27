@@ -1,17 +1,17 @@
 package com.rivalhub.event.billiards;
 
 import com.rivalhub.common.AutoMapper;
-import com.rivalhub.common.exception.EventIsNotPublicException;
+import com.rivalhub.common.exception.*;
 import com.rivalhub.event.EventDto;
-import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
 import com.rivalhub.event.common.EventCommonService;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
-import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
+import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
+import com.rivalhub.user.profile.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -71,9 +71,16 @@ public class BilliardsService implements EventService {
         return eventCommonService.findAllParticipants(billiardsEventRepository, id);
     }
 
+
+
     @Override
     public boolean matchStrategy(String eventType) {
         return eventType.equalsIgnoreCase(EventType.BILLIARDS.name());
+    }
+
+    @Override
+    public List<UserDetailsDto> deleteUserFromEvent(Long eventId, Long userId) {
+        return eventCommonService.deleteUserFromEvent(billiardsEventRepository,eventId,userId);
     }
 
     @Override

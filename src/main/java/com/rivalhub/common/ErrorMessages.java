@@ -56,5 +56,6 @@ public class ErrorMessages {
     public static final String INSUFFICIENT_PERMISSIONS = "Nie masz wymaganych uprawnien.";
     public static final String MATCH_NOT_FOUND = "Nie znaleziono meczu";
     public static final String USER_ALREADY_ACTIVATED = "Konto już zostało potwierdzone.";
+    public static final String HOST_REMOVE_EXCEPTION = "Nie można usunąć hosta z wydarzenia";
 
 }

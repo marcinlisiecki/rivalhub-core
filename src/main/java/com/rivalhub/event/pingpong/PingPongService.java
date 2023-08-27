@@ -2,17 +2,22 @@ package com.rivalhub.event.pingpong;
 
 
 import com.rivalhub.common.AutoMapper;
+import com.rivalhub.common.exception.HostRemoveException;
+import com.rivalhub.common.exception.UserNotFoundException;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
+import com.rivalhub.event.billiards.BilliardsEvent;
 import com.rivalhub.event.common.EventCommonService;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepoManager;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
+import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
+import com.rivalhub.user.profile.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -77,6 +82,11 @@ public class PingPongService implements EventService {
     @Override
     public boolean matchStrategy(String eventType) {
         return eventType.equalsIgnoreCase(EventType.PING_PONG.name());
+    }
+
+    @Override
+    public List<UserDetailsDto> deleteUserFromEvent(Long eventId, Long userId) {
+        return eventCommonService.deleteUserFromEvent(pingPongEventRepository,eventId,userId);
     }
 
     @Override

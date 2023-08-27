@@ -77,6 +77,11 @@ public class RunningEventService implements EventService {
     }
 
     @Override
+    public List<UserDetailsDto> deleteUserFromEvent(Long eventId, Long userId) {
+        return eventCommonService.deleteUserFromEvent(runningEventRepository,eventId,userId);
+    }
+
+    @Override
     public void joinPublicEvent(Long id) {
         eventCommonService.joinPublicEvent(runningEventRepository, id);
     }
