@@ -2,6 +2,7 @@ package com.rivalhub.event.billiards.match;
 
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.event.EventUtils;
+import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.event.pingpong.match.PingPongMatch;
@@ -32,7 +33,7 @@ public class BilliardsMatchMapper {
 
         billiardsMatch.setTeam1(team1);
         billiardsMatch.setTeam2(team2);
-
+        billiardsMatch.setUserApprovalMap(MatchApprovalService.prepareApprovalMap(matchDto));
         return billiardsMatch;
     }
     MatchDto mapToMatchDto(BilliardsMatch billiardsMatch){
@@ -47,8 +48,7 @@ public class BilliardsMatchMapper {
         matchDto.setId(billiardsMatch.getId());
         matchDto.setTeam1Ids(team1.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
         matchDto.setTeam2Ids(team2.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
-        matchDto.setTeam1Approval(billiardsMatch.isTeam1Approval());
-        matchDto.setTeam2Approval(billiardsMatch.isTeam2Approval());
+        matchDto.setUserApprovalMap(billiardsMatch.getUserApprovalMap());
         return matchDto;
     };
     ViewMatchDto map(BilliardsMatch billiardsMatch){
@@ -62,6 +62,7 @@ public class BilliardsMatchMapper {
         viewBilliardMatchDTO.setTeam1(billiardsMatch.getTeam1().stream().map(autoMapper::mapToUserDetails).toList());
         viewBilliardMatchDTO.setTeam1Won(billiardsMatch.isTeam1Won());
         viewBilliardMatchDTO.setTeam2Won(billiardsMatch.isTeam2Won());
+        viewBilliardMatchDTO.setUserApprovalMap(billiardsMatch.getUserApprovalMap());
         return viewBilliardMatchDTO;
     }
 

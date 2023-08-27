@@ -63,8 +63,8 @@ public class DartMatchService implements MatchService {
         return dartMatch.getUserApprovalMap().get(loggedUser.getId());
     }
 
-    private void setApprove(UserData loggedUser, DartMatch pingPongMatch) {
-        pingPongMatch.getUserApprovalMap().replace(loggedUser.getId(), !(pingPongMatch.getUserApprovalMap().get(loggedUser.getId())));
+    private void setApprove(UserData loggedUser, DartMatch dartMatch) {
+        dartMatch.getUserApprovalMap().replace(loggedUser.getId(), !(dartMatch.getUserApprovalMap().get(loggedUser.getId())));
     }
 
     private void setApproveAndNotifications(UserData loggedUser, DartMatch dartMatch, Long eventId) {

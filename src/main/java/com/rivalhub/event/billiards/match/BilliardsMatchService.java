@@ -20,6 +20,8 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
+import com.rivalhub.user.UserRepository;
+import com.rivalhub.user.notification.Notification;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
@@ -34,14 +36,52 @@ public class BilliardsMatchService implements MatchService {
     private final BilliardsMatchRepository billiardsMatchRepository;
     private final BilliardsEventRepository billiardsEventRepository;
     private final BilliardsMatchMapper billiardsMatchMapper;
+    private final UserRepository userRepository;
     @Override
     public boolean setResultApproval(Long eventId, Long matchId) {
-        throw new NotImplementedException();
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        BilliardsEvent billiardsEvent = billiardsEventRepository
+                .findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+
+        return setResultApproval(requestUser, billiardsEvent, matchId);
+    }
+
+    private boolean setResultApproval(UserData loggedUser, BilliardsEvent billiardsEvent, Long matchId) {
+        BilliardsMatch billiardsMatch = billiardsEvent.getBilliardsMatches()
+                .stream().filter(match -> match.getId().equals(matchId))
+                .findFirst()
+                .orElseThrow(MatchNotFoundException::new);
+        setApprove(loggedUser, billiardsMatch);
+        billiardsMatchRepository.save(billiardsMatch);
+        return billiardsMatch.getUserApprovalMap().get(loggedUser.getId());
+    }
+
+    private void setApprove(UserData loggedUser, BilliardsMatch billiardsMatch) {
+        billiardsMatch.getUserApprovalMap().replace(loggedUser.getId(), !(billiardsMatch.getUserApprovalMap().get(loggedUser.getId())));
+    }
+
+    private void setApproveAndNotifications(UserData loggedUser, BilliardsMatch billiardsMatch, Long eventId) {
+
+        billiardsMatch.getUserApprovalMap().put(loggedUser.getId(),true);
+        billiardsMatch.getTeam1()
+                .stream()
+                .filter(userData -> userData.getId() != loggedUser.getId())
+                .forEach(userData -> saveNotification(userData,EventType.PING_PONG, billiardsMatch.getId(), eventId));
+        billiardsMatch.getTeam2()
+                .stream()
+                .filter(userData -> userData.getId() != loggedUser.getId())
+                .forEach(userData -> saveNotification(userData,EventType.PING_PONG, billiardsMatch.getId(), eventId));
+
+    }
+    private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
+        userData.getNotifications().add(
+                new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED));
+        userRepository.save(userData);
     }
 
     @Override
     public MatchDto createMatch(Long organizationId, Long eventId, MatchDto MatchDTO) {
-        var requestUser = SecurityUtils.getUserFromSecurityContext();
         Organization organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
@@ -50,7 +90,7 @@ public class BilliardsMatchService implements MatchService {
 
         BilliardsMatch billiardsMatch = billiardsMatchMapper.map(MatchDTO, organization);
 
-        return save(requestUser, pingPongEvent, billiardsMatch);
+        return save(pingPongEvent, billiardsMatch);
     }
 
     @Override
@@ -87,7 +127,7 @@ public class BilliardsMatchService implements MatchService {
         return eventType.equalsIgnoreCase(EventType.BILLIARDS.name());
     }
 
-    private MatchDto save(UserData loggedUser, BilliardsEvent billiardsEvent,
+    private MatchDto save(BilliardsEvent billiardsEvent,
                           BilliardsMatch billiardsMatch){
 
         addBilliardsMatch(billiardsEvent, billiardsMatch);
@@ -103,12 +143,15 @@ public class BilliardsMatchService implements MatchService {
     }
 
     public ViewMatchDto addResult(Long eventId, Long matchId, BilliardsMatchResultAdd billiardsMatchResultAdd) {
+        var loggedUser = SecurityUtils.getUserFromSecurityContext();
         BilliardsEvent billiardsEvent = billiardsEventRepository
                 .findById(eventId)
                 .orElseThrow(EventNotFoundException::new);
 
         BilliardsMatch billiardsMatch = findMatchInEvent(billiardsEvent, matchId);
         setResults(billiardsMatch,billiardsMatchResultAdd);
+        setApproveAndNotifications(loggedUser, billiardsMatch, eventId);
+
         BilliardsMatch savedMatch = billiardsMatchRepository.save(billiardsMatch);
 
         return billiardsMatchMapper.map(savedMatch);

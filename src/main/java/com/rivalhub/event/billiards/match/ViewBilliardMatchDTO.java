@@ -4,7 +4,9 @@ import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.user.UserDetailsDto;
 import lombok.Data;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class ViewBilliardMatchDTO implements ViewMatchDto {
@@ -18,5 +20,6 @@ public class ViewBilliardMatchDTO implements ViewMatchDto {
     private WinType winType;
     private int howManyBillsLeftTeam1;
     private int howManyBillsLeftTeam2;
+    private Map<Long, Boolean> userApprovalMap = new HashMap<>();
 
 }
