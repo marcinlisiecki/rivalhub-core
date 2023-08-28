@@ -83,6 +83,10 @@ public class AutoMapper {
         return modelMapper.map(pingPongEvent,EventDto.class);
     }
 
+    public EventDto mapToEventDto(Event event){
+        return modelMapper.map(event, EventDto.class);
+    }
+
     public EventDto mapToEventDto(RunningEvent runningEvent){
         return modelMapper.map(runningEvent,EventDto.class);
     }
@@ -103,8 +107,27 @@ public class AutoMapper {
         return modelMapper.map(billiardsEvent,EventDto.class);
     }
 
-
     public EventProfileDTO mapToEventProfileDTO(PingPongEvent pingPongEvent) {
         return modelMapper.map(pingPongEvent, EventProfileDTO.class);
+    }
+
+    public EventProfileDTO mapToEventProfileDTO(BilliardsEvent billiardsEvent) {
+        return modelMapper.map(billiardsEvent, EventProfileDTO.class);
+    }
+
+    public EventProfileDTO mapToEventProfileDTO(DartEvent dartEvent) {
+        return modelMapper.map(dartEvent, EventProfileDTO.class);
+    }
+
+    public EventProfileDTO mapToEventProfileDTO(PullUpEvent pullUpEvent) {
+        return modelMapper.map(pullUpEvent, EventProfileDTO.class);
+    }
+
+    public EventProfileDTO mapToEventProfileDTO(RunningEvent runningEvent) {
+        return modelMapper.map(runningEvent, EventProfileDTO.class);
+    }
+
+    public EventProfileDTO mapToEventProfileDTO(TableFootballEvent tableFootballEvent) {
+        return modelMapper.map(tableFootballEvent, EventProfileDTO.class);
     }
 }
