@@ -1,6 +1,7 @@
 package com.rivalhub.event.tablefootball.match;
 
 import com.rivalhub.common.exception.EventNotFoundException;
+import com.rivalhub.common.exception.UserNotFoundException;
 import com.rivalhub.event.EventType;
 import com.rivalhub.common.exception.MatchNotFoundException;
 import com.rivalhub.event.match.MatchDto;
@@ -51,8 +52,24 @@ public class TableFootballMatchService implements MatchService {
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, tableFootballMatch);
+        if(tableFootballMatch.getTeam1().stream().anyMatch(userData -> userData.getId() == loggedUser.getId()))
+            findNotificationToDisActivate(tableFootballMatch.getTeam1(),matchId);
+        if(tableFootballMatch.getTeam2().stream().anyMatch(userData -> userData.getId() == loggedUser.getId()))
+            findNotificationToDisActivate(tableFootballMatch.getTeam2(),matchId);
         tableFootballMatchRepository.save(tableFootballMatch);
         return tableFootballMatch.getUserApprovalMap().get(loggedUser.getId());
+    }
+    private void findNotificationToDisActivate(List<UserData> team, Long matchId) {
+        team.forEach(
+                userData -> {
+                    userData.getNotifications()
+                            .stream().filter(
+                                    notification -> notification.getMatchId().equals(matchId))
+                            .findFirst()
+                            .orElseThrow(UserNotFoundException::new)
+                            .setStatus(Notification.Status.CONFIRMED);
+                }
+        );
     }
 
     private void setApprove(UserData loggedUser, TableFootballMatch tableFootballMatch) {
@@ -177,6 +194,31 @@ public class TableFootballMatchService implements MatchService {
                 });
 
         tableFootballMatchRepository.save(match);
+    }
+
+    private boolean isApprovedByDemanded(TableFootballMatch tableFootballMatch){
+        List<Long> userApproved = new ArrayList<>();
+        for (Long userId: tableFootballMatch.getUserApprovalMap().keySet()) {
+            if(tableFootballMatch.getUserApprovalMap().get(userId))
+                userApproved.add(userId);
+        }
+        boolean teamOneApproved = false;
+        for (UserData userData : tableFootballMatch.getTeam1()) {
+            for(Long userApprove : userApproved){
+                if(userData.getId() == userApprove){
+                    teamOneApproved = true;
+                }
+            }
+        };
+        boolean teamTwoApproved = false;
+        for (UserData userData : tableFootballMatch.getTeam2()) {
+            for(Long userApprove : userApproved){
+                if(userData.getId() == userApprove){
+                    teamTwoApproved = true;
+                }
+            }
+        };
+        return teamTwoApproved&&teamOneApproved;
     }
 
 }

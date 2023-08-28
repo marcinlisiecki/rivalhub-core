@@ -11,11 +11,13 @@ import com.rivalhub.event.darts.match.DartMatch;
 import com.rivalhub.event.darts.match.result.DartRound;
 import com.rivalhub.event.darts.match.result.Leg;
 import com.rivalhub.event.darts.match.result.SinglePlayerScoreInRound;
+import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.MatchService;
 import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.event.pingpong.match.PingPongMatch;
+import com.rivalhub.event.pullups.match.PullUpMatch;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.security.SecurityUtils;
@@ -53,6 +55,7 @@ public class BilliardsMatchService implements MatchService {
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, billiardsMatch);
+        MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser),matchId);
         billiardsMatchRepository.save(billiardsMatch);
         return billiardsMatch.getUserApprovalMap().get(loggedUser.getId());
     }
@@ -165,5 +168,31 @@ public class BilliardsMatchService implements MatchService {
         billiardsMatch.setTeam1HadPottedFirst(billiardsMatchResultAdd.isTeam1HadPottedFirst());
         billiardsMatch.setTeam1Won(billiardsMatchResultAdd.isTeam1Won());
         billiardsMatch.setTeam2Won(billiardsMatchResultAdd.isTeam2Won());
+    }
+
+    private boolean isApprovedByDemanded(BilliardsMatch billiardsMatch){
+        List<Long> userApproved = new ArrayList<>();
+        for (Long userId: billiardsMatch.getUserApprovalMap().keySet()) {
+            if(billiardsMatch.getUserApprovalMap().get(userId))
+                userApproved.add(userId);
+        }
+        boolean teamOneApproved = false;
+        for (UserData userData : billiardsMatch.getTeam1()) {
+            for(Long userApprove : userApproved){
+                if(userData.getId() == userApprove){
+                    teamOneApproved = true;
+                }
+            }
+        };
+        boolean teamTwoApproved = false;
+        for (UserData userData : billiardsMatch.getTeam2()) {
+            for(Long userApprove : userApproved){
+                if(userData.getId() == userApprove){
+                    teamTwoApproved = true;
+                }
+            }
+        };
+        return teamTwoApproved&&teamOneApproved;
+
     }
 }

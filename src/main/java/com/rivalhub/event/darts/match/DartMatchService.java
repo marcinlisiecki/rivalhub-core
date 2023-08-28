@@ -10,11 +10,13 @@ import com.rivalhub.event.darts.DartEvent;
 import com.rivalhub.event.darts.DartEventRepository;
 import com.rivalhub.event.darts.match.result.*;
 import com.rivalhub.event.darts.match.result.LegRepository;
+import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.MatchService;
 import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.event.pingpong.match.PingPongMatch;
+import com.rivalhub.event.pullups.match.PullUpMatch;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.security.SecurityUtils;
@@ -59,6 +61,7 @@ public class DartMatchService implements MatchService {
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, dartMatch);
+        MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser), matchId);
         dartMatchRepository.save(dartMatch);
         return dartMatch.getUserApprovalMap().get(loggedUser.getId());
     }
@@ -174,5 +177,13 @@ public class DartMatchService implements MatchService {
         dartMatch.getLegList().addAll(legList);
     }
 
+    private boolean isApprovedByDemanded(PullUpMatch pullUpMatch){
+        int numberOfUserApproved = 0;
+        for (Long userId: pullUpMatch.getUserApprovalMap().keySet()) {
+            if(pullUpMatch.getUserApprovalMap().get(userId))
+                numberOfUserApproved++;
+        }
+        return numberOfUserApproved>(pullUpMatch.getParticipants().size()/2);
+    }
 
 }

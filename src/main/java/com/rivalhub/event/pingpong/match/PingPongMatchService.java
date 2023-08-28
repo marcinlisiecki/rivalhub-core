@@ -6,6 +6,7 @@ import com.rivalhub.common.exception.UserNotFoundException;
 import com.rivalhub.common.exception.SetNotFoundException;
 import com.rivalhub.event.EventType;
 import com.rivalhub.common.exception.MatchNotFoundException;
+import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.MatchService;
 import com.rivalhub.event.match.ViewMatchDto;
@@ -59,8 +60,6 @@ public class PingPongMatchService implements MatchService {
 
 
 
-
-
     public boolean setResultApproval(Long eventId, Long matchId) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
         PingPongEvent pingPongEvent = pingPongEventRepository
@@ -97,6 +96,7 @@ public class PingPongMatchService implements MatchService {
                 .orElseThrow(EventNotFoundException::new);
 
         PingPongMatch pingPongMatch = findMatchInEvent(pingPongEvent, matchId);
+
         setApproveAndNotifications(loggedUser, pingPongMatch, eventId);
 
         addPingPongSetsIn(pingPongMatch, sets);
@@ -146,6 +146,10 @@ public class PingPongMatchService implements MatchService {
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, pingPongMatch);
+        if(pingPongMatch.getTeam1().stream().anyMatch(userData -> userData.getId() == loggedUser.getId()))
+            MatchApprovalService.findNotificationToDisActivate(pingPongMatch.getTeam1(),matchId);
+        if(pingPongMatch.getTeam2().stream().anyMatch(userData -> userData.getId() == loggedUser.getId()))
+            MatchApprovalService.findNotificationToDisActivate(pingPongMatch.getTeam2(),matchId);
         pingPongMatchRepository.save(pingPongMatch);
         return pingPongMatch.getUserApprovalMap().get(loggedUser.getId());
     }
@@ -154,18 +158,7 @@ public class PingPongMatchService implements MatchService {
         pingPongMatch.getUserApprovalMap().replace(loggedUser.getId(), !(pingPongMatch.getUserApprovalMap().get(loggedUser.getId())));
     }
 
-    private void findNotificationToDisActivate(List<UserData> team, Long matchId) {
-        team.forEach(
-                userData -> {
-                    userData.getNotifications()
-                            .stream().filter(
-                                    notification -> notification.getMatchId().equals(matchId))
-                            .findFirst()
-                            .orElseThrow(UserNotFoundException::new)
-                            .setStatus(Notification.Status.CONFIRMED);
-                }
-        );
-    }
+
 
     private PingPongMatch findMatchInEvent(PingPongEvent pingPongEvent, Long matchId) {
         return pingPongEvent.getPingPongMatchList()
@@ -197,7 +190,7 @@ public class PingPongMatchService implements MatchService {
         PingPongMatch match = findMatchInEvent(pingPongEvent, matchId);
 
         if (match.getSets().isEmpty()) return;
-        if (!match.getUserApprovalMap().containsValue(false)) {
+        if (match.getUserApprovalMap().containsValue(false)) {
             match.getSets().remove(pingPongSet);
         }
 
@@ -209,6 +202,31 @@ public class PingPongMatchService implements MatchService {
                 });
 
         pingPongMatchRepository.save(match);
+    }
+
+    private boolean isApprovedByDemanded(PingPongMatch pingPongMatch){
+        List<Long> userApproved = new ArrayList<>();
+        for (Long userId: pingPongMatch.getUserApprovalMap().keySet()) {
+            if(pingPongMatch.getUserApprovalMap().get(userId))
+                userApproved.add(userId);
+        }
+        boolean teamOneApproved = false;
+        for (UserData userData : pingPongMatch.getTeam1()) {
+            for(Long userApprove : userApproved){
+                if(userData.getId() == userApprove){
+                    teamOneApproved = true;
+                }
+            }
+        };
+        boolean teamTwoApproved = false;
+        for (UserData userData : pingPongMatch.getTeam2()) {
+            for(Long userApprove : userApproved){
+                if(userData.getId() == userApprove){
+                    teamTwoApproved = true;
+                }
+            }
+        };
+        return teamTwoApproved&&teamOneApproved;
     }
 
 }
