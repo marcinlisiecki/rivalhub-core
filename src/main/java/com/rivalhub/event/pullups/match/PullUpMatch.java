@@ -1,5 +1,6 @@
 package com.rivalhub.event.pullups.match;
 
+import com.rivalhub.event.EventType;
 import com.rivalhub.event.pullups.match.result.PullUpSeries;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
@@ -23,4 +24,8 @@ public class PullUpMatch {
     private boolean approvalFirstPlace;
     private boolean approvalSecondPlace;
     private boolean approvalThirdPlace;
+    @Transient
+    private EventType eventType;
+    @Transient
+    private Long eventId;
 }

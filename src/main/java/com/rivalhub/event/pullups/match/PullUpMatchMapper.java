@@ -48,7 +48,7 @@ public class PullUpMatchMapper {
     }
 
 
-    ViewPullUpMatchDto map(PullUpMatch pullUpMatch){
+    public ViewPullUpMatchDto map(PullUpMatch pullUpMatch){
         ViewPullUpMatchDto viewPullUpMatchDto = new ViewPullUpMatchDto();
 
         viewPullUpMatchDto.setId(pullUpMatch.getId());
@@ -59,6 +59,8 @@ public class PullUpMatchMapper {
 
         viewPullUpMatchDto.setScores(pullUpMatch.getPullUpSeries().stream().map(pullUpResultMapper::map).toList());
         viewPullUpMatchDto.setPlaces(getPlaces(pullUpMatch));
+        viewPullUpMatchDto.setEventId(pullUpMatch.getEventId());
+        viewPullUpMatchDto.setEventType(pullUpMatch.getEventType());
 
         return viewPullUpMatchDto;
     }

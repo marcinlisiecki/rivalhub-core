@@ -19,22 +19,27 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @GetMapping("/users/{id}/reservations")
-    private ResponseEntity<?> sharedOrganizationReservations(@PathVariable Long id){
+    private ResponseEntity<?> sharedOrganizationReservations(@PathVariable Long id) {
         return ResponseEntity.ok(profileService.getSharedOrganizationReservations(id));
     }
 
     @GetMapping("/users/{id}/events")
-    private ResponseEntity<?> sharedOrganizationEvents(@PathVariable Long id){
+    private ResponseEntity<?> sharedOrganizationEvents(@PathVariable Long id) {
         return ResponseEntity.ok(profileService.getSharedOrganizationEvents(id));
     }
 
+    @GetMapping("/users/{id}/matches")
+    private ResponseEntity<?> sharedOrganizationMatches(@PathVariable Long id) {
+        return ResponseEntity.ok(profileService.getSharedOrganizationMatches(id));
+    }
+
     @GetMapping("/users/events")
-    private ResponseEntity<?> getAllEventsByRequestUserAndMonth(@RequestParam("date") String date){
+    private ResponseEntity<?> getAllEventsByRequestUserAndMonth(@RequestParam("date") String date) {
         return ResponseEntity.ok(profileService.getAllEventsByRequestUserAndMonth(date));
     }
 
     @GetMapping("/users/reservations")
-    private ResponseEntity<?> getAllReservationsByRequestUserAndMonth(@RequestParam("date") String date){
+    private ResponseEntity<?> getAllReservationsByRequestUserAndMonth(@RequestParam("date") String date) {
         return ResponseEntity.ok(profileService.getAllReservationsByRequestUserAndMonth(date));
     }
 
@@ -46,13 +51,13 @@ public class ProfileController {
 
     @PostMapping("/users/image")
     private ResponseEntity<?> updateImage(@RequestParam(name = "thumbnail", required = false)
-                                              MultipartFile multipartFile, @RequestParam(name = "keepAvatar", required = false) boolean keepAvatar){
-        return ResponseEntity.ok(profileService.updateImage(multipartFile,keepAvatar));
+                                          MultipartFile multipartFile, @RequestParam(name = "keepAvatar", required = false) boolean keepAvatar) {
+        return ResponseEntity.ok(profileService.updateImage(multipartFile, keepAvatar));
     }
 
     @DeleteMapping("/users")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    private void deleteUser(){
+    private void deleteUser() {
         profileService.deleteProfile();
     }
 }

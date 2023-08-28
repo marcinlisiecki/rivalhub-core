@@ -97,6 +97,8 @@ public class Config {
                 mapper.skip(RunningEvent::setParticipants));
         modelMapper.typeMap(EventDto.class, RunningEvent.class).addMappings(mapper ->
                 mapper.skip(RunningEvent::setHost));
+        modelMapper.typeMap(EventDto.class, RunningEvent.class).addMappings(mapper ->
+                mapper.map(EventDto::getDistance,RunningEvent::setDistance));
 
         modelMapper.typeMap(RunningEvent.class, EventDto.class).addMappings(mapper ->
                 mapper.map(RunningEvent::getParticipantsId,

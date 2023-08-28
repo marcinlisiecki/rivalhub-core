@@ -6,6 +6,10 @@ import com.rivalhub.event.Event;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.event.billiards.BilliardsEvent;
 import com.rivalhub.event.match.Match;
+import com.rivalhub.event.match.ViewMatchDto;
+import com.rivalhub.event.pingpong.PingPongEvent;
+import com.rivalhub.organization.Organization;
+import com.rivalhub.organization.OrganizationRepoManager;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.user.UserData;
@@ -18,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +30,7 @@ public class EventCommonService {
 
     private final AutoMapper autoMapper;
     private final UserRepository userRepository;
+    private final OrganizationRepoManager organizationRepoManager;
 
     public <T extends Event> List<UserDetailsDto> findAllParticipants(CrudRepository<T, Long> repository, long id) {
         return repository
