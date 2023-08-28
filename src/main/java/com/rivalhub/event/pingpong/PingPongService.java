@@ -50,7 +50,7 @@ public class PingPongService implements EventService {
 
     @Override
     public List<EventDto> findAllEvents(long id) {
-        var organization = organizationRepoManager.getOrganizationWithPingPongEventsById(id);
+        var organization = organizationRepository.findById(id).orElseThrow(OrganizationNotFoundException::new);
 
         return organization.getPingPongEvents()
                 .stream()
