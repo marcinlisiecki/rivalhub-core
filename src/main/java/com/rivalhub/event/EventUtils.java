@@ -59,7 +59,6 @@ public class EventUtils {
         event.setIsEventPublic(eventDto.isEventPublic());
         event.setStartTime(LocalDateTime.parse(eventDto.getStartTime(), FormatterHelper.formatter()));
         event.setEndTime(LocalDateTime.parse(eventDto.getEndTime(), FormatterHelper.formatter()));
-        event.setReservation(reservation);
         event.setName(eventDto.getName());
         event.setDescription(event.getDescription());
     }
