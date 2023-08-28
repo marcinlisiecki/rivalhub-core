@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -301,15 +302,7 @@ public class OrganizationRepoManager {
                 .getResultStream()
                 .toList();
 
-//        List<PingPongEvent> filteredByDate = pingPongEventsWithParticipants.stream()
-//                .filter(pingPongEvent -> {
-//                            return pingPongEvent.getStartTime().getYear() == date.getYear()
-//                                    && pingPongEvent.getStartTime().getMonth() == date.getMonth()
-//                                    ||
-//                                    pingPongEvent.getEndTime().getYear() == date.getYear()
-//                                            && pingPongEvent.getEndTime().getMonth() == date.getMonth();
-//                        }
-//                ).toList();
+
 
         return new HashSet<>(pingPongEventsWithParticipants);
     }
