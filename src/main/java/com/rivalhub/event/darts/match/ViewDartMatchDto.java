@@ -24,7 +24,7 @@ public class ViewDartMatchDto implements ViewMatchDto {
     private List<List<Integer>> bestRoundScoresInLeg;
     private List<List<Integer>> numberOfRoundsPlayedInLeg;
     private Map<Long, Boolean> userApprovalMap = new HashMap<>();
-
+    private boolean isApproved;
 
 
 

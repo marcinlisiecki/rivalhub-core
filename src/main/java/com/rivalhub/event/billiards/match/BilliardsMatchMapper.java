@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,7 +64,33 @@ public class BilliardsMatchMapper {
         viewBilliardMatchDTO.setTeam1Won(billiardsMatch.isTeam1Won());
         viewBilliardMatchDTO.setTeam2Won(billiardsMatch.isTeam2Won());
         viewBilliardMatchDTO.setUserApprovalMap(billiardsMatch.getUserApprovalMap());
+        viewBilliardMatchDTO.setApproved(isApprovedByDemanded(billiardsMatch));
         return viewBilliardMatchDTO;
     }
 
+    private boolean isApprovedByDemanded(BilliardsMatch billiardsMatch){
+        List<Long> userApproved = new ArrayList<>();
+        for (Long userId: billiardsMatch.getUserApprovalMap().keySet()) {
+            if(billiardsMatch.getUserApprovalMap().get(userId))
+                userApproved.add(userId);
+        }
+        boolean teamOneApproved = false;
+        for (UserData userData : billiardsMatch.getTeam1()) {
+            for(Long userApprove : userApproved){
+                if(userData.getId() == userApprove){
+                    teamOneApproved = true;
+                }
+            }
+        };
+        boolean teamTwoApproved = false;
+        for (UserData userData : billiardsMatch.getTeam2()) {
+            for(Long userApprove : userApproved){
+                if(userData.getId() == userApprove){
+                    teamTwoApproved = true;
+                }
+            }
+        };
+        return teamTwoApproved&&teamOneApproved;
+
+    }
 }

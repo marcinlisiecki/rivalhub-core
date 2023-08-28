@@ -204,29 +204,6 @@ public class PingPongMatchService implements MatchService {
         pingPongMatchRepository.save(match);
     }
 
-    private boolean isApprovedByDemanded(PingPongMatch pingPongMatch){
-        List<Long> userApproved = new ArrayList<>();
-        for (Long userId: pingPongMatch.getUserApprovalMap().keySet()) {
-            if(pingPongMatch.getUserApprovalMap().get(userId))
-                userApproved.add(userId);
-        }
-        boolean teamOneApproved = false;
-        for (UserData userData : pingPongMatch.getTeam1()) {
-            for(Long userApprove : userApproved){
-                if(userData.getId() == userApprove){
-                    teamOneApproved = true;
-                }
-            }
-        };
-        boolean teamTwoApproved = false;
-        for (UserData userData : pingPongMatch.getTeam2()) {
-            for(Long userApprove : userApproved){
-                if(userData.getId() == userApprove){
-                    teamTwoApproved = true;
-                }
-            }
-        };
-        return teamTwoApproved&&teamOneApproved;
-    }
+
 
 }

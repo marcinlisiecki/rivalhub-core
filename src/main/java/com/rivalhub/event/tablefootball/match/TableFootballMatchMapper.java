@@ -10,6 +10,7 @@ import com.rivalhub.user.UserDetailsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,7 +69,33 @@ public class TableFootballMatchMapper {
         viewTableFootballMatchDTO.setTeam2(team2);
         viewTableFootballMatchDTO.setSets(tableFootballMatch.getSets());
         viewTableFootballMatchDTO.setUserApprovalMap(tableFootballMatch.getUserApprovalMap());
-
+        viewTableFootballMatchDTO.setApproved(isApprovedByDemanded(tableFootballMatch));
         return viewTableFootballMatchDTO;
     }
+
+    boolean isApprovedByDemanded(TableFootballMatch tableFootballMatch){
+        List<Long> userApproved = new ArrayList<>();
+        for (Long userId: tableFootballMatch.getUserApprovalMap().keySet()) {
+            if(tableFootballMatch.getUserApprovalMap().get(userId))
+                userApproved.add(userId);
+        }
+        boolean teamOneApproved = false;
+        for (UserData userData : tableFootballMatch.getTeam1()) {
+            for(Long userApprove : userApproved){
+                if(userData.getId() == userApprove){
+                    teamOneApproved = true;
+                }
+            }
+        };
+        boolean teamTwoApproved = false;
+        for (UserData userData : tableFootballMatch.getTeam2()) {
+            for(Long userApprove : userApproved){
+                if(userData.getId() == userApprove){
+                    teamTwoApproved = true;
+                }
+            }
+        };
+        return teamTwoApproved&&teamOneApproved;
+    }
+
 }

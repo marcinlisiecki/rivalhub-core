@@ -21,5 +21,5 @@ public class ViewBilliardMatchDTO implements ViewMatchDto {
     private int howManyBillsLeftTeam1;
     private int howManyBillsLeftTeam2;
     private Map<Long, Boolean> userApprovalMap = new HashMap<>();
-
+    private boolean isApproved;
 }

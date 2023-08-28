@@ -21,6 +21,7 @@ public class PullUpMatchMapper {
     private final AutoMapper autoMapper;
     private final PullUpResultMapper pullUpResultMapper;
 
+
     PullUpMatch map(MatchDto matchDto, Organization organization){
         PullUpMatch pullUpMatch = new PullUpMatch();
 
@@ -60,6 +61,7 @@ public class PullUpMatchMapper {
         viewPullUpMatchDto.setScores(pullUpMatch.getPullUpSeries().stream().map(pullUpResultMapper::map).toList());
         viewPullUpMatchDto.setPlaces(getPlaces(pullUpMatch));
         viewPullUpMatchDto.setUserApprovalMap(pullUpMatch.getUserApprovalMap());
+        viewPullUpMatchDto.setApproved(isApprovedByDemanded(pullUpMatch));
         return viewPullUpMatchDto;
     }
 
@@ -109,6 +111,14 @@ public class PullUpMatchMapper {
         singleUserScore.setId(pullUpSeries.getUser().getId());
         return  singleUserScore;
     };
+    private boolean isApprovedByDemanded(PullUpMatch pullUpMatch){
+        int numberOfUserApproved = 0;
+        for (Long userId: pullUpMatch.getUserApprovalMap().keySet()) {
+            if(pullUpMatch.getUserApprovalMap().get(userId))
+                numberOfUserApproved++;
+        }
+        return numberOfUserApproved>(pullUpMatch.getParticipants().size()/2);
+    }
 
 
 }

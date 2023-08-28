@@ -16,4 +16,5 @@ public class ViewPullUpMatchDto implements ViewMatchDto {
     private List<PullUpSeriesDto> scores;
     private Map<Long,Integer> places;
     private Map<Long, Boolean> userApprovalMap = new HashMap<>();
+    private boolean isApproved;
 }

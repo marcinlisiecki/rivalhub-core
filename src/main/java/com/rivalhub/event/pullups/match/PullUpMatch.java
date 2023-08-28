@@ -23,7 +23,5 @@ public class PullUpMatch {
 
     @ElementCollection
     private Map<Long, Boolean> userApprovalMap = new HashMap<>();
-    private boolean approvalFirstPlace;
-    private boolean approvalSecondPlace;
-    private boolean approvalThirdPlace;
+
 }

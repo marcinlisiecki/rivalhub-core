@@ -190,12 +190,5 @@ public class PullUpMatchService implements MatchService {
     }
 
 
-    private boolean isApprovedByDemanded(DartMatch dartMatch){
-        int numberOfUserApproved = 0;
-        for (Long userId: dartMatch.getUserApprovalMap().keySet()) {
-            if(dartMatch.getUserApprovalMap().get(userId))
-                numberOfUserApproved++;
-        }
-        return numberOfUserApproved>(dartMatch.getParticipants().size()/2);
-    }
+
 }

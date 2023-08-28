@@ -16,4 +16,5 @@ public class ViewPingPongMatchDTO implements ViewMatchDto {
     private List<UserDetailsDto> team2;
     private List<PingPongSet> sets;
     private Map<Long, Boolean> userApprovalMap = new HashMap<>();
+    private boolean isApproved;
 }

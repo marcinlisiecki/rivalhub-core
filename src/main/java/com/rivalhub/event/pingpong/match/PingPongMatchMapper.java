@@ -11,6 +11,7 @@ import com.rivalhub.user.UserDetailsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,8 +72,33 @@ public class PingPongMatchMapper {
         pingPongMatchDTO.setTeam2(team2);
         pingPongMatchDTO.setSets(pingPongMatch.getSets());
         pingPongMatchDTO.setUserApprovalMap(pingPongMatch.getUserApprovalMap());
-
+        pingPongMatchDTO.setApproved(isApprovedByDemanded(pingPongMatch));
         return pingPongMatchDTO;
+    }
+
+    private boolean isApprovedByDemanded(PingPongMatch pingPongMatch){
+        List<Long> userApproved = new ArrayList<>();
+        for (Long userId: pingPongMatch.getUserApprovalMap().keySet()) {
+            if(pingPongMatch.getUserApprovalMap().get(userId))
+                userApproved.add(userId);
+        }
+        boolean teamOneApproved = false;
+        for (UserData userData : pingPongMatch.getTeam1()) {
+            for(Long userApprove : userApproved){
+                if(userData.getId() == userApprove){
+                    teamOneApproved = true;
+                }
+            }
+        };
+        boolean teamTwoApproved = false;
+        for (UserData userData : pingPongMatch.getTeam2()) {
+            for(Long userApprove : userApproved){
+                if(userData.getId() == userApprove){
+                    teamTwoApproved = true;
+                }
+            }
+        };
+        return teamTwoApproved&&teamOneApproved;
     }
 
 }

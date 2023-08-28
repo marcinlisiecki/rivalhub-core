@@ -196,29 +196,5 @@ public class TableFootballMatchService implements MatchService {
         tableFootballMatchRepository.save(match);
     }
 
-    private boolean isApprovedByDemanded(TableFootballMatch tableFootballMatch){
-        List<Long> userApproved = new ArrayList<>();
-        for (Long userId: tableFootballMatch.getUserApprovalMap().keySet()) {
-            if(tableFootballMatch.getUserApprovalMap().get(userId))
-                userApproved.add(userId);
-        }
-        boolean teamOneApproved = false;
-        for (UserData userData : tableFootballMatch.getTeam1()) {
-            for(Long userApprove : userApproved){
-                if(userData.getId() == userApprove){
-                    teamOneApproved = true;
-                }
-            }
-        };
-        boolean teamTwoApproved = false;
-        for (UserData userData : tableFootballMatch.getTeam2()) {
-            for(Long userApprove : userApproved){
-                if(userData.getId() == userApprove){
-                    teamTwoApproved = true;
-                }
-            }
-        };
-        return teamTwoApproved&&teamOneApproved;
-    }
 
 }

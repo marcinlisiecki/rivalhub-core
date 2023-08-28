@@ -18,4 +18,5 @@ public class ViewTableFootballMatchDTO implements ViewMatchDto {
     private List<UserDetailsDto> team2;
     private List<TableFootballMatchSet> sets;
     private Map<Long, Boolean> userApprovalMap = new HashMap<>();
+    private boolean isApproved;
 }
