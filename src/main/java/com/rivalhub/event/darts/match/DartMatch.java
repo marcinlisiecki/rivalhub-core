@@ -19,7 +19,7 @@ public class DartMatch {
 
 
 
-    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
     private List<Leg> legList = new ArrayList<>();
 
     private DartFormat dartFormat;
