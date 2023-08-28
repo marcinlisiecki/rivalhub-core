@@ -29,6 +29,8 @@ public class Event {
     @ManyToOne
     private UserData host;
 
+    private Long reservationId;
+
     @ManyToMany
     private List<UserData> participants = new ArrayList<>();
 

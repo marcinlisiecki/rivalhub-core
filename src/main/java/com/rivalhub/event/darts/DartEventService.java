@@ -11,6 +11,7 @@ import com.rivalhub.event.common.EventCommonService;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
+import com.rivalhub.reservation.ReservationRepository;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserDetailsDto;
 import jakarta.transaction.Transactional;
@@ -30,6 +31,7 @@ public class DartEventService implements EventService {
     private final DartEventRepository dartEventRepository;
     private final DartEventSaver dartEventSaver;
     private final EventCommonService eventCommonService;
+    private final ReservationRepository reservationRepository;
 
     @Override
     public EventDto addEvent(Long organizationId, EventDto eventDto) {
@@ -98,8 +100,12 @@ public class DartEventService implements EventService {
     @Transactional
     public void deleteEvent(Long organizationId,Long eventId) {
         Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
-        organization.getDartEvents().remove(dartEventRepository.findById(eventId)
-                .orElseThrow(EventNotFoundException::new));
+        DartEvent eventToDelete = dartEventRepository.findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+
+        organization.getDartEvents().remove(eventToDelete);
+
+        reservationRepository.deleteById(eventToDelete.getReservationId());
         dartEventRepository.deleteById(eventId);
     }
 }

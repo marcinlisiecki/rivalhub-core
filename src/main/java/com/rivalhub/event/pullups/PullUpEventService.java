@@ -9,6 +9,7 @@ import com.rivalhub.event.common.EventCommonService;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
+import com.rivalhub.reservation.ReservationRepository;
 import com.rivalhub.user.UserDetailsDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class PullUpEventService implements EventService {
     private final PullUpEventRepository pullUpEventRepository;
     private final PullUpEventSaver pullUpEventSaver;
     private final EventCommonService eventCommonService;
+    private final ReservationRepository reservationRepository;
 
     @Override
     public EventDto addEvent(Long organizationId, EventDto eventDto) {
@@ -95,8 +97,12 @@ public class PullUpEventService implements EventService {
     @Transactional
     public void deleteEvent(Long organizationId,Long eventId) {
         Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
-        organization.getPullUpsEvents().remove(pullUpEventRepository.findById(eventId)
-                .orElseThrow(EventNotFoundException::new));
+
+        PullUpEvent eventToDelete = pullUpEventRepository.findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+        organization.getPullUpsEvents().remove(eventToDelete);
+
+        reservationRepository.deleteById(eventToDelete.getReservationId());
         pullUpEventRepository.deleteById(eventId);
     }
 

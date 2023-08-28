@@ -15,6 +15,7 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepoManager;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
+import com.rivalhub.reservation.ReservationRepository;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
@@ -38,6 +39,7 @@ public class PingPongService implements EventService {
     private final PingPongEventSaver pingPongEventSaver;
     private final OrganizationRepoManager organizationRepoManager;
     private final EventCommonService eventCommonService;
+    private final ReservationRepository reservationRepository;
 
     @Override
     public EventDto addEvent(Long organizationId, EventDto eventDto) {
@@ -108,9 +110,13 @@ public class PingPongService implements EventService {
     @Override
     @Transactional
     public void deleteEvent(Long organizationId,Long eventId) {
-        Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
-        organization.getPingPongEvents().remove(pingPongEventRepository.findById(eventId)
-                .orElseThrow(EventNotFoundException::new));
+        Organization organization = organizationRepository.findById(organizationId)
+                .orElseThrow(OrganizationNotFoundException::new);
+        PingPongEvent eventToDelete = pingPongEventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
+
+        organization.getPingPongEvents().remove(eventToDelete);
+
+        reservationRepository.deleteById(eventToDelete.getReservationId());
         pingPongEventRepository.deleteById(eventId);
     }
 }
