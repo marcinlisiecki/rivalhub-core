@@ -2,6 +2,7 @@ package com.rivalhub.event.billiards.match;
 
 import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.common.exception.MatchNotFoundException;
+import com.rivalhub.common.exception.NotificationNotFoundException;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.event.EventType;
 import com.rivalhub.event.billiards.BilliardsEvent;
@@ -24,6 +25,7 @@ import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
 import com.rivalhub.user.notification.Notification;
+import com.rivalhub.user.notification.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
@@ -65,22 +67,54 @@ public class BilliardsMatchService implements MatchService {
     }
 
     private void setApproveAndNotifications(UserData loggedUser, BilliardsMatch billiardsMatch, Long eventId) {
-
+        billiardsMatch.getUserApprovalMap().keySet().forEach(key -> billiardsMatch.getUserApprovalMap().put(key,false));
         billiardsMatch.getUserApprovalMap().put(loggedUser.getId(),true);
-        billiardsMatch.getTeam1()
+            billiardsMatch.getTeam1()
+                    .stream()
+                    .filter(userData -> (userData.getId() != loggedUser.getId()) &&
+                            userData.getNotifications().stream()
+                                    .noneMatch(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() != billiardsMatch.getId()))
+                    .forEach(userData -> saveNotification(userData, EventType.PING_PONG, billiardsMatch.getId(), eventId));
+            billiardsMatch.getTeam2()
+                    .stream()
+                    .filter(userData -> userData.getId() != loggedUser.getId()&&
+                            userData.getNotifications().stream()
+                                    .noneMatch(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() != billiardsMatch.getId()))
+                    .forEach(userData -> saveNotification(userData, EventType.PING_PONG, billiardsMatch.getId(), eventId));
+
+            billiardsMatch.getTeam1()
                 .stream()
-                .filter(userData -> userData.getId() != loggedUser.getId())
-                .forEach(userData -> saveNotification(userData,EventType.PING_PONG, billiardsMatch.getId(), eventId));
+                .filter(userData -> (userData.getId() != loggedUser.getId()))
+                .forEach(userData ->{
+                    userData.getNotifications()
+                            .stream()
+                            .filter(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() != billiardsMatch.getId())
+                            .findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.NOT_CONFIRMED);
+                    userRepository.save(userData);
+                });
+
         billiardsMatch.getTeam2()
                 .stream()
-                .filter(userData -> userData.getId() != loggedUser.getId())
-                .forEach(userData -> saveNotification(userData,EventType.PING_PONG, billiardsMatch.getId(), eventId));
-
+                .filter(userData -> (userData.getId() != loggedUser.getId()))
+                .forEach(userData ->{
+                    userData.getNotifications()
+                            .stream()
+                            .filter(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() != billiardsMatch.getId())
+                            .findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.NOT_CONFIRMED);
+                    userRepository.save(userData);
+                });
     }
     private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
-        userData.getNotifications().add(
-                new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED));
-        userRepository.save(userData);
+        if(userData.getNotifications().stream().anyMatch(notification -> (notification.getMatchId() == matchId && notification.getType() == type))) {
+            userData.getNotifications().add(
+                    new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED));
+            userRepository.save(userData);
+        }else {
+            userData.getNotifications().stream()
+                    .filter(notification -> (notification.getMatchId() == matchId && notification.getType() == type))
+                    .findFirst()
+                    .orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.NOT_CONFIRMED);
+        }
     }
 
     @Override

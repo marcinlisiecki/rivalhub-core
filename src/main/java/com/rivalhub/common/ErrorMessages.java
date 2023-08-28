@@ -60,4 +60,6 @@ public class ErrorMessages {
     public static final String USER_ALREADY_ACTIVATED = "api.error.USER_ALREADY_ACTIVATED";
     public static final String HOST_REMOVE_EXCEPTION = "api.error.HOST_REMOVE_EXCEPTION";
 
+    public static final String NOTIFICATION_NOT_FOUND_EXCEPTION = "api.error.NOTIFICATION_NOT_FOUND_EXCEPTION";
+
 }

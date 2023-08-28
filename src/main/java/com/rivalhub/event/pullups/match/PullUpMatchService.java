@@ -83,9 +83,11 @@ public class PullUpMatchService implements MatchService {
 
 
     private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
-        userData.getNotifications().add(
-                new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED));
-        userRepository.save(userData);
+        if(userData.getNotifications().stream().anyMatch(notification -> (notification.getMatchId() == matchId && notification.getType() == type))) {
+            userData.getNotifications().add(
+                    new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED));
+            userRepository.save(userData);
+        }
     }
 
     @Override
