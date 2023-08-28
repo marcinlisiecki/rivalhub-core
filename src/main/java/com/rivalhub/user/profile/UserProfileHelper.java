@@ -93,16 +93,22 @@ public class UserProfileHelper {
         LocalDateTime datePattern = LocalDateTime.parse(date, FormatterHelper.formatter());
 
         Set<Event> eventList = new HashSet<>();
-
+        Set<EventDto> eventDtos = new HashSet<>();
         for (Organization sharedOrganization : userOrganizations) {
             eventList.addAll(getAllEventsInOrganizationByUser(sharedOrganization, requestUser));
 
-        }
-        eventList = filterByDate(eventList, datePattern);
+            eventList = filterByDate(eventList, datePattern);
 
-        return eventList.stream()
-                .map(autoMapper::mapToEventDto)
-                .collect(Collectors.toSet());
+            eventDtos.addAll(eventList.stream()
+                    .map(event -> {
+                        EventDto eventDto = autoMapper.mapToEventDto(event);
+                        eventDto.setOrganization(autoMapper.mapToOrganizationDto(sharedOrganization));
+                        return eventDto;
+                    })
+                    .collect(Collectors.toSet())
+            );
+        }
+        return eventDtos;
     }
 
     private <T extends Event> Set<T> filterByDate(Set<T> events, LocalDateTime date) {
