@@ -6,6 +6,7 @@ import com.rivalhub.event.EventDto;
 import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
 import com.rivalhub.event.common.EventCommonService;
+import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.security.SecurityUtils;
@@ -52,6 +53,7 @@ public class BilliardsService implements EventService {
     private Function<BilliardsEvent, EventDto> mapToEventDTO(Organization organization) {
         return billiardsEvent -> {
             EventDto eventDto = autoMapper.mapToEventDto(billiardsEvent);
+            eventDto.setIsEventPublic(billiardsEvent.isEventPublic());
             eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
 
             eventCommonService.setStatusForEvent(billiardsEvent, eventDto);
@@ -61,10 +63,14 @@ public class BilliardsService implements EventService {
 
     @Override
     public EventDto findEvent(long eventId) {
-        return billiardsEventRepository
+        BilliardsEvent event = billiardsEventRepository
                 .findById(eventId)
-                .map(autoMapper::mapToEventDto)
                 .orElseThrow(EventNotFoundException::new);
+
+        EventDto eventDto = autoMapper.mapToEventDto(event);
+        eventDto.setIsEventPublic(event.isEventPublic());
+
+        return eventDto;
     }
 
     @Override

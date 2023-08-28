@@ -5,6 +5,7 @@ import com.rivalhub.event.EventDto;
 import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
+import com.rivalhub.event.billiards.BilliardsEvent;
 import com.rivalhub.event.common.EventCommonService;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
@@ -52,6 +53,7 @@ public class RunningEventService implements EventService {
     private Function<RunningEvent, EventDto> mapToEventDTO(Organization organization) {
         return runningEvent -> {
             EventDto eventDto = autoMapper.mapToEventDto(runningEvent);
+            eventDto.setIsEventPublic(runningEvent.isEventPublic());
             eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
 
             eventCommonService.setStatusForEvent(runningEvent, eventDto);
@@ -61,10 +63,14 @@ public class RunningEventService implements EventService {
 
     @Override
     public EventDto findEvent(long eventId) {
-        return runningEventRepository
+        RunningEvent event = runningEventRepository
                 .findById(eventId)
-                .map(autoMapper::mapToEventDto)
                 .orElseThrow(EventNotFoundException::new);
+
+        EventDto eventDto = autoMapper.mapToEventDto(event);
+        eventDto.setIsEventPublic(event.isEventPublic());
+
+        return eventDto;
     }
 
     @Override

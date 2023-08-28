@@ -54,6 +54,7 @@ public class DartEventService implements EventService {
     private Function<DartEvent, EventDto> mapToEventDTO(Organization organization) {
         return dartEvent -> {
             EventDto eventDto = autoMapper.mapToEventDto(dartEvent);
+            eventDto.setIsEventPublic(dartEvent.isEventPublic());
             eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
 
             eventCommonService.setStatusForEvent(dartEvent, eventDto);
@@ -63,10 +64,14 @@ public class DartEventService implements EventService {
 
     @Override
     public EventDto findEvent(long eventId) {
-        return dartEventRepository
+        DartEvent event = dartEventRepository
                 .findById(eventId)
-                .map(autoMapper::mapToEventDto)
                 .orElseThrow(EventNotFoundException::new);
+
+        EventDto eventDto = autoMapper.mapToEventDto(event);
+        eventDto.setIsEventPublic(event.isEventPublic());
+
+        return eventDto;
     }
 
     @Override
