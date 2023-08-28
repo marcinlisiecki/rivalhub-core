@@ -104,6 +104,7 @@ public class RunningEventService implements EventService {
         Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
         organization.getRunningEvents().remove(runningEventRepository.findById(eventId)
                 .orElseThrow(EventNotFoundException::new));
+
         runningEventRepository.deleteById(eventId);
     }
 }

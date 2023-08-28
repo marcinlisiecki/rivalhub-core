@@ -2,6 +2,7 @@ package com.rivalhub.organization.service;
 
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.FormatterHelper;
+import com.rivalhub.common.exception.ReservationNotFoundException;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepoManager;
 import com.rivalhub.reservation.*;
@@ -59,5 +60,16 @@ public class OrganizationReservationService {
                 .stationList(reservationStations)
                 .build();
         return reservationRepository.save(newReservation);
+    }
+
+    public ReservationDTO getReservation(Long id) {
+        return reservationRepository
+                .findById(id)
+                .map(autoMapper::mapToReservationDto)
+                .orElseThrow(ReservationNotFoundException::new);
+    }
+
+    public void deleteReservation(Long id) {
+        reservationRepository.deleteById(id);
     }
 }
