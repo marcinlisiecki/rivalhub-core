@@ -69,7 +69,15 @@ public class StationAvailabilityFinder {
                 }
             }
 
-            if ((firstAvailable == null && !foundAny) || currentStationFirstAvailable.isBefore(firstAvailable)) {
+            if (firstAvailable == null) {
+                if (!foundAny) {
+                    firstAvailable = currentStationFirstAvailable;
+                }
+
+                continue;
+            }
+
+            if (currentStationFirstAvailable.isBefore(firstAvailable)) {
                 firstAvailable = currentStationFirstAvailable;
             }
         }
