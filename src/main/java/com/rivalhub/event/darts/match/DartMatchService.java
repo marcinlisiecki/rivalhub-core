@@ -169,4 +169,11 @@ public class DartMatchService implements MatchService {
     }
 
 
+    public void deleteRound(Long matchId, Long legNumber,int roundNumber) {
+       DartMatch dartMatch = dartMatchRepository.findById(matchId).orElseThrow(MatchNotFoundException::new);
+       DartRound dartRound = dartMatch.getLegList().get(Math.toIntExact(legNumber)).getRoundList().get(roundNumber);
+       dartMatch.getLegList().get(Math.toIntExact(legNumber)).getRoundList().remove(roundNumber);
+       dartRoundRepository.deleteById(dartRound.getId());
+       dartMatchRepository.save(dartMatch);
+    }
 }

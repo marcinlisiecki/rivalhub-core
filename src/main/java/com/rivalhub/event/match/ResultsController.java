@@ -104,6 +104,17 @@ public class ResultsController {
         return ResponseEntity.ok(dartMatchService.addRound(eventId, matchId,dartRoundDto,legNumber));
     }
 
+    @DeleteMapping("/{matchId}/dart/legs/rounds/{legNumber}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void deleteLeg(@PathVariable Long eventId,
+                                    @PathVariable Long matchId,
+                                    @PathVariable Long legNumber,
+                                    @RequestBody int numberOfRound
+    ) {
+        dartMatchService.deleteRound(matchId, legNumber,numberOfRound);
+    }
+
+
     @PostMapping("/{matchId}/billiards")
     private ResponseEntity<?> addResultsBilliards(@PathVariable Long eventId,
                                              @PathVariable Long matchId,
