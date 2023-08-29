@@ -1,5 +1,6 @@
 package com.rivalhub.event.darts.match;
 
+import com.rivalhub.event.EventType;
 import com.rivalhub.event.darts.match.result.variables.DartFormat;
 import com.rivalhub.event.darts.match.result.variables.DartMode;
 import com.rivalhub.event.match.ViewMatchDto;
@@ -14,6 +15,7 @@ public class ViewDartMatchDto implements ViewMatchDto {
 
     private DartFormat dateFormat;
     private DartMode dartMode;
+    private Long id;
     private List<UserDetailsDto> userDetails;
     private List<List<List<Long>>> scoresInMatch;
     private List<List<Integer>> pointsLeftInLeg;
@@ -23,7 +25,8 @@ public class ViewDartMatchDto implements ViewMatchDto {
     private List<List<Integer>> numberOfRoundsPlayedInLeg;
     private List<List<List<Integer>>> pointsLeftInLegAfterRound;
     private List<List<List<Integer>>> bounceOutsInRound;
-
+    private EventType eventType;
+    private Long eventId;
 
 
 

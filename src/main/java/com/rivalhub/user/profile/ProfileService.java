@@ -6,6 +6,8 @@ import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.FileUploadUtil;
 import com.rivalhub.common.MergePatcher;
+import com.rivalhub.event.EventDto;
+import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.common.exception.UserAlreadyExistsException;
 import com.rivalhub.user.UserData;
@@ -15,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -43,7 +46,7 @@ public class ProfileService {
         return userProfileHelper.getEventsInSharedOrganizations(requestUser, viewedUser);
     }
 
-    public Set<EventProfileDTO> getAllEventsByRequestUserAndMonth(String date) {
+    public Set<EventDto> getAllEventsByRequestUserAndMonth(String date) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
         return userProfileHelper.getEventsByOrganizationsAndDateForRequestUser(requestUser, date);
     }
@@ -75,5 +78,14 @@ public class ProfileService {
         userRepository.save(requestUser);
 
         return UserMapper.map(requestUser);
+    }
+
+    public Set<ViewMatchDto> getSharedOrganizationMatches(Long id) {
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        UserData viewedUser = userRepository.findById(id)
+                .orElseThrow(UserAlreadyExistsException::new);
+
+        return userProfileHelper.getMatchesInSharedOrganizations(requestUser,viewedUser);
+
     }
 }

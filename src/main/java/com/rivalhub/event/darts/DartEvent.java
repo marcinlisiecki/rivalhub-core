@@ -29,13 +29,5 @@ public class DartEvent extends Event {
         }
         return participantsId;
     }
-
-    public List<Long> getStationId(){
-        List<Long> stationId = new ArrayList<>();
-        for (Station station:this.getReservation().getStationList()) {
-            stationId.add(station.getId());
-        }
-        return stationId;
-    }
 }
 

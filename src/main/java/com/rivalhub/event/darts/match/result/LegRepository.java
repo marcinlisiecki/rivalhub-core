@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LegRepository extends CrudRepository<Leg,Long> {
+
 }

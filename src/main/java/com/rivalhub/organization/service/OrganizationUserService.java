@@ -58,7 +58,9 @@ public class OrganizationUserService {
                 .orElseThrow(OrganizationNotFoundException::new);
         var requestUser = SecurityUtils.getUserFromSecurityContext();
 
-        OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
+        if (organization.getOnlyAdminCanSeeInvitationLink()){
+            OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
+        }
 
         userRepository.findByEmail(email)
                 .stream().findFirst()
