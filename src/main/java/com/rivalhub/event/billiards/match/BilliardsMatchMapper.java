@@ -50,6 +50,8 @@ public class BilliardsMatchMapper {
         matchDto.setTeam1Ids(team1.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
         matchDto.setTeam2Ids(team2.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
         matchDto.setUserApprovalMap(billiardsMatch.getUserApprovalMap());
+        matchDto.setEventId(billiardsMatch.getEventId());
+        matchDto.setEventType(billiardsMatch.getEventType());
         return matchDto;
     };
     public ViewMatchDto map(BilliardsMatch billiardsMatch){

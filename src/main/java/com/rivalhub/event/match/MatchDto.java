@@ -1,5 +1,6 @@
 package com.rivalhub.event.match;
 
+import com.rivalhub.event.EventType;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,4 +16,7 @@ public class MatchDto {
     private Map<Long, Boolean> userApprovalMap = new HashMap<>();
     private String dartFormat;
     private String dartMode;
+    private EventType eventType;
+    private Long eventId;
+
 }

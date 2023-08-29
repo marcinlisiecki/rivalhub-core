@@ -50,7 +50,8 @@ public class TableFootballMatchMapper {
         tableFootballMatchDto.setTeam1Ids(team1.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
         tableFootballMatchDto.setTeam2Ids(team2.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
         tableFootballMatchDto.setUserApprovalMap(tableFootballMatch.getUserApprovalMap());
-
+        tableFootballMatchDto.setEventId(tableFootballMatch.getEventId());
+        tableFootballMatchDto.setEventType(tableFootballMatch.getEventType());
         return tableFootballMatchDto;
     }
 

@@ -51,6 +51,8 @@ public class PingPongMatchMapper {
         pingPongMatchDTO.setTeam1Ids(team1.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
         pingPongMatchDTO.setTeam2Ids(team2.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
         pingPongMatchDTO.setUserApprovalMap(pingPongMatch.getUserApprovalMap());
+        pingPongMatchDTO.setEventId(pingPongMatch.getEventId());
+        pingPongMatchDTO.setEventType(pingPongMatch.getEventType());
 
         return pingPongMatchDTO;
     }

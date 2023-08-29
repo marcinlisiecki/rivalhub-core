@@ -44,7 +44,8 @@ public class PullUpMatchMapper {
         pullUpMatchDTO.setId(pullUpMatch.getId());
         pullUpMatchDTO.setTeam1Ids(team1.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
         pullUpMatchDTO.setUserApprovalMap(pullUpMatch.getUserApprovalMap());
-
+        pullUpMatchDTO.setEventId(pullUpMatch.getEventId());
+        pullUpMatchDTO.setEventType(pullUpMatch.getEventType());
         return pullUpMatchDTO;
     }
 

@@ -51,6 +51,8 @@ public class DartMatchMapper {
         dartMatchDTO.setId(dartMatch.getId());
         dartMatchDTO.setTeam1Ids(participants.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
         dartMatchDTO.setUserApprovalMap(dartMatch.getUserApprovalMap());
+        dartMatchDTO.setEventId(dartMatch.getEventId());
+        dartMatchDTO.setEventType(dartMatch.getEventType());
         return dartMatchDTO;
     }
 
