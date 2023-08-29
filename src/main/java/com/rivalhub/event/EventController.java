@@ -1,5 +1,7 @@
 package com.rivalhub.event;
 
+import com.rivalhub.event.running.RunningEventService;
+import com.rivalhub.event.running.UserTimesAddDto;
 import com.rivalhub.user.UserDetailsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,7 @@ import java.util.List;
 public class EventController {
 
     private final EventStrategyResolver eventStrategyResolver;
+    private final RunningEventService runningEventService;
 
     @GetMapping("/events/{eventId}")
     private ResponseEntity<?> findEvent(@PathVariable Long eventId, @RequestParam String type) {
@@ -65,5 +68,15 @@ public class EventController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     private void joinPublicEvent(@PathVariable Long id, @RequestParam String type) {
         eventStrategyResolver.joinPublicEvent(id, type);
+    }
+
+    @PostMapping("/events/{eventId}/running")
+    private ResponseEntity<?> addRunningResults(@PathVariable Long eventId,@RequestBody List<UserTimesAddDto> userTimesList) {
+        return ResponseEntity.ok(runningEventService.addRunningResults(eventId,userTimesList));
+    }
+
+    @GetMapping("/events/{eventId}/running")
+    private ResponseEntity<?> getRunningResults(@PathVariable Long eventId) {
+        return ResponseEntity.ok(runningEventService.getRunningResults(eventId));
     }
 }

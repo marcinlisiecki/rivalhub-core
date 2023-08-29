@@ -15,6 +15,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -28,6 +29,9 @@ public class RunningEventService implements EventService {
     private final RunningEventRepository runningEventRepository;
     private final RunningEventSaver runningEventSaver;
     private final EventCommonService eventCommonService;
+    private final RunningResultsMapper runningResultsMapper;
+    private final RunningResultSaver runningResultSaver;
+
 
     @Override
     public EventDto addEvent(Long organizationId, EventDto eventDto) {
@@ -78,9 +82,22 @@ public class RunningEventService implements EventService {
         return eventCommonService.findAllParticipants(runningEventRepository, id);
     }
 
+
+
     @Override
     public boolean matchStrategy(String eventType) {
         return eventType.equalsIgnoreCase(EventType.RUNNING.name());
+    }
+
+    public RunningEventViewDto addRunningResults(Long eventId, List<UserTimesAddDto> userTimesAddDtos){
+        return runningResultSaver.save(eventId,userTimesAddDtos);
+    }
+
+    public List<UserTimesViewDto> getRunningResults(Long eventId) {
+        RunningEvent runningEvent = runningEventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
+        List<UserTimesViewDto> userViewTimeList = new ArrayList<>();
+        runningEvent.getUserTimesList().forEach(userTime ->  userViewTimeList.add(runningResultsMapper.map(userTime,runningEvent)));
+        return userViewTimeList;
     }
 
     @Override

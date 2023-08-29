@@ -16,8 +16,9 @@ import java.util.List;
 @Entity
 @Data
 public class RunningEvent extends Event {
-    @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
-    List<UserTimes> userTimesList;
+
+    @OneToMany(orphanRemoval = true,cascade = CascadeType.REMOVE)
+    List<UserTime> userTimesList;
     Double distance;
 
     private EventType eventType = EventType.RUNNING;

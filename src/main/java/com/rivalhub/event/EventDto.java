@@ -23,6 +23,7 @@ public class EventDto {
     private boolean isEventPublic;
     private String status;
     private Long reservationId;
+    private double distance;
 
 
     public boolean isEventPublic() {
