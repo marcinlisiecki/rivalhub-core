@@ -21,6 +21,8 @@ public class ViewDartMatchDto implements ViewMatchDto {
     private List<List<Integer>> bounceOutsInLeg;
     private List<List<Integer>> bestRoundScoresInLeg;
     private List<List<Integer>> numberOfRoundsPlayedInLeg;
+    private List<List<List<Integer>>> pointsLeftInLegAfterRound;
+    private List<List<List<Integer>>> bounceOutsInRound;
 
 
 

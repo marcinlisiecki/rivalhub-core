@@ -156,8 +156,10 @@ public class DartMatchService implements MatchService {
                     singlePlayerScoreInRound.setUserData(dartMatch.getParticipants().get(userNumber));
                     singlePlayerInRoundRepository.save(singlePlayerScoreInRound);
                 }
+                dartRoundRepository.save(round);
             }
         }
+        legRepository.saveAll(legList);
         addLegsIn(dartMatch, legList);
         DartMatch savedMatch = dartMatchRepository.save(dartMatch);
 
