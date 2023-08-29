@@ -16,6 +16,8 @@ public class DartMatchResultCalculator {
 
         int maxScore = dartMatch.getDartFormat().maxScore;
         List<List<List<Long>>> scoresInMatch = new ArrayList<>();
+        List<List<List<Integer>>> bounceOutInMatch = new ArrayList<>();
+        List<List<List<Integer>>> pointLeft = new ArrayList<>();
         List<List<Integer>> pointsLeftInLeg = new ArrayList<>();
         List<List<Integer>> placesInLeg = new ArrayList<>();
         List<List<Integer>> bounceOutsInLeg = new ArrayList<>();
@@ -30,6 +32,7 @@ public class DartMatchResultCalculator {
             List<Integer> playersNumberOfThrows = new ArrayList<>();
             List<Integer> playerPlacesInLeg = Arrays.asList(new Integer[dartMatch.getParticipants().size()]);
 
+
             for (int i = 0; i < dartMatch.getParticipants().size(); i++) {
                 playersPointsLeft.add(maxScore);
                 playersBlankShotsListInLeg.add(0);
@@ -39,14 +42,19 @@ public class DartMatchResultCalculator {
             }
 
             List<List<Long>> roundList = new ArrayList<>();
+            List<List<Integer>> bounceInLegList = new ArrayList<>();
+            List<List<Integer>> leftInLeg = new ArrayList<>();
             int numberOfPlayersFinished = 0;
             for (int roundNumber = 0; roundNumber < dartMatch.getLegList().get(legNumber).getRoundList().size(); roundNumber++) {
 
                 List<Long> scoresInRound = Arrays.asList(new Long[dartMatch.getParticipants().size()]);
+                List<Integer> bounceInRound = Arrays.asList(new Integer[dartMatch.getParticipants().size()]);
+                List<Integer> leftInRound = Arrays.asList(new Integer[dartMatch.getParticipants().size()]);
+
                 int numberOfPlayersFinishedInRound = 0;
 
                 for (int playerNumber = 0; playerNumber < dartMatch.getParticipants().size(); playerNumber++) {
-
+                    leftInRound.set(playerNumber,playersPointsLeft.get(playerNumber));
                     if (playersPointsLeft.get(playerNumber) == 0)
                         continue;
 
@@ -54,8 +62,9 @@ public class DartMatchResultCalculator {
                             .getRoundList().get(roundNumber)
                             .getSinglePlayerScoreInRoundsList().get(playerNumber);
 
-                    scoresInRound.set(playerNumber, singlePlayerScoreInRound.getScore());
 
+                    scoresInRound.set(playerNumber, singlePlayerScoreInRound.getScore());
+                    bounceInRound.set(playerNumber, Math.toIntExact(singlePlayerScoreInRound.getBlanks()));
                     playersBlankShotsListInLeg.set(playerNumber, (int) (playersBlankShotsListInLeg.get(playerNumber) + singlePlayerScoreInRound.getBlanks()));
 
                     if (singlePlayerScoreInRound.getScore() > playersHighestRoundScoreInLeg.get(playerNumber)) {
@@ -72,8 +81,12 @@ public class DartMatchResultCalculator {
 
                 }
                 roundList.add(scoresInRound);
+                bounceInLegList.add(bounceInRound);
+                leftInLeg.add(leftInRound);
                 numberOfPlayersFinished += numberOfPlayersFinishedInRound;
             }
+            bounceOutInMatch.add(bounceInLegList);
+            pointLeft.add(leftInLeg);
             scoresInMatch.add(roundList);
             Collections.replaceAll(playerPlacesInLeg, null, numberOfPlayersFinished + 1);
             pointsLeftInLeg.add(playersPointsLeft);
@@ -82,13 +95,14 @@ public class DartMatchResultCalculator {
             numberOfRoundsPlayedInLeg.add(playersNumberOfThrows);
             bestRoundScoresInLeg.add(playersHighestRoundScoreInLeg);
 
-
             viewDartMatch.setBounceOutsInLeg(bounceOutsInLeg);
             viewDartMatch.setPointsLeftInLeg(pointsLeftInLeg);
             viewDartMatch.setPlacesInLeg(placesInLeg);
             viewDartMatch.setBestRoundScoresInLeg(bestRoundScoresInLeg);
             viewDartMatch.setNumberOfRoundsPlayedInLeg(numberOfRoundsPlayedInLeg);
             viewDartMatch.setScoresInMatch(scoresInMatch);
+            viewDartMatch.setBounceOutsInRound(bounceOutInMatch);
+            viewDartMatch.setPointsLeftInLegAfterRound(pointLeft);
         }
     }
 }
