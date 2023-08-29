@@ -11,7 +11,7 @@ public class DartResultMapper {
         return leg;
     }
 
-    DartRound map(DartRoundDto dartRoundDto){
+    public DartRound map(DartRoundDto dartRoundDto){
         DartRound dartRound = new DartRound();
         dartRound.setSinglePlayerScoreInRoundsList(dartRoundDto.getSinglePlayerScoreInRoundsList()
                 .stream()

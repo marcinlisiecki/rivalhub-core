@@ -16,6 +16,7 @@ import java.util.List;
 @Entity
 @Data
 public class RunningEvent extends Event {
+
     @OneToMany(orphanRemoval = true,cascade = CascadeType.REMOVE)
     List<UserTime> userTimesList;
     Double distance;
@@ -23,19 +24,11 @@ public class RunningEvent extends Event {
     private EventType eventType = EventType.RUNNING;
 
 
-    public List<Long> getParticipantsId(){
+    public List<Long> getParticipantsId() {
         List<Long> participantsId = new ArrayList<>();
-        for (UserData userData:this.getParticipants()) {
+        for (UserData userData : this.getParticipants()) {
             participantsId.add(userData.getId());
         }
         return participantsId;
-    }
-
-    public List<Long> getStationId(){
-        List<Long> stationId = new ArrayList<>();
-        for (Station station:this.getReservation().getStationList()) {
-            stationId.add(station.getId());
-        }
-        return stationId;
     }
 }

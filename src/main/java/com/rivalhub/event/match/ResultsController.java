@@ -5,6 +5,7 @@ import com.rivalhub.event.billiards.match.BilliardsMatch;
 import com.rivalhub.event.billiards.match.BilliardsMatchResultAdd;
 import com.rivalhub.event.billiards.match.BilliardsMatchService;
 import com.rivalhub.event.darts.match.DartMatchService;
+import com.rivalhub.event.darts.match.result.DartRoundDto;
 import com.rivalhub.event.darts.match.result.LegAddDto;
 import com.rivalhub.event.pingpong.match.PingPongMatchService;
 import com.rivalhub.event.pingpong.match.result.PingPongSet;
@@ -87,6 +88,20 @@ public class ResultsController {
                                          @PathVariable Long matchId,
                                          @RequestBody List<LegAddDto> legListDto) {
         return ResponseEntity.ok(dartMatchService.addResult(eventId, matchId, legListDto));
+    }
+
+    @PostMapping("/{matchId}/dart/legs")
+    private ResponseEntity<?> createLeg(@PathVariable Long eventId,
+                                             @PathVariable Long matchId) {
+        return ResponseEntity.ok(dartMatchService.createLeg(eventId, matchId));
+    }
+    @PostMapping("/{matchId}/dart/legs/rounds/{legNumber}")
+    private ResponseEntity<?> addRound(@PathVariable Long eventId,
+                                        @PathVariable Long matchId,
+                                       @PathVariable int legNumber,
+                                       @RequestBody DartRoundDto dartRoundDto
+    ) {
+        return ResponseEntity.ok(dartMatchService.addRound(eventId, matchId,dartRoundDto,legNumber));
     }
 
     @PostMapping("/{matchId}/billiards")

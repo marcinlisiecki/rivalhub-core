@@ -22,13 +22,11 @@ public class Config {
         ModelMapper modelMapper = new ModelMapper();
 
         modelMapper.typeMap(PingPongEvent.class, EventDto.class).addMappings(mapper ->
-            mapper.map(PingPongEvent::getParticipantsId,
-                    EventDto::setParticipants));
+                mapper.map(PingPongEvent::getParticipantsId,
+                        EventDto::setParticipants));
         modelMapper.typeMap(PingPongEvent.class, EventDto.class).addMappings(mapper ->
                 mapper.map(src -> src.getHost().getId(),
                         EventDto::setHost));
-        modelMapper.typeMap(PingPongEvent.class, EventDto.class).addMappings(mapper ->
-                mapper.map(PingPongEvent::getStationId,EventDto::setStationList));
 
         modelMapper.getConfiguration().setSkipNullEnabled(true);
 
@@ -43,9 +41,6 @@ public class Config {
         modelMapper.typeMap(BilliardsEvent.class, EventDto.class).addMappings(mapper ->
                 mapper.map(src -> src.getHost().getId(),
                         EventDto::setHost));
-        modelMapper.typeMap(BilliardsEvent.class, EventDto.class).addMappings(mapper ->
-                mapper.map(BilliardsEvent::getStationId,EventDto::setStationList));
-
 
 
         modelMapper.typeMap(EventDto.class, DartEvent.class).addMappings(mapper ->
@@ -59,10 +54,6 @@ public class Config {
         modelMapper.typeMap(DartEvent.class, EventDto.class).addMappings(mapper ->
                 mapper.map(src -> src.getHost().getId(),
                         EventDto::setHost));
-        modelMapper.typeMap(DartEvent.class, EventDto.class).addMappings(mapper ->
-                mapper.map(DartEvent::getStationId,EventDto::setStationList));
-
-
 
 
         modelMapper.typeMap(EventDto.class, PullUpEvent.class).addMappings(mapper ->
@@ -76,8 +67,6 @@ public class Config {
         modelMapper.typeMap(PullUpEvent.class, EventDto.class).addMappings(mapper ->
                 mapper.map(src -> src.getHost().getId(),
                         EventDto::setHost));
-        modelMapper.typeMap(PullUpEvent.class, EventDto.class).addMappings(mapper ->
-                mapper.map(PullUpEvent::getStationId,EventDto::setStationList));
 
         modelMapper.typeMap(EventDto.class, TableFootballEvent.class).addMappings(mapper ->
                 mapper.skip(TableFootballEvent::setParticipants));
@@ -90,8 +79,6 @@ public class Config {
         modelMapper.typeMap(TableFootballEvent.class, EventDto.class).addMappings(mapper ->
                 mapper.map(src -> src.getHost().getId(),
                         EventDto::setHost));
-        modelMapper.typeMap(TableFootballEvent.class, EventDto.class).addMappings(mapper ->
-                mapper.map(TableFootballEvent::getStationId,EventDto::setStationList));
 
         modelMapper.typeMap(EventDto.class, RunningEvent.class).addMappings(mapper ->
                 mapper.skip(RunningEvent::setParticipants));
@@ -106,9 +93,6 @@ public class Config {
         modelMapper.typeMap(RunningEvent.class, EventDto.class).addMappings(mapper ->
                 mapper.map(src -> src.getHost().getId(),
                         EventDto::setHost));
-        modelMapper.typeMap(RunningEvent.class, EventDto.class).addMappings(mapper ->
-                mapper.map(RunningEvent::getStationId,EventDto::setStationList));
-
 
 
         modelMapper.getConfiguration().setSkipNullEnabled(true);
@@ -117,8 +101,6 @@ public class Config {
                 mapper.skip(PingPongEvent::setParticipants));
         modelMapper.typeMap(EventDto.class, PingPongEvent.class).addMappings(mapper ->
                 mapper.skip(PingPongEvent::setHost));
-
-
 
 
         modelMapper.typeMap(OrganizationDTO.class, Organization.class).addMappings(mapper ->
