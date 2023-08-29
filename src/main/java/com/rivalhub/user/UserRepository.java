@@ -81,5 +81,5 @@ public interface UserRepository extends CrudRepository<UserData, Long>, PagingAn
         JOIN u.notifications n
         WHERE u.id = ?1
             """)
-    UserData findUserWithNotifications(Long id);
+    Optional<UserData> findUserWithNotifications(Long id);
 }

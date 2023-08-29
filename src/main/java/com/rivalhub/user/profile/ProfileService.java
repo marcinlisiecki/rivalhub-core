@@ -6,6 +6,7 @@ import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.FileUploadUtil;
 import com.rivalhub.common.MergePatcher;
+import com.rivalhub.common.exception.UserNotFoundException;
 import com.rivalhub.event.EventDto;
 import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.security.SecurityUtils;
@@ -84,8 +85,10 @@ public class ProfileService {
     public List<Notification> getNotifications() {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
         var userWithNotifications = userRepository.findUserWithNotifications(requestUser.getId());
-
-        return userWithNotifications.getNotifications()
+        if(userWithNotifications.isEmpty()){
+            return List.of();
+        }
+        return userWithNotifications.orElseThrow(UserNotFoundException::new).getNotifications()
                 .stream().filter(
                         notification -> notification.getStatus()
                                 .equals(Notification.Status.NOT_CONFIRMED))
