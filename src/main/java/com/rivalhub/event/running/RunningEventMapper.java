@@ -16,6 +16,7 @@ public class RunningEventMapper {
         RunningEventViewDto runningEventViewDto = new RunningEventViewDto();
 
         List<UserTimesViewDto> userTimesViewDtoList = new ArrayList<>();
+        runningEvent.getUserTimeList().forEach(userTimes -> userTimesViewDtoList.add(runningResultsMapper.map(userTimes,runningEvent)));
         runningEventViewDto.setUserTimesViewDtoList(userTimesViewDtoList);
         runningEventViewDto.setUserDetailsDtos(runningEvent.getParticipants().stream().map(UserMapper::map).toList());
         return runningEventViewDto;

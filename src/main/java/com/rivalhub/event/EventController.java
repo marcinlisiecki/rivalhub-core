@@ -79,4 +79,6 @@ public class EventController {
     private ResponseEntity<?> getRunningResults(@PathVariable Long eventId) {
         return ResponseEntity.ok(runningEventService.getRunningResults(eventId));
     }
+
+
 }

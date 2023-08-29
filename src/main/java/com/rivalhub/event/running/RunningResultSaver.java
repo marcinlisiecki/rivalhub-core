@@ -23,6 +23,7 @@ public class RunningResultSaver {
         List<UserTime> userTimeList = new ArrayList<>();
         userTimesAddDtos.forEach(userTimesAddDto ->  userTimeList.add(runningResultsMapper.map(userTimesAddDto,runningEvent)));
         userTimeRepository.saveAll(userTimeList);
+        runningEvent.setUserTimeList(userTimeList);
         return runningEventMapper.map(runningEventRepository.save(runningEvent));
     }
 

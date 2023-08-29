@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Entity
 @Data
-public class UserTime implements ViewMatchDto {
+public class UserTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

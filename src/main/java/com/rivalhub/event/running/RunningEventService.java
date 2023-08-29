@@ -96,7 +96,7 @@ public class RunningEventService implements EventService {
     public List<UserTimesViewDto> getRunningResults(Long eventId) {
         RunningEvent runningEvent = runningEventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
         List<UserTimesViewDto> userViewTimeList = new ArrayList<>();
-        runningEvent.getUserTimesList().forEach(userTime ->  userViewTimeList.add(runningResultsMapper.map(userTime,runningEvent)));
+        runningEvent.getUserTimeList().forEach(userTime ->  userViewTimeList.add(runningResultsMapper.map(userTime,runningEvent)));
         return userViewTimeList;
     }
 
