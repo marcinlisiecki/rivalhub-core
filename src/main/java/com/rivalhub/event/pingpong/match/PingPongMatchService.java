@@ -123,7 +123,6 @@ public class PingPongMatchService implements MatchService {
                 .stream()
                 .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.PING_PONG && notification.getMatchId() != pingPongMatch.getId()))
                 .forEach(userData -> saveNotification(userData,EventType.PING_PONG, pingPongMatch.getId(), eventId));
-
         pingPongMatch.getTeam1()
                 .stream()
                 .filter(userData -> (userData.getId() != loggedUser.getId()))
