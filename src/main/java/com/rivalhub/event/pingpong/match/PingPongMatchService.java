@@ -117,11 +117,11 @@ public class PingPongMatchService implements MatchService {
         pingPongMatch.getUserApprovalMap().put(loggedUser.getId(),true);
         pingPongMatch.getTeam1()
                 .stream()
-                .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.PING_PONG && notification.getMatchId() != pingPongMatch.getId()))
+                .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.PING_PONG && notification.getMatchId() == pingPongMatch.getId()))
                 .forEach(userData -> saveNotification(userData,EventType.PING_PONG, pingPongMatch.getId(), eventId));
         pingPongMatch.getTeam2()
                 .stream()
-                .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.PING_PONG && notification.getMatchId() != pingPongMatch.getId()))
+                .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.PING_PONG && notification.getMatchId() == pingPongMatch.getId()))
                 .forEach(userData -> saveNotification(userData,EventType.PING_PONG, pingPongMatch.getId(), eventId));
         pingPongMatch.getTeam1()
                 .stream()
