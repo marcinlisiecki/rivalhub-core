@@ -66,6 +66,7 @@ public class DartMatchMapper {
         viewDartMatch.setDateFormat(dartMatch.getDartFormat());
         viewDartMatch.setDartMode(dartMatch.getDartMode());
         dartMatchResultCalculator.calculateResults(viewDartMatch,dartMatch);
+        viewDartMatch.setId(dartMatch.getId());
         return viewDartMatch;
     }
 }

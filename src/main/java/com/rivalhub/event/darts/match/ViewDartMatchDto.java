@@ -14,6 +14,7 @@ public class ViewDartMatchDto implements ViewMatchDto {
 
     private DartFormat dateFormat;
     private DartMode dartMode;
+    private Long id;
     private List<UserDetailsDto> userDetails;
     private List<List<List<Long>>> scoresInMatch;
     private List<List<Integer>> pointsLeftInLeg;
