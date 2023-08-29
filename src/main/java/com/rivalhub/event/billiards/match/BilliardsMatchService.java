@@ -88,7 +88,7 @@ public class BilliardsMatchService implements MatchService {
                 .forEach(userData ->{
                     userData.getNotifications()
                             .stream()
-                            .filter(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() != billiardsMatch.getId())
+                            .filter(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() == billiardsMatch.getId())
                             .findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.NOT_CONFIRMED);
                     userRepository.save(userData);
                 });
@@ -99,13 +99,13 @@ public class BilliardsMatchService implements MatchService {
                 .forEach(userData ->{
                     userData.getNotifications()
                             .stream()
-                            .filter(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() != billiardsMatch.getId())
+                            .filter(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() == billiardsMatch.getId())
                             .findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.NOT_CONFIRMED);
                     userRepository.save(userData);
                 });
     }
     private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
-        if(userData.getNotifications().stream().anyMatch(notification -> (notification.getMatchId() == matchId && notification.getType() == type))) {
+        if(userData.getNotifications().stream().noneMatch(notification -> (notification.getMatchId() == matchId && notification.getType() == type))) {
             userData.getNotifications().add(
                     new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED));
             userRepository.save(userData);

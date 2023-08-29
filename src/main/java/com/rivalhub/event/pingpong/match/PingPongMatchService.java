@@ -117,11 +117,11 @@ public class PingPongMatchService implements MatchService {
         pingPongMatch.getUserApprovalMap().put(loggedUser.getId(),true);
         pingPongMatch.getTeam1()
                 .stream()
-                .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() != pingPongMatch.getId()))
+                .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.PING_PONG && notification.getMatchId() != pingPongMatch.getId()))
                 .forEach(userData -> saveNotification(userData,EventType.PING_PONG, pingPongMatch.getId(), eventId));
         pingPongMatch.getTeam2()
                 .stream()
-                .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() != pingPongMatch.getId()))
+                .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.PING_PONG && notification.getMatchId() != pingPongMatch.getId()))
                 .forEach(userData -> saveNotification(userData,EventType.PING_PONG, pingPongMatch.getId(), eventId));
 
         pingPongMatch.getTeam1()
@@ -130,7 +130,7 @@ public class PingPongMatchService implements MatchService {
                 .forEach(userData ->{
                     userData.getNotifications()
                             .stream()
-                            .filter(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() != pingPongMatch.getId())
+                            .filter(notification -> notification.getType() == EventType.PING_PONG && notification.getMatchId() == pingPongMatch.getId())
                             .findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.NOT_CONFIRMED);
                     userRepository.save(userData);
                 });
@@ -141,7 +141,7 @@ public class PingPongMatchService implements MatchService {
                 .forEach(userData ->{
                     userData.getNotifications()
                             .stream()
-                            .filter(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() != pingPongMatch.getId())
+                            .filter(notification -> notification.getType() == EventType.PING_PONG && notification.getMatchId() == pingPongMatch.getId())
                             .findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.NOT_CONFIRMED);
                     userRepository.save(userData);
                 });
@@ -151,7 +151,7 @@ public class PingPongMatchService implements MatchService {
 
 
     private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
-        if(userData.getNotifications().stream().anyMatch(notification -> (notification.getMatchId() == matchId && notification.getType() == type))) {
+        if(userData.getNotifications().stream().noneMatch(notification -> (notification.getMatchId() == matchId && notification.getType() == type))) {
             userData.getNotifications().add(
                     new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED));
             userRepository.save(userData);
