@@ -25,4 +25,5 @@ public class ViewBilliardMatchDTO implements ViewMatchDto {
     private Long eventId;
     private Map<Long, Boolean> userApprovalMap = new HashMap<>();
     private boolean isApproved;
+    private Long matchId;
 }

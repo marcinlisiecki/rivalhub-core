@@ -67,6 +67,7 @@ public class BilliardsMatchMapper {
         viewBilliardMatchDTO.setApproved(isApprovedByDemanded(billiardsMatch));
         viewBilliardMatchDTO.setEventId(billiardsMatch.getEventId());
         viewBilliardMatchDTO.setEventType(billiardsMatch.getEventType());
+        viewBilliardMatchDTO.setMatchId(billiardsMatch.getId());
         return viewBilliardMatchDTO;
     }
 
