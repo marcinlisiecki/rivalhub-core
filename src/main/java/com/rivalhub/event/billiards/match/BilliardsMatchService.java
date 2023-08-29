@@ -198,4 +198,12 @@ public class BilliardsMatchService implements MatchService {
     }
 
 
+
+    public void deleteBilliardsMatch(Long eventId, Long matchId) {
+        BilliardsEvent billiardsEvent = billiardsEventRepository.findById(eventId).orElseThrow(EventNotFoundException::new);
+        BilliardsMatch billiardsMatchToDelete = billiardsEvent.getBilliardsMatches().stream().filter(billiardsMatch -> billiardsMatch.getId() == matchId).findFirst().orElseThrow(MatchNotFoundException::new);
+        billiardsEvent.getBilliardsMatches().remove(billiardsMatchToDelete);
+        billiardsEventRepository.save(billiardsEvent);
+        billiardsMatchRepository.delete(billiardsMatchToDelete);
+    }
 }
