@@ -116,11 +116,11 @@ public class UserProfileHelper {
     private <T extends Event> Set<T> filterByDate(Set<T> events, LocalDateTime date) {
         return events.stream()
                 .filter(event -> {
-                            return event.getStartTime().getYear() == date.getYear()
-                                    && event.getStartTime().getMonth() == date.getMonth()
+                            return (event.getStartTime().getYear() == date.getYear()
+                                    && (event.getStartTime().getMonth() == date.getMonth() || event.getStartTime().getMonth() == date.getMonth().plus(1) || event.getStartTime().getMonth() == date.getMonth().minus(1)))
                                     ||
-                                    event.getEndTime().getYear() == date.getYear()
-                                            && event.getEndTime().getMonth() == date.getMonth();
+                                    (event.getEndTime().getYear() == date.getYear()
+                                            && (event.getEndTime().getMonth() == date.getMonth() || event.getEndTime().getMonth() == date.getMonth().plus(1) || event.getEndTime().getMonth() == date.getMonth().minus(1)));
                         }
                 ).collect(Collectors.toSet());
     }
