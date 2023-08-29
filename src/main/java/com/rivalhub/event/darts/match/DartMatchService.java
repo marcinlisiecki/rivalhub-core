@@ -1,9 +1,11 @@
 package com.rivalhub.event.darts.match;
 
+
 import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.common.exception.MatchNotFoundException;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.event.EventType;
+
 import com.rivalhub.event.darts.DartEvent;
 import com.rivalhub.event.darts.DartEventRepository;
 import com.rivalhub.event.darts.match.result.*;
@@ -15,6 +17,7 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
@@ -103,6 +106,40 @@ public class DartMatchService implements MatchService {
                 .orElseThrow(MatchNotFoundException::new);
     }
 
+    public ViewMatchDto createLeg(Long eventId, Long matchId) {
+        Leg leg = new Leg();
+        leg.setRoundList(List.of());
+        legRepository.save(leg);
+        DartEvent dartEvent = dartEventRepository
+                .findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+
+        DartMatch dartMatch = findMatchInEvent(dartEvent, matchId);
+        dartMatch.getLegList().add(leg);
+        DartMatch savedMatch = dartMatchRepository.save(dartMatch);
+        return dartMatchMapper.map(savedMatch);
+    }
+
+    public ViewMatchDto addRound(Long eventId, Long matchId,DartRoundDto addRoundResult,int legNumber) {
+        DartEvent dartEvent = dartEventRepository
+                .findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+
+        DartMatch dartMatch = findMatchInEvent(dartEvent, matchId);
+
+        DartRound dartRound = dartResultMapper.map(addRoundResult);
+        int userNumber = 0;
+        for(SinglePlayerScoreInRound singlePlayerScoreInRound : dartRound.getSinglePlayerScoreInRoundsList()){
+            singlePlayerScoreInRound.setUserData(dartMatch.getParticipants().get(userNumber));
+            singlePlayerInRoundRepository.save(singlePlayerScoreInRound);
+            userNumber++;
+        }
+        dartRoundRepository.save(dartRound);
+
+        dartMatch.getLegList().get(legNumber).getRoundList().add(dartRound);
+        DartMatch savedMatch = dartMatchRepository.save(dartMatch);
+        return dartMatchMapper.map(savedMatch);
+    }
 
     public ViewMatchDto addResult(Long eventId, Long matchId, List<LegAddDto> legListDto) {
         DartEvent dartEvent = dartEventRepository

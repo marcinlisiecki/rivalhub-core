@@ -56,7 +56,7 @@ public class DartMatchMapper {
     }
 
 
-    ViewDartMatchDto map(DartMatch dartMatch){
+    public ViewDartMatchDto map(DartMatch dartMatch){
 
         ViewDartMatchDto viewDartMatch = new ViewDartMatchDto();
         List<UserDetailsDto> players = dartMatch.getParticipants().stream()
@@ -65,7 +65,10 @@ public class DartMatchMapper {
         viewDartMatch.setUserDetails(players);
         viewDartMatch.setDateFormat(dartMatch.getDartFormat());
         viewDartMatch.setDartMode(dartMatch.getDartMode());
+        viewDartMatch.setEventId(dartMatch.getEventId());
+        viewDartMatch.setEventType(dartMatch.getEventType());
         dartMatchResultCalculator.calculateResults(viewDartMatch,dartMatch);
+        viewDartMatch.setId(dartMatch.getId());
         return viewDartMatch;
     }
 }

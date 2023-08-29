@@ -1,5 +1,6 @@
 package com.rivalhub.event.billiards.match;
 
+import com.rivalhub.event.match.Match;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -9,18 +10,15 @@ import java.util.List;
 
 @Entity
 @Data
-public class BilliardsMatch {
+public class BilliardsMatch extends Match {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @ManyToMany
-    private List<UserData> team1 = new ArrayList<>();
-    @ManyToMany
-    private List<UserData> team2 = new ArrayList<>();
-//      TODO jakie dane z meczu chcemy??????
-//    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
-//    private List<PingPongSet> sets = new ArrayList<>();
-    private boolean team1Approval;
-    private boolean team2Approval;
+
+    private boolean team1PlaysFull;
+    private boolean team1HadPottedFirst;
+    private WinType winType;
+    private int howManyBillsLeftTeam1;
+    private int howManyBillsLeftTeam2;
+    private boolean team1Won;
+    private boolean team2Won;
+
 }

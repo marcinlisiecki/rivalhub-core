@@ -53,7 +53,7 @@ public class OrganizationStationService {
     }
 
     public List<Station> viewStations(Long organizationId, String start, String end, EventType type,
-                               boolean onlyAvailable, boolean showInactive) {
+                                      boolean onlyAvailable, boolean showInactive) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
 
         var organization = organizationRepository.findById(organizationId)
@@ -95,20 +95,20 @@ public class OrganizationStationService {
         deleteStationIn(organization, stationId);
     }
 
-    private void deleteStationIn(Organization organization, Long id){
+    private void deleteStationIn(Organization organization, Long id) {
         Station station = findStationIn(organization, id);
         organization.getStationList().remove(station);
         organizationRepository.save(organization);
     }
 
-    private Station findStationIn(Organization organization, Long id){
+    private Station findStationIn(Organization organization, Long id) {
         return organization.getStationList().stream()
                 .filter(station -> station.getId().equals(id))
                 .findFirst()
                 .orElseThrow(StationNotFoundException::new);
     }
 
-    private Long findRequestOrganizationIn(List<Long> organizationIdsList, Long id){
+    private Long findRequestOrganizationIn(List<Long> organizationIdsList, Long id) {
         return organizationIdsList.stream()
                 .filter(orgId -> orgId.equals(id)).findFirst()
                 .orElseThrow(OrganizationNotFoundException::new);
@@ -127,7 +127,6 @@ public class OrganizationStationService {
 
         return eventStation;
     }
-
 
     private List<EventTypeStationsDto> getEventTypeStationsByTime(String start, String end, EventType type, UserData requestUser, Organization organization) {
         LocalDateTime startTime = LocalDateTime.parse(start, FormatterHelper.formatter());

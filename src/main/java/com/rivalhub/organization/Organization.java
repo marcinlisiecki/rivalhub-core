@@ -81,7 +81,7 @@ public class Organization {
     private Boolean onlyAdminCanSeeInvitationLink = true;
 
     @OneToMany(fetch = FetchType.LAZY,
-            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH,CascadeType.REMOVE})
     List<PingPongEvent> pingPongEvents = new ArrayList<>();
 
     private String color;

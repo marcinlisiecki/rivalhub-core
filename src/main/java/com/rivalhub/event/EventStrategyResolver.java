@@ -17,7 +17,7 @@ public class EventStrategyResolver {
     }
 
     EventDto addEvent(Long id, EventDto eventDto, String type) {
-        return eventOperator.useStrategy(type).addEvent(id,eventDto);
+        return eventOperator.useStrategy(type).addEvent(id, eventDto);
     }
 
     List<UserDetailsDto> findEventParticipants(long id, String type) {
@@ -26,5 +26,21 @@ public class EventStrategyResolver {
 
     List<EventDto> findAllEvents(Long id, String type) {
         return eventOperator.useStrategy(type).findAllEvents(id);
+    }
+
+    List<UserDetailsDto> deleteUserFromEvent(Long eventId, Long userId, String type) {
+        return eventOperator.useStrategy(type).deleteUserFromEvent(eventId, userId);
+    }
+
+    List<UserDetailsDto> addUserToEvent(Long eventId, Long userId, String type) {
+        return eventOperator.useStrategy(type).addUserToEvent(eventId, userId);
+    }
+
+    void joinPublicEvent(Long id, String type) {
+        eventOperator.useStrategy(type).joinPublicEvent(id);
+    }
+
+    public void deleteEvent(Long organizationId ,Long eventId, String type) {
+        eventOperator.useStrategy(type).deleteEvent(organizationId,eventId);
     }
 }

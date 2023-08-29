@@ -1,5 +1,7 @@
 package com.rivalhub.event.running;
 
+import com.rivalhub.event.EventType;
+import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -15,5 +17,9 @@ public class UserTime {
     private UserData user;
     private Double time;
 
+    @Transient
+    private EventType eventType;
+    @Transient
+    private Long eventId;
 
 }

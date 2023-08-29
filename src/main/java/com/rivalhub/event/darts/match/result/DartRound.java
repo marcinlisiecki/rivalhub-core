@@ -13,6 +13,6 @@ public class DartRound {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToMany
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
     private List<SinglePlayerScoreInRound> singlePlayerScoreInRoundsList = new ArrayList<>();
 }

@@ -20,6 +20,17 @@ public class EventDto {
     private EventType eventType;
     private String name;
     private String description;
+    private boolean isEventPublic;
     private String status;
     private double distance;
+    private Long reservationId;
+
+
+    public boolean isEventPublic() {
+        return isEventPublic;
+    }
+
+    public void setIsEventPublic(boolean eventPublic) {
+        isEventPublic = eventPublic;
+    }
 }
