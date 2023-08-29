@@ -1,7 +1,10 @@
 package com.rivalhub.event.match;
 
+import com.rivalhub.common.exception.NotificationNotFoundException;
 import com.rivalhub.common.exception.UserNotFoundException;
+import com.rivalhub.event.EventType;
 import com.rivalhub.user.UserData;
+import com.rivalhub.user.UserRepository;
 import com.rivalhub.user.notification.Notification;
 
 import java.util.HashMap;
@@ -17,16 +20,31 @@ public class MatchApprovalService {
         return userApproval;
     }
 
-    public static void findNotificationToDisActivate(List<UserData> team, Long matchId) {
+    public static void findNotificationToDisActivate(List<UserData> team, Long matchId,EventType type,UserRepository userRepository) {
         team.forEach(
                 userData -> {
                     userData.getNotifications()
                             .stream().filter(
-                                    notification -> notification.getMatchId().equals(matchId))
+                                    notification -> notification.getMatchId() == matchId && notification.getType() == type)
                             .findFirst()
                             .orElseThrow(UserNotFoundException::new)
                             .setStatus(Notification.Status.CONFIRMED);
+                    userRepository.save(userData);
+
                 }
         );
+    }
+
+    public static void saveNotification(UserData userData, EventType type, Long matchId, Long eventId, UserRepository userRepository) {
+        if(userData.getNotifications().stream().noneMatch(notification -> (notification.getMatchId() == matchId && notification.getType() == type))) {
+            userData.getNotifications().add(
+                    new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED));
+            userRepository.save(userData);
+        }else {
+            userData.getNotifications().stream()
+                    .filter(notification -> (notification.getMatchId() == matchId && notification.getType() == type))
+                    .findFirst()
+                    .orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.NOT_CONFIRMED);
+        }
     }
 }

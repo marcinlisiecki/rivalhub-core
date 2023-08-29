@@ -3,6 +3,7 @@ package com.rivalhub.event.pingpong.match;
 import com.rivalhub.common.MergePatcher;
 import com.rivalhub.common.exception.*;
 import com.rivalhub.event.EventType;
+import com.rivalhub.event.billiards.match.BilliardsMatchService;
 import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.MatchService;
@@ -154,16 +155,7 @@ public class PingPongMatchService implements MatchService {
 
 
     private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
-        if(userData.getNotifications().stream().noneMatch(notification -> (notification.getMatchId() == matchId && notification.getType() == type))) {
-            userData.getNotifications().add(
-                    new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED));
-            userRepository.save(userData);
-        }else {
-            userData.getNotifications().stream()
-                    .filter(notification -> (notification.getMatchId() == matchId && notification.getType() == type))
-                    .findFirst()
-                    .orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.NOT_CONFIRMED);
-        }
+        MatchApprovalService.saveNotification(userData, type, matchId, eventId, userRepository);
     }
 
     private void addPingPongMatch(PingPongEvent pingPongEvent, PingPongMatch pingPongMatch) {
@@ -176,9 +168,20 @@ public class PingPongMatchService implements MatchService {
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, pingPongMatch);
-        MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser),matchId);
+        findUserTeam(pingPongMatch,loggedUser);
+        MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser),matchId,EventType.PING_PONG,userRepository);
         pingPongMatchRepository.save(pingPongMatch);
         return pingPongMatch.getUserApprovalMap().get(loggedUser.getId());
+    }
+
+    private List<UserData> findUserTeam(PingPongMatch pingPongMatch, UserData loggedUser) {
+        if(pingPongMatch.getTeam1().contains(loggedUser)){
+            return pingPongMatch.getTeam1();
+        }
+        if(pingPongMatch.getTeam2().contains((loggedUser))){
+            return pingPongMatch.getTeam2();
+        }
+        throw new UserNotFoundException();
     }
 
     private void setApprove(UserData loggedUser, PingPongMatch pingPongMatch) {

@@ -3,6 +3,7 @@ package com.rivalhub.event.darts.match;
 
 import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.common.exception.MatchNotFoundException;
+import com.rivalhub.common.exception.NotificationNotFoundException;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.event.EventType;
 
@@ -61,7 +62,7 @@ public class DartMatchService implements MatchService {
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, dartMatch);
-        MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser), matchId);
+        MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser), matchId,EventType.DARTS,userRepository);
         dartMatchRepository.save(dartMatch);
         return dartMatch.getUserApprovalMap().get(loggedUser.getId());
     }
@@ -72,12 +73,30 @@ public class DartMatchService implements MatchService {
 
     private void setApproveAndNotifications(UserData loggedUser, DartMatch dartMatch, Long eventId) {
 
+        dartMatch.getUserApprovalMap().keySet().forEach(key -> dartMatch.getUserApprovalMap().put(key,false));
         dartMatch.getUserApprovalMap().put(loggedUser.getId(),true);
+        if(loggedUser.getNotifications().stream().anyMatch(notification -> notification.getType() == EventType.DARTS && notification.getMatchId() == dartMatch.getId())) {
+            loggedUser.getNotifications().stream().filter(notification -> notification.getType() == EventType.DARTS && notification.getMatchId() == dartMatch.getId()).findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.CONFIRMED);
+            userRepository.save(loggedUser);
+        }
         dartMatch.getParticipants()
                 .stream()
-                .filter(userData -> userData.getId() != loggedUser.getId())
-                .forEach(userData -> saveNotification(userData,EventType.PING_PONG, dartMatch.getId(), eventId));
-        }
+                .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.DARTS && notification.getMatchId() == dartMatch.getId()))
+                .forEach(userData -> saveNotification(userData,EventType.DARTS, dartMatch.getId(), eventId));
+        dartMatch.getParticipants()
+                .stream()
+                .filter(userData -> (userData.getId() != loggedUser.getId()))
+                .forEach(userData ->{
+                    userData.getNotifications()
+                            .stream()
+                            .filter(notification -> notification.getType() == EventType.DARTS && notification.getMatchId() == dartMatch.getId())
+                            .findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.NOT_CONFIRMED);
+                    userRepository.save(userData);
+                });
+
+
+
+    }
 
     private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
         if(userData.getNotifications().stream().anyMatch(notification -> (notification.getMatchId() == matchId && notification.getType() == type)))

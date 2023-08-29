@@ -57,7 +57,7 @@ public class BilliardsMatchService implements MatchService {
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, billiardsMatch);
-        MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser),matchId);
+        MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser),matchId,EventType.BILLIARDS,userRepository);
         billiardsMatchRepository.save(billiardsMatch);
         return billiardsMatch.getUserApprovalMap().get(loggedUser.getId());
     }
@@ -69,7 +69,10 @@ public class BilliardsMatchService implements MatchService {
     private void setApproveAndNotifications(UserData loggedUser, BilliardsMatch billiardsMatch, Long eventId) {
         billiardsMatch.getUserApprovalMap().keySet().forEach(key -> billiardsMatch.getUserApprovalMap().put(key,false));
         billiardsMatch.getUserApprovalMap().put(loggedUser.getId(),true);
-
+        if(loggedUser.getNotifications().stream().anyMatch(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() == billiardsMatch.getId())) {
+            loggedUser.getNotifications().stream().filter(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() == billiardsMatch.getId()).findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.CONFIRMED);
+            userRepository.save(loggedUser);
+        }
         billiardsMatch.getTeam1()
                 .stream()
                 .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() == billiardsMatch.getId()))
@@ -102,17 +105,10 @@ public class BilliardsMatchService implements MatchService {
 
     }
     private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
-        if(userData.getNotifications().stream().noneMatch(notification -> (notification.getMatchId() == matchId && notification.getType() == type))) {
-            userData.getNotifications().add(
-                    new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED));
-            userRepository.save(userData);
-        }else {
-            userData.getNotifications().stream()
-                    .filter(notification -> (notification.getMatchId() == matchId && notification.getType() == type))
-                    .findFirst()
-                    .orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.NOT_CONFIRMED);
-        }
+        MatchApprovalService.saveNotification(userData, type, matchId, eventId, userRepository);
     }
+
+
 
     @Override
     public MatchDto createMatch(Long organizationId, Long eventId, MatchDto MatchDTO) {
