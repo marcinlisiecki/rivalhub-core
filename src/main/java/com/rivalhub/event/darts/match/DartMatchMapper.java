@@ -38,6 +38,8 @@ public class DartMatchMapper {
         dartMatch.setDartFormat(DartFormat.valueOf(matchDto.getDartFormat()));
         dartMatch.setDartMode(DartMode.valueOf(matchDto.getDartMode()));
         dartMatch.setUserApprovalMap(MatchApprovalService.prepareApprovalMap(matchDto));
+        dartMatch.setEventId(matchDto.getEventId());
+        dartMatch.setEventType(matchDto.getEventType());
         return dartMatch;
     }
 
@@ -53,6 +55,7 @@ public class DartMatchMapper {
         dartMatchDTO.setUserApprovalMap(dartMatch.getUserApprovalMap());
         dartMatchDTO.setEventId(dartMatch.getEventId());
         dartMatchDTO.setEventType(dartMatch.getEventType());
+
         return dartMatchDTO;
     }
 

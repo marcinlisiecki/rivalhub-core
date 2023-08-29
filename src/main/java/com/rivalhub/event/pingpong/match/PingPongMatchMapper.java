@@ -34,6 +34,8 @@ public class PingPongMatchMapper {
         pingPongMatch.setTeam1(team1);
         pingPongMatch.setTeam2(team2);
         pingPongMatch.setUserApprovalMap(MatchApprovalService.prepareApprovalMap(matchDto));
+        pingPongMatch.setEventId(matchDto.getEventId());
+        pingPongMatch.setEventType(matchDto.getEventType());
         return pingPongMatch;
     }
 

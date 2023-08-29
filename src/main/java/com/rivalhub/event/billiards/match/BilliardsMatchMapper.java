@@ -35,6 +35,8 @@ public class BilliardsMatchMapper {
         billiardsMatch.setTeam1(team1);
         billiardsMatch.setTeam2(team2);
         billiardsMatch.setUserApprovalMap(MatchApprovalService.prepareApprovalMap(matchDto));
+        billiardsMatch.setEventId(matchDto.getEventId());
+        billiardsMatch.setEventType(matchDto.getEventType());
         return billiardsMatch;
     }
     MatchDto mapToMatchDto(BilliardsMatch billiardsMatch){

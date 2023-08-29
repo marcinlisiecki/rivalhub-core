@@ -52,6 +52,8 @@ public class TableFootballMatchMapper {
         tableFootballMatchDto.setUserApprovalMap(tableFootballMatch.getUserApprovalMap());
         tableFootballMatchDto.setEventId(tableFootballMatch.getEventId());
         tableFootballMatchDto.setEventType(tableFootballMatch.getEventType());
+        tableFootballMatchDto.setEventId(tableFootballMatch.getEventId());
+        tableFootballMatchDto.setEventType(tableFootballMatch.getEventType());
         return tableFootballMatchDto;
     }
 

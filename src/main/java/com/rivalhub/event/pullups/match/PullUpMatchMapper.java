@@ -30,6 +30,8 @@ public class PullUpMatchMapper {
                 .toList();
         pullUpMatch.setParticipants(participants);
         pullUpMatch.setUserApprovalMap(MatchApprovalService.prepareApprovalMap(matchDto));
+        pullUpMatch.setEventId(matchDto.getEventId());
+        pullUpMatch.setEventType(matchDto.getEventType());
         return pullUpMatch;
     }
 
