@@ -311,11 +311,11 @@ public class OrganizationRepoManager {
         Set<Reservation> reservations = reservationRepository.reservationsWithParticipantsByOrganizationIdAndUserIdWithFilterByDate(organizationId, userId);
         return reservations.stream()
                 .filter(reservation -> {
-                    return reservation.getStartTime().getYear() == date.getYear()
-                            && reservation.getStartTime().getMonth() == date.getMonth()
+                    return (reservation.getStartTime().getYear() == date.getYear()
+                            && (reservation.getStartTime().getMonth() == date.getMonth() || reservation.getStartTime().getMonth() == date.getMonth().plus(1) || reservation.getStartTime().getMonth() == date.getMonth().minus(1)))
                             ||
-                            reservation.getEndTime().getYear() == date.getYear()
-                                    && reservation.getEndTime().getMonth() == date.getMonth();
+                            (reservation.getEndTime().getYear() == date.getYear()
+                                    && (reservation.getEndTime().getMonth() == date.getMonth() || reservation.getEndTime().getMonth() == date.getMonth().plus(1) || reservation.getEndTime().getMonth() == date.getMonth().minus(1)));
                 }).collect(Collectors.toSet());
     }
 }
