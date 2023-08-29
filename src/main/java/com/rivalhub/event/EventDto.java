@@ -39,11 +39,11 @@ public class EventDto {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof EventDto eventDto)) return false;
-        return Objects.equals(eventId, eventDto.eventId);
+        return Objects.equals(eventId, eventDto.eventId) && eventType == eventDto.eventType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(eventId);
+        return Objects.hash(eventId, eventType);
     }
 }

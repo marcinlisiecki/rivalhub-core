@@ -1,17 +1,11 @@
 package com.rivalhub.user.profile;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rivalhub.event.EventType;
 import com.rivalhub.organization.OrganizationDTO;
-import com.rivalhub.reservation.Reservation;
-import com.rivalhub.user.UserData;
-import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 public class EventProfileDTO {
@@ -23,4 +17,16 @@ public class EventProfileDTO {
     private EventType eventType;
     private Long numberOfParticipants;
     private String name;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof EventProfileDTO that)) return false;
+        return Objects.equals(eventId, that.eventId) && eventType == that.eventType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(eventId, eventType);
+    }
 }
