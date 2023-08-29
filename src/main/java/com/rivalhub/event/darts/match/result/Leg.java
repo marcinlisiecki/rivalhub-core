@@ -12,7 +12,7 @@ public class Leg {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
     private List<DartRound> roundList = new ArrayList<>();
 
 

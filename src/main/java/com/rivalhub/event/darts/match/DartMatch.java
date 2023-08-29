@@ -1,5 +1,6 @@
 package com.rivalhub.event.darts.match;
 
+import com.rivalhub.event.EventType;
 import com.rivalhub.event.darts.match.result.Leg;
 import com.rivalhub.event.darts.match.result.variables.DartFormat;
 import com.rivalhub.event.darts.match.result.variables.DartMode;
@@ -21,7 +22,7 @@ public class DartMatch {
 
 
 
-    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
     private List<Leg> legList = new ArrayList<>();
 
     private DartFormat dartFormat;
@@ -35,5 +36,9 @@ public class DartMatch {
     private boolean approvalFirstPlace;
     private boolean approvalSecondPlace;
     private boolean approvalThirdPlace;
+    @Transient
+    private EventType eventType;
+    @Transient
+    private Long eventId;
 
 }

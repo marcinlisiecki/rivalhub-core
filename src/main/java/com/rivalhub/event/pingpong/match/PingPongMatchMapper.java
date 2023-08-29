@@ -57,7 +57,7 @@ public class PingPongMatchMapper {
 
 
 
-    ViewPingPongMatchDTO map(PingPongMatch pingPongMatch){
+    public ViewPingPongMatchDTO map(PingPongMatch pingPongMatch){
         ViewPingPongMatchDTO pingPongMatchDTO = new ViewPingPongMatchDTO();
 
         List<UserDetailsDto> team1 = pingPongMatch.getTeam1()
@@ -73,6 +73,8 @@ public class PingPongMatchMapper {
         pingPongMatchDTO.setSets(pingPongMatch.getSets());
         pingPongMatchDTO.setUserApprovalMap(pingPongMatch.getUserApprovalMap());
         pingPongMatchDTO.setApproved(isApprovedByDemanded(pingPongMatch));
+        pingPongMatchDTO.setEventId(pingPongMatch.getEventId());
+        pingPongMatchDTO.setEventType(pingPongMatch.getEventType());
         return pingPongMatchDTO;
     }
 

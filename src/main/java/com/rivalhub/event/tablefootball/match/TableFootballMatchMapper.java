@@ -54,7 +54,7 @@ public class TableFootballMatchMapper {
         return tableFootballMatchDto;
     }
 
-    ViewTableFootballMatchDTO map(TableFootballMatch tableFootballMatch){
+    public ViewTableFootballMatchDTO map(TableFootballMatch tableFootballMatch){
         ViewTableFootballMatchDTO viewTableFootballMatchDTO = new ViewTableFootballMatchDTO();
 
         List<UserDetailsDto> team1 = tableFootballMatch.getTeam1()
@@ -70,6 +70,8 @@ public class TableFootballMatchMapper {
         viewTableFootballMatchDTO.setSets(tableFootballMatch.getSets());
         viewTableFootballMatchDTO.setUserApprovalMap(tableFootballMatch.getUserApprovalMap());
         viewTableFootballMatchDTO.setApproved(isApprovedByDemanded(tableFootballMatch));
+        viewTableFootballMatchDTO.setEventId(tableFootballMatch.getEventId());
+        viewTableFootballMatchDTO.setEventType(tableFootballMatch.getEventType());
         return viewTableFootballMatchDTO;
     }
 

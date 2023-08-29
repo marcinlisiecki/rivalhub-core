@@ -5,10 +5,12 @@ import com.rivalhub.event.EventDto;
 import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
+import com.rivalhub.event.billiards.BilliardsEvent;
 import com.rivalhub.event.common.EventCommonService;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
+import com.rivalhub.reservation.ReservationRepository;
 import com.rivalhub.user.UserDetailsDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class TableFootballEventService implements EventService {
     private final TableFootballEventRepository tableFootballEventRepository;
     private final TableFootballEventSaver tableFootballEventSaver;
     private final EventCommonService eventCommonService;
+    private final ReservationRepository reservationRepository;
 
     @Override
     public EventDto addEvent(Long organizationId, EventDto eventDto) {
@@ -51,6 +54,7 @@ public class TableFootballEventService implements EventService {
     private Function<TableFootballEvent, EventDto> mapToDTO(Organization organization) {
         return tableFootballEvent -> {
             EventDto eventDto = autoMapper.mapToEventDto(tableFootballEvent);
+            eventDto.setIsEventPublic(tableFootballEvent.isEventPublic());
             eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
 
             eventCommonService.setStatusForEvent(tableFootballEvent, eventDto);
@@ -60,11 +64,14 @@ public class TableFootballEventService implements EventService {
 
     @Override
     public EventDto findEvent(long eventId) {
-        return tableFootballEventRepository
+        TableFootballEvent event = tableFootballEventRepository
                 .findById(eventId)
-                .map(autoMapper::mapToEventDto)
                 .orElseThrow(EventNotFoundException::new);
 
+        EventDto eventDto = autoMapper.mapToEventDto(event);
+        eventDto.setIsEventPublic(event.isEventPublic());
+
+        return eventDto;
     }
 
     @Override
@@ -83,6 +90,11 @@ public class TableFootballEventService implements EventService {
     }
 
     @Override
+    public List<UserDetailsDto> addUserToEvent(Long eventId, Long userId) {
+        return eventCommonService.addUserToEvent(tableFootballEventRepository, eventId, userId);
+    }
+
+    @Override
     public void joinPublicEvent(Long id) {
         eventCommonService.joinPublicEvent(tableFootballEventRepository, id);
     }
@@ -91,8 +103,12 @@ public class TableFootballEventService implements EventService {
     @Transactional
     public void deleteEvent(Long organizationId,Long eventId) {
         Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
-        organization.getTableFootballEvents().remove(tableFootballEventRepository.findById(eventId)
-                .orElseThrow(EventNotFoundException::new));
+        TableFootballEvent eventToDelete = tableFootballEventRepository.findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+
+        organization.getTableFootballEvents().remove(eventToDelete);
+
+        reservationRepository.deleteById(eventToDelete.getEventId());
         tableFootballEventRepository.deleteById(eventId);
     }
 }

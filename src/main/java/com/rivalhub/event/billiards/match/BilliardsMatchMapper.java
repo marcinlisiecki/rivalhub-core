@@ -52,7 +52,7 @@ public class BilliardsMatchMapper {
         matchDto.setUserApprovalMap(billiardsMatch.getUserApprovalMap());
         return matchDto;
     };
-    ViewMatchDto map(BilliardsMatch billiardsMatch){
+    public ViewMatchDto map(BilliardsMatch billiardsMatch){
         ViewBilliardMatchDTO viewBilliardMatchDTO = new ViewBilliardMatchDTO();
         viewBilliardMatchDTO.setWinType(billiardsMatch.getWinType());
         viewBilliardMatchDTO.setHowManyBillsLeftTeam2(billiardsMatch.getHowManyBillsLeftTeam2());
@@ -65,6 +65,8 @@ public class BilliardsMatchMapper {
         viewBilliardMatchDTO.setTeam2Won(billiardsMatch.isTeam2Won());
         viewBilliardMatchDTO.setUserApprovalMap(billiardsMatch.getUserApprovalMap());
         viewBilliardMatchDTO.setApproved(isApprovedByDemanded(billiardsMatch));
+        viewBilliardMatchDTO.setEventId(billiardsMatch.getEventId());
+        viewBilliardMatchDTO.setEventType(billiardsMatch.getEventType());
         return viewBilliardMatchDTO;
     }
 

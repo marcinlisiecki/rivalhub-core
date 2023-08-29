@@ -32,7 +32,10 @@ public class ExceptionHandler {
             EventIsNotPublicException.class,
             AlreadyEventParticipantException.class,
             HostRemoveException.class,
-            SetNotFoundException.class
+            UserAlreadyInEventException.class,
+            HostRemoveException.class,
+            SetNotFoundException.class,
+            ReservationNotFoundException.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessageDto handleExceptions(Exception e) {

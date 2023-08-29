@@ -1,5 +1,6 @@
 package com.rivalhub.event.pullups.match.result;
 
+import com.rivalhub.event.EventType;
 import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.user.UserDetailsDto;
 import lombok.Data;
@@ -17,4 +18,7 @@ public class ViewPullUpMatchDto implements ViewMatchDto {
     private Map<Long,Integer> places;
     private Map<Long, Boolean> userApprovalMap = new HashMap<>();
     private boolean isApproved;
+    private EventType eventType;
+    private Long eventId;
+
 }

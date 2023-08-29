@@ -5,10 +5,12 @@ import com.rivalhub.event.EventDto;
 import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.event.EventService;
 import com.rivalhub.event.EventType;
+import com.rivalhub.event.billiards.BilliardsEvent;
 import com.rivalhub.event.common.EventCommonService;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
+import com.rivalhub.reservation.ReservationRepository;
 import com.rivalhub.user.UserDetailsDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class PullUpEventService implements EventService {
     private final PullUpEventRepository pullUpEventRepository;
     private final PullUpEventSaver pullUpEventSaver;
     private final EventCommonService eventCommonService;
+    private final ReservationRepository reservationRepository;
 
     @Override
     public EventDto addEvent(Long organizationId, EventDto eventDto) {
@@ -51,6 +54,7 @@ public class PullUpEventService implements EventService {
     private Function<PullUpEvent, EventDto> mapToEventDTO(Organization organization) {
         return pullUpEvent -> {
             EventDto eventDto = autoMapper.mapToEventDto(pullUpEvent);
+            eventDto.setIsEventPublic(pullUpEvent.isEventPublic());
             eventDto.setOrganization(autoMapper.mapToOrganizationDto(organization));
 
             eventCommonService.setStatusForEvent(pullUpEvent, eventDto);
@@ -60,11 +64,14 @@ public class PullUpEventService implements EventService {
 
     @Override
     public EventDto findEvent(long eventId) {
-        return pullUpEventRepository
+        PullUpEvent event = pullUpEventRepository
                 .findById(eventId)
-                .map(autoMapper::mapToEventDto)
                 .orElseThrow(EventNotFoundException::new);
 
+        EventDto eventDto = autoMapper.mapToEventDto(event);
+        eventDto.setIsEventPublic(event.isEventPublic());
+
+        return eventDto;
     }
 
     @Override
@@ -82,6 +89,11 @@ public class PullUpEventService implements EventService {
     }
 
     @Override
+    public List<UserDetailsDto> addUserToEvent(Long eventId, Long userId) {
+        return eventCommonService.addUserToEvent(pullUpEventRepository, eventId, userId);
+    }
+
+    @Override
     public void joinPublicEvent(Long id) {
         eventCommonService.joinPublicEvent(pullUpEventRepository, id);
     }
@@ -90,8 +102,12 @@ public class PullUpEventService implements EventService {
     @Transactional
     public void deleteEvent(Long organizationId,Long eventId) {
         Organization organization = organizationRepository.findById(organizationId).orElseThrow(OrganizationNotFoundException::new);
-        organization.getPullUpsEvents().remove(pullUpEventRepository.findById(eventId)
-                .orElseThrow(EventNotFoundException::new));
+
+        PullUpEvent eventToDelete = pullUpEventRepository.findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+        organization.getPullUpsEvents().remove(eventToDelete);
+
+        reservationRepository.deleteById(eventToDelete.getReservationId());
         pullUpEventRepository.deleteById(eventId);
     }
 

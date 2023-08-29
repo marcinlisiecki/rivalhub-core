@@ -20,6 +20,7 @@ public class RunningEventSaver {
         AddReservationDTO addReservationDTO = EventUtils.createAddReservationDTO(eventDto, organization);
         Reservation reservation = reservationService.addReservationForEvent(addReservationDTO, organization);
         EventUtils.setBasicInfo(runningEvent,organization,eventDto,reservation);
+        runningEvent.setDistance(eventDto.getDistance());
         addRunningEventTo(organization, runningEvent);
         organizationRepository.save(organization);
         return runningEvent;
