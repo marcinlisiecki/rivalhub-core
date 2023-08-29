@@ -115,6 +115,10 @@ public class PingPongMatchService implements MatchService {
     private void setApproveAndNotifications(UserData loggedUser, PingPongMatch pingPongMatch, Long eventId) {
         pingPongMatch.getUserApprovalMap().keySet().forEach(key -> pingPongMatch.getUserApprovalMap().put(key,false));
         pingPongMatch.getUserApprovalMap().put(loggedUser.getId(),true);
+        if(loggedUser.getNotifications().stream().anyMatch(notification -> notification.getType() == EventType.PING_PONG && notification.getMatchId() == pingPongMatch.getId())) {
+            loggedUser.getNotifications().stream().filter(notification -> notification.getType() == EventType.PING_PONG && notification.getMatchId() == pingPongMatch.getId()).findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.CONFIRMED);
+            userRepository.save(loggedUser);
+        }
         pingPongMatch.getTeam1()
                 .stream()
                 .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.PING_PONG && notification.getMatchId() == pingPongMatch.getId()))
