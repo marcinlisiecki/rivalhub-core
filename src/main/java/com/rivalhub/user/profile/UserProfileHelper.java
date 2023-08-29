@@ -16,6 +16,7 @@ import com.rivalhub.event.pingpong.match.PingPongMatchMapper;
 import com.rivalhub.event.pullups.PullUpEvent;
 import com.rivalhub.event.pullups.match.PullUpMatchMapper;
 import com.rivalhub.event.running.RunningEvent;
+import com.rivalhub.event.running.RunningResultsMapper;
 import com.rivalhub.event.tablefootball.TableFootballEvent;
 import com.rivalhub.event.tablefootball.match.TableFootballMatchMapper;
 import com.rivalhub.organization.Organization;
@@ -42,6 +43,7 @@ public class UserProfileHelper {
     private final DartMatchMapper dartMatchMapper;
     private final PullUpMatchMapper pullUpMatchMapper;
     private final TableFootballMatchMapper tableFootballMatchMapper;
+    private final RunningResultsMapper runningResultsMapper;
 
     Set<ReservationInProfileDTO> getReservationsInSharedOrganizations(UserData loggedUser, UserData viewedUser) {
         List<Long> sharedOrganizationIds = getSharedOrganizationList(loggedUser, viewedUser);
@@ -258,11 +260,11 @@ public class UserProfileHelper {
 
         runningEvents
                 .forEach(runningEvent -> {
-                    runningEvent.getUserTimesList().forEach(userTimes -> {
+                    runningEvent.getUserTimeList().forEach(userTimes -> {
                         if (userTimes.getUser().equals(viewedUser)) {
                             userTimes.setEventId(runningEvent.getEventId());
                             userTimes.setEventType(EventType.RUNNING);
-                            eventList.add(userTimes);
+                            eventList.add(runningResultsMapper.map(userTimes,runningEvent));
                         }
                     });
                 });
