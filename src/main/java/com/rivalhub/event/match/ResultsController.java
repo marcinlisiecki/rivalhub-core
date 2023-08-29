@@ -121,4 +121,11 @@ public class ResultsController {
                                              @RequestBody BilliardsMatchResultAdd billiardsMatchResultAdd) {
         return ResponseEntity.ok(billiardsMatchService.addResult(eventId, matchId, billiardsMatchResultAdd));
     }
+
+    @DeleteMapping("/{matchId}/billiards")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void deleteBilliardsMatch(@PathVariable Long eventId,
+                                    @PathVariable Long matchId) {
+        billiardsMatchService.deleteBilliardsMatch(eventId, matchId);
+    }
 }
