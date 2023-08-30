@@ -27,7 +27,7 @@ public class MatchApprovalService {
                             .stream().filter(
                                     notification -> notification.getMatchId() == matchId && notification.getType() == type)
                             .findFirst()
-                            .orElseThrow(UserNotFoundException::new)
+                            .orElseThrow(NotificationNotFoundException::new)
                             .setStatus(Notification.Status.CONFIRMED);
                     userRepository.save(userData);
 

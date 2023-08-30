@@ -64,8 +64,6 @@ public class DartMatchService implements MatchService {
         setApprove(loggedUser, dartMatch);
         if(dartMatchMapper.isApprovedByDemanded(dartMatch)) {
             MatchApprovalService.findNotificationToDisActivate(dartMatch.getParticipants(), matchId, EventType.DARTS, userRepository);
-        }else {
-            MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser), matchId, EventType.DARTS, userRepository);
         }
         dartMatchRepository.save(dartMatch);
         return dartMatch.getUserApprovalMap().get(loggedUser.getId());
