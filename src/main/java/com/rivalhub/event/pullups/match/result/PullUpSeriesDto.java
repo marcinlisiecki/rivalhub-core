@@ -13,4 +13,5 @@ public class PullUpSeriesDto {
     private Long userId;
     private Long score;
     private Long seriesID;
+
 }

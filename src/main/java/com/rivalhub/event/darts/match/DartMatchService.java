@@ -3,6 +3,7 @@ package com.rivalhub.event.darts.match;
 
 import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.common.exception.MatchNotFoundException;
+import com.rivalhub.common.exception.NotificationNotFoundException;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.event.EventType;
 
@@ -10,13 +11,19 @@ import com.rivalhub.event.darts.DartEvent;
 import com.rivalhub.event.darts.DartEventRepository;
 import com.rivalhub.event.darts.match.result.*;
 import com.rivalhub.event.darts.match.result.LegRepository;
+import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.MatchService;
 import com.rivalhub.event.match.ViewMatchDto;
+import com.rivalhub.event.pingpong.PingPongEvent;
+import com.rivalhub.event.pingpong.match.PingPongMatch;
+import com.rivalhub.event.pullups.match.PullUpMatch;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
+import com.rivalhub.user.UserRepository;
+import com.rivalhub.user.notification.Notification;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
@@ -29,6 +36,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DartMatchService implements MatchService {
 
+    //WIENCEJ REPOZYTORIÓW SPRING WYCZYMA
     final OrganizationRepository organizationRepository;
     final DartEventRepository dartEventRepository;
     final DartMatchRepository dartMatchRepository;
@@ -37,14 +45,71 @@ public class DartMatchService implements MatchService {
     final LegRepository legRepository;
     final DartRoundRepository dartRoundRepository;
     final SinglePlayerInRoundRepository singlePlayerInRoundRepository;
+    final UserRepository userRepository;
     @Override
-    public boolean setResultApproval(Long eventId, Long matchId, boolean approve) {
-        throw new NotImplementedException();
+    public boolean setResultApproval(Long eventId, Long matchId) {
+        var requestUser = SecurityUtils.getUserFromSecurityContext();
+        DartEvent dartEvent = dartEventRepository
+                .findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+
+        return setResultApproval(requestUser, dartEvent, matchId);
+    }
+
+    private boolean setResultApproval(UserData loggedUser, DartEvent dartEvent, Long matchId) {
+        DartMatch dartMatch = dartEvent.getDartsMatch()
+                .stream().filter(match -> match.getId().equals(matchId))
+                .findFirst()
+                .orElseThrow(MatchNotFoundException::new);
+        setApprove(loggedUser, dartMatch);
+        MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser), matchId,EventType.DARTS,userRepository);
+        dartMatchRepository.save(dartMatch);
+        return dartMatch.getUserApprovalMap().get(loggedUser.getId());
+    }
+
+    private void setApprove(UserData loggedUser, DartMatch dartMatch) {
+        dartMatch.getUserApprovalMap().replace(loggedUser.getId(), !(dartMatch.getUserApprovalMap().get(loggedUser.getId())));
+    }
+
+    private void setApproveAndNotifications(UserData loggedUser, DartMatch dartMatch, Long eventId) {
+
+        dartMatch.getUserApprovalMap().keySet().forEach(key -> dartMatch.getUserApprovalMap().put(key,false));
+        dartMatch.getUserApprovalMap().put(loggedUser.getId(),true);
+        if(loggedUser.getNotifications().stream().anyMatch(notification -> notification.getType() == EventType.DARTS && notification.getMatchId() == dartMatch.getId())) {
+            loggedUser.getNotifications().stream().filter(notification -> notification.getType() == EventType.DARTS && notification.getMatchId() == dartMatch.getId()).findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.CONFIRMED);
+            userRepository.save(loggedUser);
+        }
+        dartMatch.getParticipants()
+                .stream()
+                .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.DARTS && notification.getMatchId() == dartMatch.getId()))
+                .forEach(userData -> saveNotification(userData,EventType.DARTS, dartMatch.getId(), eventId));
+        dartMatch.getParticipants()
+                .stream()
+                .filter(userData -> (userData.getId() != loggedUser.getId()))
+                .forEach(userData ->{
+                    userData.getNotifications()
+                            .stream()
+                            .filter(notification -> notification.getType() == EventType.DARTS && notification.getMatchId() == dartMatch.getId())
+                            .findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.NOT_CONFIRMED);
+                    userRepository.save(userData);
+                });
+
+
+
+    }
+
+    private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
+        if(userData.getNotifications().stream().anyMatch(notification -> (notification.getMatchId() == matchId && notification.getType() == type)))
+        {
+            userData.getNotifications().add(
+                    new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED));
+            userRepository.save(userData);
+        }
     }
 
     @Override
     public MatchDto createMatch(Long organizationId, Long eventId, MatchDto MatchDTO) {
-        var requestUser = SecurityUtils.getUserFromSecurityContext();
+
         Organization organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
@@ -53,7 +118,7 @@ public class DartMatchService implements MatchService {
 
         DartMatch dartMatch = dartMatchMapper.map(MatchDTO, organization);
 
-        return save(requestUser, dartEvent, dartMatch);
+        return save( dartEvent, dartMatch);
     }
 
     @Override
@@ -84,9 +149,7 @@ public class DartMatchService implements MatchService {
         return eventType.equalsIgnoreCase(EventType.DARTS.name());
     }
 
-    private MatchDto save(UserData loggedUser, DartEvent dartEvent,
-                          DartMatch dartMatch){
-
+    private MatchDto save(DartEvent dartEvent, DartMatch dartMatch){
 
         addDartMatch(dartEvent, dartMatch);
         DartMatch savedMatch = dartMatchRepository.save(dartMatch);
@@ -142,11 +205,13 @@ public class DartMatchService implements MatchService {
     }
 
     public ViewMatchDto addResult(Long eventId, Long matchId, List<LegAddDto> legListDto) {
+        var loggedUser = SecurityUtils.getUserFromSecurityContext();
         DartEvent dartEvent = dartEventRepository
                 .findById(eventId)
                 .orElseThrow(EventNotFoundException::new);
 
         DartMatch dartMatch = findMatchInEvent(dartEvent, matchId);
+        setApproveAndNotifications(loggedUser, dartMatch, eventId);
 
         List<Leg> legList = legListDto.stream().map(dartResultMapper::map).toList();
         for (Leg leg:legList) {
@@ -169,6 +234,7 @@ public class DartMatchService implements MatchService {
     private void addLegsIn(DartMatch dartMatch, List<Leg> legList) {
         dartMatch.getLegList().addAll(legList);
     }
+
 
 
     public void deleteRound(Long matchId, Long legNumber,int roundNumber) {

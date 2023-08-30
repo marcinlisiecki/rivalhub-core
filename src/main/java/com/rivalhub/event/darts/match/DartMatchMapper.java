@@ -8,7 +8,9 @@ import com.rivalhub.event.darts.match.result.Leg;
 import com.rivalhub.event.darts.match.result.SinglePlayerScoreInRound;
 import com.rivalhub.event.darts.match.result.variables.DartFormat;
 import com.rivalhub.event.darts.match.result.variables.DartMode;
+import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
+import com.rivalhub.event.pullups.match.PullUpMatch;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 public class DartMatchMapper {
     private final AutoMapper autoMapper;
     private final DartMatchResultCalculator dartMatchResultCalculator;
+
     DartMatch map(MatchDto matchDto, Organization organization){
 
         DartMatch dartMatch = new DartMatch();
@@ -34,9 +37,10 @@ public class DartMatchMapper {
         dartMatch.setParticipants(players);
         dartMatch.setDartFormat(DartFormat.valueOf(matchDto.getDartFormat()));
         dartMatch.setDartMode(DartMode.valueOf(matchDto.getDartMode()));
+        dartMatch.setUserApprovalMap(MatchApprovalService.prepareApprovalMap(matchDto));
+        dartMatch.setEventId(matchDto.getEventId());
+        dartMatch.setEventType(matchDto.getEventType());
         return dartMatch;
-
-
     }
 
     public MatchDto mapToMatchDto(DartMatch dartMatch) {
@@ -48,9 +52,9 @@ public class DartMatchMapper {
 
         dartMatchDTO.setId(dartMatch.getId());
         dartMatchDTO.setTeam1Ids(participants.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
-        dartMatchDTO.setTeam1Approval(dartMatch.isApprovalFirstPlace());
-        dartMatchDTO.setTeam2Approval(dartMatch.isApprovalSecondPlace());
-        dartMatchDTO.setTeam3Approval(dartMatch.isApprovalThirdPlace());
+        dartMatchDTO.setUserApprovalMap(dartMatch.getUserApprovalMap());
+        dartMatchDTO.setEventId(dartMatch.getEventId());
+        dartMatchDTO.setEventType(dartMatch.getEventType());
 
         return dartMatchDTO;
     }
@@ -68,7 +72,17 @@ public class DartMatchMapper {
         viewDartMatch.setEventId(dartMatch.getEventId());
         viewDartMatch.setEventType(dartMatch.getEventType());
         dartMatchResultCalculator.calculateResults(viewDartMatch,dartMatch);
+        viewDartMatch.setUserApprovalMap(viewDartMatch.getUserApprovalMap());
+        viewDartMatch.setApproved(isApprovedByDemanded(dartMatch));
         viewDartMatch.setId(dartMatch.getId());
         return viewDartMatch;
+    }
+    private boolean isApprovedByDemanded(DartMatch dartMatch){
+        int numberOfUserApproved = 0;
+        for (Long userId: dartMatch.getUserApprovalMap().keySet()) {
+            if(dartMatch.getUserApprovalMap().get(userId))
+                numberOfUserApproved++;
+        }
+        return numberOfUserApproved>(dartMatch.getParticipants().size()/2);
     }
 }

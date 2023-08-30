@@ -7,7 +7,9 @@ import jakarta.transaction.Transactional;
 import lombok.Data;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @MappedSuperclass
@@ -20,10 +22,13 @@ public class Match {
     private List<UserData> team1 = new ArrayList<>();
     @ManyToMany
     private List<UserData> team2 = new ArrayList<>();
-    private boolean team1Approval;
-    private boolean team2Approval;
+
+    @ElementCollection
+    private Map<Long, Boolean> userApprovalMap = new HashMap<>();
+
     @Transient
     private EventType eventType;
     @Transient
     private Long eventId;
+
 }

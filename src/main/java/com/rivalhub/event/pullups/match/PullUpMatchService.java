@@ -1,14 +1,13 @@
 package com.rivalhub.event.pullups.match;
 
-import com.rivalhub.common.exception.EventNotFoundException;
-import com.rivalhub.common.exception.MatchNotFoundException;
-import com.rivalhub.common.exception.OrganizationNotFoundException;
+import com.rivalhub.common.exception.*;
 import com.rivalhub.event.EventType;
 import com.rivalhub.event.darts.DartEvent;
 import com.rivalhub.event.darts.match.DartMatch;
 import com.rivalhub.event.darts.match.result.DartRound;
 import com.rivalhub.event.darts.match.result.Leg;
 import com.rivalhub.event.darts.match.result.SinglePlayerScoreInRound;
+import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.MatchService;
 import com.rivalhub.event.match.ViewMatchDto;
@@ -24,6 +23,8 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
+import com.rivalhub.user.UserRepository;
+import com.rivalhub.user.notification.Notification;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
@@ -42,16 +43,65 @@ public class PullUpMatchService implements MatchService {
     private final PullUpMatchMapper pullUpMatchMapper;
     private final PullUpResultMapper pullUpResultMapper;
     private final PullUpSeriesRepository pullUpSeriesRepository;
-
+    private final UserRepository userRepository;
     @Override
-    public boolean setResultApproval(Long eventId, Long matchId, boolean approve) {
-        throw new NotImplementedException();
+    public boolean setResultApproval(Long eventId, Long matchId) {
+            var requestUser = SecurityUtils.getUserFromSecurityContext();
+            PullUpEvent pullUpEvent = pullUpEventRepository
+                    .findById(eventId)
+                    .orElseThrow(EventNotFoundException::new);
+
+            return setResultApproval(requestUser, pullUpEvent, matchId);
+    }
+
+    private boolean setResultApproval(UserData loggedUser, PullUpEvent pullUpEvent, Long matchId) {
+        PullUpMatch pullUpMatch = pullUpEvent.getPullUpMatchList()
+                .stream().filter(match -> match.getId().equals(matchId))
+                .findFirst()
+                .orElseThrow(MatchNotFoundException::new);
+        setApprove(loggedUser, pullUpMatch);
+        MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser),matchId,EventType.PULL_UPS,userRepository);
+        pullUpMatchRepository.save(pullUpMatch);
+        return pullUpMatch.getUserApprovalMap().get(loggedUser.getId());
+    }
+
+    private void setApprove(UserData loggedUser, PullUpMatch pullUpMatch) {
+        pullUpMatch.getUserApprovalMap().replace(loggedUser.getId(), !(pullUpMatch.getUserApprovalMap().get(loggedUser.getId())));
+    }
+
+    private void setApproveAndNotifications(UserData loggedUser, PullUpMatch pullUpMatch, Long eventId) {
+        pullUpMatch.getUserApprovalMap().keySet().forEach(key -> pullUpMatch.getUserApprovalMap().put(key,false));
+        pullUpMatch.getUserApprovalMap().put(loggedUser.getId(),true);
+        if(loggedUser.getNotifications().stream().anyMatch(notification -> notification.getType() == EventType.PULL_UPS && notification.getMatchId() == pullUpMatch.getId())) {
+            loggedUser.getNotifications().stream().filter(notification -> notification.getType() == EventType.PULL_UPS && notification.getMatchId() == pullUpMatch.getId()).findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.CONFIRMED);
+            userRepository.save(loggedUser);
+        }
+        pullUpMatch.getParticipants()
+                .stream()
+                .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream()
+                        .noneMatch(notification -> notification.getType() == EventType.PULL_UPS && notification.getMatchId() == pullUpMatch.getId()))
+                .forEach(userData -> saveNotification(userData,EventType.PULL_UPS, pullUpMatch.getId(), eventId));
+       pullUpMatch.getParticipants()
+                .stream()
+                .filter(userData -> (userData.getId() != loggedUser.getId()))
+                .forEach(userData ->{
+                    userData.getNotifications()
+                            .stream()
+                            .filter(notification -> notification.getType() == EventType.PULL_UPS && notification.getMatchId() == pullUpMatch.getId())
+                            .findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.NOT_CONFIRMED);
+                    userRepository.save(userData);
+                });
+    }
+
+
+
+    private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
+        MatchApprovalService.saveNotification(userData, type, matchId, eventId, userRepository);
     }
 
     @Override
     public MatchDto createMatch(Long organizationId, Long eventId, MatchDto MatchDTO) {
 
-        var requestUser = SecurityUtils.getUserFromSecurityContext();
         Organization organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
@@ -60,12 +110,12 @@ public class PullUpMatchService implements MatchService {
 
         PullUpMatch pullUpMatch = pullUpMatchMapper.map(MatchDTO, organization);
 
-        return save(requestUser, pullUpEvent, pullUpMatch);
+        return save( pullUpEvent, pullUpMatch);
 
     }
 
-    private MatchDto save(UserData loggedUser, PullUpEvent pullUpEvent,
-                          PullUpMatch pullUpMatch) {
+    private MatchDto save(PullUpEvent pullUpEvent,
+                          PullUpMatch pullUpMatch){
 
         addPullUpMatch(pullUpEvent, pullUpMatch);
 
@@ -114,16 +164,16 @@ public class PullUpMatchService implements MatchService {
     }
 
     public ViewMatchDto addResult(Long eventId, Long matchId, List<PullUpSeriesAddDto> pullUpSeriesAddDto) {
+        var loggedUser = SecurityUtils.getUserFromSecurityContext();
         PullUpEvent pullUpEvent = pullUpEventRepository
                 .findById(eventId)
                 .orElseThrow(EventNotFoundException::new);
         PullUpMatch pullUpMatch = findMatchInEvent(pullUpEvent, matchId);
         List<PullUpSeries> pullUpSeries = new ArrayList<>();
-        pullUpSeriesAddDto.stream().forEach(pullUpSeriesDto -> pullUpSeries.add(pullUpResultMapper.map(pullUpSeriesDto, pullUpMatch)));
+        pullUpSeriesAddDto.stream().forEach(pullUpSeriesDto -> pullUpSeries.add(pullUpResultMapper.map(pullUpSeriesDto,pullUpMatch)));
         pullUpSeries.stream().forEach(pullUpSerie -> pullUpSeriesRepository.save(pullUpSerie));
         pullUpMatch.setPullUpSeries(pullUpSeries);
-
-
+        setApproveAndNotifications(loggedUser, pullUpMatch,eventId);
         PullUpMatch savedMatch = pullUpMatchRepository.save(pullUpMatch);
 
         return pullUpMatchMapper.map(savedMatch);
@@ -135,7 +185,7 @@ public class PullUpMatchService implements MatchService {
         PullUpMatch match = findMatchInEvent(pullUpEvent, matchId);
 
         if (match.getPullUpSeries().isEmpty()) return;
-        if (!match.isApprovalFirstPlace() || !match.isApprovalSecondPlace() || !match.isApprovalThirdPlace()) {
+        if (match.getUserApprovalMap().containsValue(false)) {
             List<PullUpSeries> seriesToDelete = match.getPullUpSeries().stream().filter(s -> s.getSeriesID().equals(seriesId)).toList();
             match.getPullUpSeries().removeAll(seriesToDelete);
         }
@@ -149,4 +199,7 @@ public class PullUpMatchService implements MatchService {
 
         pullUpMatchRepository.save(match);
     }
+
+
+
 }

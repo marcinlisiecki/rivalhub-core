@@ -2,6 +2,7 @@ package com.rivalhub.event.pullups.match;
 
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.event.EventUtils;
+import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.pullups.match.result.*;
 import com.rivalhub.organization.Organization;
@@ -20,6 +21,7 @@ public class PullUpMatchMapper {
     private final AutoMapper autoMapper;
     private final PullUpResultMapper pullUpResultMapper;
 
+
     PullUpMatch map(MatchDto matchDto, Organization organization){
         PullUpMatch pullUpMatch = new PullUpMatch();
 
@@ -27,6 +29,9 @@ public class PullUpMatchMapper {
                 .filter(EventUtils.getUserFromOrganization(matchDto.getTeam1Ids()))
                 .toList();
         pullUpMatch.setParticipants(participants);
+        pullUpMatch.setUserApprovalMap(MatchApprovalService.prepareApprovalMap(matchDto));
+        pullUpMatch.setEventId(matchDto.getEventId());
+        pullUpMatch.setEventType(matchDto.getEventType());
         return pullUpMatch;
     }
 
@@ -40,10 +45,9 @@ public class PullUpMatchMapper {
 
         pullUpMatchDTO.setId(pullUpMatch.getId());
         pullUpMatchDTO.setTeam1Ids(team1.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
-        pullUpMatchDTO.setTeam1Approval(pullUpMatch.isApprovalFirstPlace());
-        pullUpMatchDTO.setTeam2Approval(pullUpMatch.isApprovalSecondPlace());
-        pullUpMatchDTO.setTeam3Approval(pullUpMatch.isApprovalThirdPlace());
-
+        pullUpMatchDTO.setUserApprovalMap(pullUpMatch.getUserApprovalMap());
+        pullUpMatchDTO.setEventId(pullUpMatch.getEventId());
+        pullUpMatchDTO.setEventType(pullUpMatch.getEventType());
         return pullUpMatchDTO;
     }
 
@@ -59,6 +63,8 @@ public class PullUpMatchMapper {
 
         viewPullUpMatchDto.setScores(pullUpMatch.getPullUpSeries().stream().map(pullUpResultMapper::map).toList());
         viewPullUpMatchDto.setPlaces(getPlaces(pullUpMatch));
+        viewPullUpMatchDto.setUserApprovalMap(pullUpMatch.getUserApprovalMap());
+        viewPullUpMatchDto.setApproved(isApprovedByDemanded(pullUpMatch));
         viewPullUpMatchDto.setEventId(pullUpMatch.getEventId());
         viewPullUpMatchDto.setEventType(pullUpMatch.getEventType());
 
@@ -111,6 +117,14 @@ public class PullUpMatchMapper {
         singleUserScore.setId(pullUpSeries.getUser().getId());
         return  singleUserScore;
     };
+    private boolean isApprovedByDemanded(PullUpMatch pullUpMatch){
+        int numberOfUserApproved = 0;
+        for (Long userId: pullUpMatch.getUserApprovalMap().keySet()) {
+            if(pullUpMatch.getUserApprovalMap().get(userId))
+                numberOfUserApproved++;
+        }
+        return numberOfUserApproved>(pullUpMatch.getParticipants().size()/2);
+    }
 
 
 }

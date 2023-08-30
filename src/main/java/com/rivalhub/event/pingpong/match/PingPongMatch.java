@@ -3,13 +3,13 @@ package com.rivalhub.event.pingpong.match;
 
 import com.rivalhub.event.match.Match;
 import com.rivalhub.event.pingpong.match.result.PingPongSet;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Data

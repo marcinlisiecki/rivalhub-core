@@ -25,9 +25,8 @@ public class MatchController {
     @GetMapping("/{matchId}/approve")
     private ResponseEntity<?> setResultApproval(@PathVariable Long eventId,
                                                 @PathVariable Long matchId,
-                                                @RequestParam String type,
-                                                @RequestParam boolean approve) {
-        return ResponseEntity.ok(matchStrategyResolver.setResultApproval(eventId, matchId, approve,type));
+                                                @RequestParam String type) {
+        return ResponseEntity.ok(matchStrategyResolver.setResultApproval(eventId, matchId, type));
     }
 
     @GetMapping("/{matchId}")

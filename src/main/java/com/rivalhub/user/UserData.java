@@ -1,12 +1,14 @@
 package com.rivalhub.user;
 
 import com.rivalhub.common.ErrorMessages;
+import com.rivalhub.user.notification.Notification;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -45,6 +47,9 @@ public class UserData implements UserDetails {
 
     //@Length(min=8,message = ErrorMessages.PASSWORD_IS_TOO_SHORT)
     private String password;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Notification> notifications;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();

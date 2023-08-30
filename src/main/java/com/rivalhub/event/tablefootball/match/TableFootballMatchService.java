@@ -1,6 +1,7 @@
 package com.rivalhub.event.tablefootball.match;
 
 import com.rivalhub.common.exception.EventNotFoundException;
+import com.rivalhub.common.exception.UserNotFoundException;
 import com.rivalhub.event.EventType;
 import com.rivalhub.common.exception.MatchNotFoundException;
 import com.rivalhub.event.match.MatchDto;
@@ -16,6 +17,8 @@ import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
+import com.rivalhub.user.UserRepository;
+import com.rivalhub.user.notification.Notification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,21 +33,52 @@ public class TableFootballMatchService implements MatchService {
     private final TableFootballEventRepository tableFootballEventRepository;
     private final TableFootballMatchRepository tableFootballMatchRepository;
     private final TableFootballMatchMapper tableFootballMatchMapper;
+    private final UserRepository userRepository;
 
     @Override
-    public boolean setResultApproval(Long eventId, Long matchId, boolean approve) {
+    public boolean setResultApproval(Long eventId, Long matchId) {
+
         var requestUser = SecurityUtils.getUserFromSecurityContext();
         TableFootballEvent tableFootballEvent = tableFootballEventRepository
                 .findById(eventId)
                 .orElseThrow(EventNotFoundException::new);
 
-        return setResultApproval(requestUser, tableFootballEvent, matchId, approve);
+        return setResultApproval(requestUser, tableFootballEvent, matchId);
+    }
 
+    private boolean setResultApproval(UserData loggedUser, TableFootballEvent tableFootballEvent, Long matchId) {
+        TableFootballMatch tableFootballMatch = tableFootballEvent.getTableFootballMatch()
+                .stream().filter(match -> match.getId().equals(matchId))
+                .findFirst()
+                .orElseThrow(MatchNotFoundException::new);
+        setApprove(loggedUser, tableFootballMatch);
+        if(tableFootballMatch.getTeam1().stream().anyMatch(userData -> userData.getId() == loggedUser.getId()))
+            findNotificationToDisActivate(tableFootballMatch.getTeam1(),matchId);
+        if(tableFootballMatch.getTeam2().stream().anyMatch(userData -> userData.getId() == loggedUser.getId()))
+            findNotificationToDisActivate(tableFootballMatch.getTeam2(),matchId);
+        tableFootballMatchRepository.save(tableFootballMatch);
+        return tableFootballMatch.getUserApprovalMap().get(loggedUser.getId());
+    }
+    private void findNotificationToDisActivate(List<UserData> team, Long matchId) {
+        team.forEach(
+                userData -> {
+                    userData.getNotifications()
+                            .stream().filter(
+                                    notification -> notification.getMatchId().equals(matchId))
+                            .findFirst()
+                            .orElseThrow(UserNotFoundException::new)
+                            .setStatus(Notification.Status.CONFIRMED);
+                }
+        );
+    }
+
+    private void setApprove(UserData loggedUser, TableFootballMatch tableFootballMatch) {
+        tableFootballMatch.getUserApprovalMap().replace(loggedUser.getId(), !(tableFootballMatch.getUserApprovalMap().get(loggedUser.getId())));
     }
 
     @Override
     public MatchDto createMatch(Long organizationId, Long eventId, MatchDto MatchDTO) {
-        var requestUser = SecurityUtils.getUserFromSecurityContext();
+
         Organization organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
@@ -53,7 +87,7 @@ public class TableFootballMatchService implements MatchService {
 
         TableFootballMatch tableFootballMatch = tableFootballMatchMapper.map(MatchDTO, organization);
 
-        return save(requestUser, tableFootballEvent, tableFootballMatch);
+        return save(tableFootballEvent, tableFootballMatch);
     }
 
     @Override
@@ -84,6 +118,7 @@ public class TableFootballMatchService implements MatchService {
     }
 
     public List<TableFootballMatchSet> addResult(Long eventId, Long matchId, List<TableFootballMatchSet> sets) {
+        var loggedUser = SecurityUtils.getUserFromSecurityContext();
         TableFootballEvent tableFootballEvent = tableFootballEventRepository
                 .findById(eventId)
                 .orElseThrow(EventNotFoundException::new);
@@ -91,23 +126,35 @@ public class TableFootballMatchService implements MatchService {
         TableFootballMatch tableFootballMatch = findMatchInEvent(tableFootballEvent, matchId);
 
         addTableFootballSetsIn(tableFootballMatch, sets);
+
+        setApproveAndNotifications(loggedUser,tableFootballMatch, eventId);
         TableFootballMatch savedMatch = tableFootballMatchRepository.save(tableFootballMatch);
 
         return savedMatch.getSets();
     }
 
+    private void setApproveAndNotifications(UserData loggedUser, TableFootballMatch tableFootballMatch, Long eventId) {
+        tableFootballMatch.getUserApprovalMap().put(loggedUser.getId(),true);
+        tableFootballMatch.getTeam1()
+                .stream()
+                .filter(userData -> userData.getId() != loggedUser.getId())
+                .forEach(userData -> saveNotification(userData,EventType.PING_PONG, tableFootballMatch.getId(), eventId));
+        tableFootballMatch.getTeam2()
+                .stream()
+                .filter(userData -> userData.getId() != loggedUser.getId())
+                .forEach(userData -> saveNotification(userData,EventType.PING_PONG, tableFootballMatch.getId(), eventId));
+    }
 
-    private MatchDto save(UserData loggedUser, TableFootballEvent tableFootballEvent,
-                          TableFootballMatch tableFootballMatch) {
-        boolean loggedUserInTeam1 = tableFootballMatch.getTeam1()
-                .stream().anyMatch(loggedUser::equals);
+    private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
+        if(userData.getNotifications().stream().anyMatch(notification -> (notification.getMatchId() == matchId && notification.getType() == type))) {
+            userData.getNotifications().add(
+                    new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED));
+            userRepository.save(userData);
+        }
+    }
 
-        if (loggedUserInTeam1) tableFootballMatch.setTeam1Approval(true);
-
-        boolean loggedUserInTeam2 = tableFootballMatch.getTeam2()
-                .stream().anyMatch(loggedUser::equals);
-
-        if (loggedUserInTeam2) tableFootballMatch.setTeam2Approval(true);
+    private MatchDto save(TableFootballEvent tableFootballEvent,
+                          TableFootballMatch tableFootballMatch){
 
         addTableFootballMatch(tableFootballEvent, tableFootballMatch);
 
@@ -121,26 +168,12 @@ public class TableFootballMatchService implements MatchService {
         tableFootballMatch.getSets().addAll(sets);
     }
 
-    private boolean setResultApproval(UserData loggedUser, TableFootballEvent tableFootballEvent, Long matchId, boolean approve) {
-        TableFootballMatch tableFootballMatch = tableFootballEvent.getTableFootballMatch()
-                .stream().filter(match -> match.getId().equals(matchId))
-                .findFirst()
-                .orElseThrow(MatchNotFoundException::new);
 
-        if (tableFootballMatch.getTeam1().stream().anyMatch(loggedUser::equals))
-            tableFootballMatch.setTeam1Approval(approve);
-        if (tableFootballMatch.getTeam2().stream().anyMatch(loggedUser::equals))
-            tableFootballMatch.setTeam2Approval(approve);
-
-        tableFootballMatchRepository.save(tableFootballMatch);
-        return approve;
-    }
-
-    private void addTableFootballMatch(TableFootballEvent tableFootballEvent, TableFootballMatch tableFootballMatch) {
+    private void addTableFootballMatch(TableFootballEvent tableFootballEvent,TableFootballMatch tableFootballMatch){
         tableFootballEvent.getTableFootballMatch().add(tableFootballMatch);
     }
 
-    private TableFootballMatch findMatchInEvent(TableFootballEvent tableFootballEvent, Long matchId) {
+    private TableFootballMatch findMatchInEvent(TableFootballEvent tableFootballEvent, Long matchId){
         return tableFootballEvent.getTableFootballMatch()
                 .stream().filter(match -> match.getId().equals(matchId))
                 .findFirst()
@@ -153,7 +186,7 @@ public class TableFootballMatchService implements MatchService {
         TableFootballMatch match = findMatchInEvent(tableFootballEvent, matchId);
 
         if (match.getSets().isEmpty()) return;
-        if (!match.isTeam1Approval() || !match.isTeam2Approval()) match.getSets().remove(tableFootballSet);
+        if (match.getUserApprovalMap().containsValue(false));
 
         match.getSets()
                 .forEach(set -> {
@@ -164,5 +197,6 @@ public class TableFootballMatchService implements MatchService {
 
         tableFootballMatchRepository.save(match);
     }
+
 
 }

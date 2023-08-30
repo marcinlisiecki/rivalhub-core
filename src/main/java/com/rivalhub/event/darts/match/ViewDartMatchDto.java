@@ -7,7 +7,9 @@ import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.user.UserDetailsDto;
 import lombok.Data;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class ViewDartMatchDto implements ViewMatchDto {
@@ -27,6 +29,8 @@ public class ViewDartMatchDto implements ViewMatchDto {
     private List<List<List<Integer>>> bounceOutsInRound;
     private EventType eventType;
     private Long eventId;
+    private Map<Long, Boolean> userApprovalMap = new HashMap<>();
+    private boolean isApproved;
 
 
 

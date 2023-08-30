@@ -18,6 +18,7 @@ public class StationAvailabilityFinder {
 
     public static LocalDateTime getFirstDateAvailableForDuration(List<Station> stations, Duration timeWindow, EventType type) {
         LocalDateTime firstAvailable = null;
+        boolean foundAny = false;
 
         for (Station station : stations) {
             if (station.getType() != type) {
@@ -33,11 +34,13 @@ public class StationAvailabilityFinder {
 
                     if (firstAvailable == null || currentStationFirstAvailable.isBefore(firstAvailable)) {
                         firstAvailable = currentStationFirstAvailable;
+                        foundAny = true;
                     }
 
                     break;
                 }
             } else {
+                foundAny = true;
                 firstAvailable = currentStationFirstAvailable;
                 break;
             }
@@ -60,12 +63,21 @@ public class StationAvailabilityFinder {
                         currentReservation.getEndTime().plusMinutes(1),
                         nextReservation.getStartTime().minusMinutes(1)) >= timeWindow.getSeconds()) {
 
+                    foundAny = true;
                     currentStationFirstAvailable = currentReservation.getEndTime().plusMinutes(1);
                     break;
                 }
             }
 
-            if (firstAvailable == null || currentStationFirstAvailable.isBefore(firstAvailable)) {
+            if (firstAvailable == null) {
+                if (!foundAny) {
+                    firstAvailable = currentStationFirstAvailable;
+                }
+
+                continue;
+            }
+
+            if (currentStationFirstAvailable.isBefore(firstAvailable)) {
                 firstAvailable = currentStationFirstAvailable;
             }
         }

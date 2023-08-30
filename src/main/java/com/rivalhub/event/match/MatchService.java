@@ -1,9 +1,10 @@
 package com.rivalhub.event.match;
 
+import java.util.HashMap;
 import java.util.List;
 
 public interface MatchService {
-    boolean setResultApproval(Long eventId, Long matchId, boolean approve);
+    boolean setResultApproval(Long eventId, Long matchId);
 
     MatchDto createMatch(Long organizationId, Long eventId, MatchDto MatchDTO);
 
@@ -11,4 +12,5 @@ public interface MatchService {
 
     List<ViewMatchDto> findMatches(Long eventId);
     boolean matchStrategy(String strategy);
+
 }

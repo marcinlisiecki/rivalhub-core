@@ -2,6 +2,7 @@ package com.rivalhub.event.tablefootball.match;
 
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.event.EventUtils;
+import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.user.UserData;
@@ -9,6 +10,7 @@ import com.rivalhub.user.UserDetailsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +32,7 @@ public class TableFootballMatchMapper {
 
         tableFootballMatch.setTeam1(team1);
         tableFootballMatch.setTeam2(team2);
-
+        tableFootballMatch.setUserApprovalMap(MatchApprovalService.prepareApprovalMap(matchDto));
         return tableFootballMatch;
     }
 
@@ -47,9 +49,11 @@ public class TableFootballMatchMapper {
         tableFootballMatchDto.setId(tableFootballMatch.getId());
         tableFootballMatchDto.setTeam1Ids(team1.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
         tableFootballMatchDto.setTeam2Ids(team2.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
-        tableFootballMatchDto.setTeam1Approval(tableFootballMatch.isTeam1Approval());
-        tableFootballMatchDto.setTeam2Approval(tableFootballMatch.isTeam2Approval());
-
+        tableFootballMatchDto.setUserApprovalMap(tableFootballMatch.getUserApprovalMap());
+        tableFootballMatchDto.setEventId(tableFootballMatch.getEventId());
+        tableFootballMatchDto.setEventType(tableFootballMatch.getEventType());
+        tableFootballMatchDto.setEventId(tableFootballMatch.getEventId());
+        tableFootballMatchDto.setEventType(tableFootballMatch.getEventType());
         return tableFootballMatchDto;
     }
 
@@ -67,12 +71,36 @@ public class TableFootballMatchMapper {
         viewTableFootballMatchDTO.setTeam1(team1);
         viewTableFootballMatchDTO.setTeam2(team2);
         viewTableFootballMatchDTO.setSets(tableFootballMatch.getSets());
-        viewTableFootballMatchDTO.setTeam1Approval(tableFootballMatch.isTeam1Approval());
-        viewTableFootballMatchDTO.setTeam2Approval(tableFootballMatch.isTeam2Approval());
+        viewTableFootballMatchDTO.setUserApprovalMap(tableFootballMatch.getUserApprovalMap());
+        viewTableFootballMatchDTO.setApproved(isApprovedByDemanded(tableFootballMatch));
         viewTableFootballMatchDTO.setEventId(tableFootballMatch.getEventId());
         viewTableFootballMatchDTO.setEventType(tableFootballMatch.getEventType());
-
-
         return viewTableFootballMatchDTO;
     }
+
+    boolean isApprovedByDemanded(TableFootballMatch tableFootballMatch){
+        List<Long> userApproved = new ArrayList<>();
+        for (Long userId: tableFootballMatch.getUserApprovalMap().keySet()) {
+            if(tableFootballMatch.getUserApprovalMap().get(userId))
+                userApproved.add(userId);
+        }
+        boolean teamOneApproved = false;
+        for (UserData userData : tableFootballMatch.getTeam1()) {
+            for(Long userApprove : userApproved){
+                if(userData.getId() == userApprove){
+                    teamOneApproved = true;
+                }
+            }
+        };
+        boolean teamTwoApproved = false;
+        for (UserData userData : tableFootballMatch.getTeam2()) {
+            for(Long userApprove : userApproved){
+                if(userData.getId() == userApprove){
+                    teamTwoApproved = true;
+                }
+            }
+        };
+        return teamTwoApproved&&teamOneApproved;
+    }
+
 }
