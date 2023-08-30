@@ -70,9 +70,10 @@ public interface UserRepository extends CrudRepository<UserData, Long>, PagingAn
     @Query(value = """
             SELECT USER_DATA.USER_ID, NAME, EMAIL, PROFILE_PICTURE_URL, ACTIVATION_TIME FROM USER_DATA
             JOIN ORGANIZATION_USERS ON USER_DATA.USER_ID=ORGANIZATION_USERS.USER_ID
-            WHERE ORGANIZATION_ID=:id AND REPLACE(LOWER(NAME), ' ', '') LIKE REPLACE(LOWER(:namePhrase), ' ', '')
+            WHERE ORGANIZATION_ID=:id AND REPLACE(LOWER(NAME), ' ', '') LIKE REPLACE(LOWER(:namePhrase), ' ', '') 
+            OR REPLACE(LOWER(EMAIL), ' ', '') LIKE REPLACE(LOWER(:namePhrase), ' ', '')
             """, nativeQuery = true)
-    Set<Tuple> findByNamePhraseAndOrganizationId(Long id, String namePhrase);
+    Set<Tuple> findByNamePhraseOrEmailAndOrganizationId(Long id, String namePhrase);
 
 
     @Query(value = """
