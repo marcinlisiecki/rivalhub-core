@@ -1,9 +1,7 @@
 package com.rivalhub.event.tablefootball.match;
 
-import com.rivalhub.common.exception.EventNotFoundException;
-import com.rivalhub.common.exception.UserNotFoundException;
+import com.rivalhub.common.exception.*;
 import com.rivalhub.event.EventType;
-import com.rivalhub.common.exception.MatchNotFoundException;
 import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.MatchService;
@@ -15,7 +13,6 @@ import com.rivalhub.event.tablefootball.TableFootballEventRepository;
 import com.rivalhub.event.tablefootball.match.result.TableFootballMatchSet;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
-import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
@@ -54,13 +51,10 @@ public class TableFootballMatchService implements MatchService {
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, tableFootballMatch);
         if(tableFootballMatchMapper.isApprovedByDemanded(tableFootballMatch)){
-            MatchApprovalService.findNotificationToDisActivate(tableFootballMatch.getTeam1(), matchId, EventType.TABLE_FOOTBALL,userRepository);
-            MatchApprovalService.findNotificationToDisActivate(tableFootballMatch.getTeam2(), matchId, EventType.TABLE_FOOTBALL,userRepository);
-        }else {
-            if (tableFootballMatch.getTeam1().stream().anyMatch(userData -> userData.getId() == loggedUser.getId()))
-                MatchApprovalService.findNotificationToDisActivate(tableFootballMatch.getTeam1(), matchId, EventType.TABLE_FOOTBALL,userRepository);
-            if (tableFootballMatch.getTeam2().stream().anyMatch(userData -> userData.getId() == loggedUser.getId()))
-                MatchApprovalService.findNotificationToDisActivate(tableFootballMatch.getTeam2(), matchId, EventType.TABLE_FOOTBALL,userRepository);
+            MatchApprovalService.findNotificationToDisActivate(tableFootballMatch.getTeam2(), matchId, EventType.TABLE_FOOTBALL, userRepository);
+            MatchApprovalService.findNotificationToDisActivate(tableFootballMatch.getTeam1(), matchId, EventType.TABLE_FOOTBALL, userRepository);
+        } else {
+            MatchApprovalService.findNotificationToDisActivate(findUserTeam(tableFootballMatch, loggedUser), matchId, EventType.TABLE_FOOTBALL, userRepository);
         }
         tableFootballMatchRepository.save(tableFootballMatch);
         return tableFootballMatch.getUserApprovalMap().get(loggedUser.getId());
@@ -120,24 +114,64 @@ public class TableFootballMatchService implements MatchService {
 
         TableFootballMatch tableFootballMatch = findMatchInEvent(tableFootballEvent, matchId);
 
+        setApproveAndNotifications(loggedUser,tableFootballMatch, eventId);
+        MatchApprovalService.findNotificationToDisActivate(findUserTeam(tableFootballMatch, loggedUser), matchId, EventType.TABLE_FOOTBALL, userRepository);
+
         addTableFootballSetsIn(tableFootballMatch, sets);
 
-        setApproveAndNotifications(loggedUser,tableFootballMatch, eventId);
+
+
         TableFootballMatch savedMatch = tableFootballMatchRepository.save(tableFootballMatch);
 
         return savedMatch.getSets();
     }
 
+
+    private List<UserData> findUserTeam(TableFootballMatch tableFootballMatch, UserData loggedUser) {
+        if(tableFootballMatch.getTeam1().stream().anyMatch(userData -> userData.getId() == loggedUser.getId())){
+            return tableFootballMatch.getTeam1();
+        }
+        if(tableFootballMatch.getTeam2().stream().anyMatch(userData -> userData.getId() == loggedUser.getId())){
+            return tableFootballMatch.getTeam2();
+        }
+        throw new UserNotFoundException();
+    }
     private void setApproveAndNotifications(UserData loggedUser, TableFootballMatch tableFootballMatch, Long eventId) {
+        tableFootballMatch.getUserApprovalMap().keySet().forEach(key -> tableFootballMatch.getUserApprovalMap().put(key,false));
         tableFootballMatch.getUserApprovalMap().put(loggedUser.getId(),true);
+        if(loggedUser.getNotifications().stream().anyMatch(notification -> notification.getType() == EventType.TABLE_FOOTBALL && notification.getMatchId() == tableFootballMatch.getId())) {
+            loggedUser.getNotifications().stream().filter(notification -> notification.getType() == EventType.TABLE_FOOTBALL && notification.getMatchId() == tableFootballMatch.getId()).findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.CONFIRMED);
+            userRepository.save(loggedUser);
+        }
         tableFootballMatch.getTeam1()
                 .stream()
-                .filter(userData -> userData.getId() != loggedUser.getId())
-                .forEach(userData -> saveNotification(userData,EventType.PING_PONG, tableFootballMatch.getId(), eventId));
+                .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.TABLE_FOOTBALL && notification.getMatchId() == tableFootballMatch.getId()))
+                .forEach(userData -> saveNotification(userData,EventType.TABLE_FOOTBALL, tableFootballMatch.getId(), eventId));
         tableFootballMatch.getTeam2()
                 .stream()
-                .filter(userData -> userData.getId() != loggedUser.getId())
-                .forEach(userData -> saveNotification(userData,EventType.PING_PONG, tableFootballMatch.getId(), eventId));
+                .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.TABLE_FOOTBALL && notification.getMatchId() == tableFootballMatch.getId()))
+                .forEach(userData -> saveNotification(userData,EventType.TABLE_FOOTBALL, tableFootballMatch.getId(), eventId));
+        tableFootballMatch.getTeam1()
+                .stream()
+                .filter(userData -> (userData.getId() != loggedUser.getId()))
+                .forEach(userData ->{
+                    userData.getNotifications()
+                            .stream()
+                            .filter(notification -> notification.getType() == EventType.TABLE_FOOTBALL && notification.getMatchId() == tableFootballMatch.getId())
+                            .findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.NOT_CONFIRMED);
+                    userRepository.save(userData);
+                });
+
+        tableFootballMatch.getTeam2()
+                .stream()
+                .filter(userData -> (userData.getId() != loggedUser.getId()))
+                .forEach(userData ->{
+                    userData.getNotifications()
+                            .stream()
+                            .filter(notification -> notification.getType() == EventType.TABLE_FOOTBALL && notification.getMatchId() == tableFootballMatch.getId())
+                            .findFirst().orElseThrow(NotificationNotFoundException::new).setStatus(Notification.Status.NOT_CONFIRMED);
+                    userRepository.save(userData);
+                });
     }
 
     private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
