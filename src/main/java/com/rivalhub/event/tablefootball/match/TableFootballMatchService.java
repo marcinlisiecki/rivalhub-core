@@ -6,6 +6,8 @@ import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.MatchService;
 import com.rivalhub.event.match.ViewMatchDto;
+import com.rivalhub.event.pingpong.PingPongEvent;
+import com.rivalhub.event.pingpong.match.PingPongMatch;
 import com.rivalhub.event.tablefootball.TableFootballEvent;
 import com.rivalhub.event.tablefootball.TableFootballEventRepository;
 import com.rivalhub.event.tablefootball.match.result.TableFootballMatchSet;
@@ -159,8 +161,8 @@ public class TableFootballMatchService implements MatchService {
 
         TableFootballMatch tableFootballMatch = findMatchInEvent(tableFootballEvent, matchId);
 
-        setApproveAndNotifications(loggedUser,tableFootballMatch, eventId, organizationId);
-        //MatchApprovalService.findNotificationToDisActivate(findUserTeam(tableFootballMatch, loggedUser), matchId, EventType.TABLE_FOOTBALL, userRepository);
+        setApproveAndNotifications(loggedUser,tableFootballMatch, eventId);
+        MatchApprovalService.findNotificationToDisActivate(findUserTeam(tableFootballMatch, loggedUser), matchId, EventType.TABLE_FOOTBALL, userRepository);
 
         addTableFootballSetsIn(tableFootballMatch, sets);
 

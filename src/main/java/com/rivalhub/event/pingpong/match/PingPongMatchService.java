@@ -90,8 +90,8 @@ public class PingPongMatchService implements MatchService {
 
         PingPongMatch pingPongMatch = findMatchInEvent(pingPongEvent, matchId);
 
-        setApproveAndNotifications(loggedUser, pingPongMatch, eventId, organizationId);
-        //MatchApprovalService.findNotificationToDisActivate(findUserTeam(pingPongMatch, loggedUser), matchId, EventType.PING_PONG, userRepository);
+        setApproveAndNotifications(loggedUser, pingPongMatch, eventId);
+        MatchApprovalService.findNotificationToDisActivate(findUserTeam(pingPongMatch, loggedUser), matchId, EventType.PING_PONG, userRepository);
 
         addPingPongSetsIn(pingPongMatch, sets);
         PingPongMatch savedMatch = pingPongMatchRepository.save(pingPongMatch);
@@ -206,19 +206,15 @@ public class PingPongMatchService implements MatchService {
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, pingPongMatch);
-        List<UserData> team = findUserTeam(pingPongMatch, loggedUser);
-        team =  team.stream().filter(userData -> userData.getId() != loggedUser.getId()).toList();
+
         if(pingPongMatchMapper.isApprovedByDemanded(pingPongMatch)){
-            if(pingPongMatch.getTeam1().stream().anyMatch(userData -> userData.getId() == loggedUser.getId())){
-                MatchApprovalService.findNotificationToDisActivate(team, matchId, EventType.PING_PONG, userRepository);
-                MatchApprovalService.findNotificationToDisActivate(pingPongMatch.getTeam2(), matchId, EventType.PING_PONG, userRepository);
-            } else {
-                MatchApprovalService.findNotificationToDisActivate(team, matchId, EventType.PING_PONG, userRepository);
-                MatchApprovalService.findNotificationToDisActivate(pingPongMatch.getTeam1(), matchId, EventType.PING_PONG, userRepository);
-            }
             addStats(organizationId, pingPongMatch);
+
+                MatchApprovalService.findNotificationToDisActivate(pingPongMatch.getTeam2(), matchId, EventType.PING_PONG, userRepository);
+                MatchApprovalService.findNotificationToDisActivate(pingPongMatch.getTeam1(), matchId, EventType.PING_PONG, userRepository);
+
         } else {
-            MatchApprovalService.findNotificationToDisActivate(team, matchId, EventType.PING_PONG, userRepository);
+            MatchApprovalService.findNotificationToDisActivate(findUserTeam(pingPongMatch, loggedUser), matchId, EventType.PING_PONG, userRepository);
         }
         pingPongMatchRepository.save(pingPongMatch);
         return pingPongMatch.getUserApprovalMap().get(loggedUser.getId());
