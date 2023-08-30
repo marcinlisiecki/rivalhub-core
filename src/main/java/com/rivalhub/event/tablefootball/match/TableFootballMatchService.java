@@ -4,6 +4,7 @@ import com.rivalhub.common.exception.EventNotFoundException;
 import com.rivalhub.common.exception.UserNotFoundException;
 import com.rivalhub.event.EventType;
 import com.rivalhub.common.exception.MatchNotFoundException;
+import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.MatchService;
 import com.rivalhub.event.match.ViewMatchDto;
@@ -52,25 +53,19 @@ public class TableFootballMatchService implements MatchService {
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, tableFootballMatch);
-        if(tableFootballMatch.getTeam1().stream().anyMatch(userData -> userData.getId() == loggedUser.getId()))
-            findNotificationToDisActivate(tableFootballMatch.getTeam1(),matchId);
-        if(tableFootballMatch.getTeam2().stream().anyMatch(userData -> userData.getId() == loggedUser.getId()))
-            findNotificationToDisActivate(tableFootballMatch.getTeam2(),matchId);
+        if(tableFootballMatchMapper.isApprovedByDemanded(tableFootballMatch)){
+            MatchApprovalService.findNotificationToDisActivate(tableFootballMatch.getTeam1(), matchId, EventType.TABLE_FOOTBALL,userRepository);
+            MatchApprovalService.findNotificationToDisActivate(tableFootballMatch.getTeam2(), matchId, EventType.TABLE_FOOTBALL,userRepository);
+        }else {
+            if (tableFootballMatch.getTeam1().stream().anyMatch(userData -> userData.getId() == loggedUser.getId()))
+                MatchApprovalService.findNotificationToDisActivate(tableFootballMatch.getTeam1(), matchId, EventType.TABLE_FOOTBALL,userRepository);
+            if (tableFootballMatch.getTeam2().stream().anyMatch(userData -> userData.getId() == loggedUser.getId()))
+                MatchApprovalService.findNotificationToDisActivate(tableFootballMatch.getTeam2(), matchId, EventType.TABLE_FOOTBALL,userRepository);
+        }
         tableFootballMatchRepository.save(tableFootballMatch);
         return tableFootballMatch.getUserApprovalMap().get(loggedUser.getId());
     }
-    private void findNotificationToDisActivate(List<UserData> team, Long matchId) {
-        team.forEach(
-                userData -> {
-                    userData.getNotifications()
-                            .stream().filter(
-                                    notification -> notification.getMatchId().equals(matchId))
-                            .findFirst()
-                            .orElseThrow(UserNotFoundException::new)
-                            .setStatus(Notification.Status.CONFIRMED);
-                }
-        );
-    }
+
 
     private void setApprove(UserData loggedUser, TableFootballMatch tableFootballMatch) {
         tableFootballMatch.getUserApprovalMap().replace(loggedUser.getId(), !(tableFootballMatch.getUserApprovalMap().get(loggedUser.getId())));

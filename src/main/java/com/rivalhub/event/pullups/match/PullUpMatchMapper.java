@@ -117,7 +117,7 @@ public class PullUpMatchMapper {
         singleUserScore.setId(pullUpSeries.getUser().getId());
         return  singleUserScore;
     };
-    private boolean isApprovedByDemanded(PullUpMatch pullUpMatch){
+    protected boolean isApprovedByDemanded(PullUpMatch pullUpMatch){
         int numberOfUserApproved = 0;
         for (Long userId: pullUpMatch.getUserApprovalMap().keySet()) {
             if(pullUpMatch.getUserApprovalMap().get(userId))
