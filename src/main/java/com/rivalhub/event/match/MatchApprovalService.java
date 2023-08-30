@@ -6,10 +6,12 @@ import com.rivalhub.event.EventType;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
 import com.rivalhub.user.notification.Notification;
+import org.aspectj.weaver.ast.Not;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class MatchApprovalService {
 
@@ -23,12 +25,14 @@ public class MatchApprovalService {
     public static void findNotificationToDisActivate(List<UserData> team, Long matchId,EventType type,UserRepository userRepository) {
         team.forEach(
                 userData -> {
+                    Optional<Notification> notificationToDisactivate =
                     userData.getNotifications()
                             .stream().filter(
                                     notification -> notification.getMatchId() == matchId && notification.getType() == type)
-                            .findFirst()
-                            .orElseThrow(NotificationNotFoundException::new)
-                            .setStatus(Notification.Status.CONFIRMED);
+                            .findFirst();
+                            if(!notificationToDisactivate.isEmpty()) {
+                                notificationToDisactivate.get().setStatus(Notification.Status.CONFIRMED);
+                            }
                     userRepository.save(userData);
 
                 }
