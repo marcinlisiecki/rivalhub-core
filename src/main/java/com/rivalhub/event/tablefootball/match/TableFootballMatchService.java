@@ -175,11 +175,7 @@ public class TableFootballMatchService implements MatchService {
     }
 
     private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
-        if(userData.getNotifications().stream().anyMatch(notification -> (notification.getMatchId() == matchId && notification.getType() == type))) {
-            userData.getNotifications().add(
-                    new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED));
-            userRepository.save(userData);
-        }
+        MatchApprovalService.saveNotification( userData,type, matchId, eventId,userRepository);
     }
 
     private MatchDto save(TableFootballEvent tableFootballEvent,
