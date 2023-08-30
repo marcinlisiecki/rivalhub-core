@@ -19,4 +19,12 @@ public interface StatsRepository extends CrudRepository<Stats, Long> {
                 AND u IN ?2
             """)
     List<Stats> findByUserAndOrganization(Long organizationId, List<UserData> users);
+
+    @Query("""
+                SELECT s
+                FROM Organization o
+                JOIN o.stats s
+                WHERE o.id = ?1
+            """)
+    List<Stats> findAllByOrganizationId(Long id);
 }

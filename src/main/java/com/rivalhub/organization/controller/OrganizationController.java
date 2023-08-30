@@ -3,6 +3,7 @@ package com.rivalhub.organization.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
+import com.rivalhub.event.EventType;
 import com.rivalhub.organization.OrganizationDTO;
 import com.rivalhub.organization.service.OrganizationService;
 import lombok.AllArgsConstructor;
@@ -62,5 +63,10 @@ public class OrganizationController {
     @PostMapping("/{id}/invitation")
     private ResponseEntity<?> createInvitation(@PathVariable Long id){
         return ResponseEntity.ok(organizationService.createInvitation(id));
+    }
+
+    @GetMapping("/{id}/stats")
+    private ResponseEntity<?> getStatsByType(@PathVariable Long id, @RequestParam EventType type){
+        return ResponseEntity.ok(organizationService.getStatsByType(id, type));
     }
 }
