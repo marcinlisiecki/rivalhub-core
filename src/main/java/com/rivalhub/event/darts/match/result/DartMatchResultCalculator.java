@@ -76,14 +76,13 @@ public class DartMatchResultCalculator {
 
                     if (playersPointsLeft.get(playerNumber) == 0) {
                         playerPlacesInLeg.set(playerNumber, numberOfPlayersFinished + 1);
-                        numberOfPlayersFinishedInRound++;
+                        numberOfPlayersFinished++;
                     }
 
                 }
                 roundList.add(scoresInRound);
                 bounceInLegList.add(bounceInRound);
                 leftInLeg.add(leftInRound);
-                numberOfPlayersFinished += numberOfPlayersFinishedInRound;
             }
             bounceOutInMatch.add(bounceInLegList);
             pointLeft.add(leftInLeg);
