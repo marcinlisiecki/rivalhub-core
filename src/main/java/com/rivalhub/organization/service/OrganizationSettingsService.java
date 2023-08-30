@@ -83,7 +83,9 @@ public class OrganizationSettingsService {
     }
 
     public Set<EventType> allEventTypeInApp() {
-        return Arrays.stream(EventType.values()).collect(Collectors.toSet());
+        Set<EventType> collect = Arrays.stream(EventType.values()).collect(Collectors.toSet());
+        collect.remove(EventType.RUNNING);
+        return collect;
     }
 
     public boolean setOnlyAdminCanSeeInvitationLink(Long organizationId, boolean onlyAdminCanSeeInvitationLink) {
