@@ -14,6 +14,8 @@ import com.rivalhub.event.pingpong.match.result.PingPongSet;
 import com.rivalhub.event.pingpong.match.result.PingPongSetRepository;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
+import com.rivalhub.organization.Stats;
+import com.rivalhub.organization.StatsRepository;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
@@ -28,6 +30,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +40,7 @@ public class PingPongMatchService implements MatchService {
     private final PingPongMatchRepository pingPongMatchRepository;
     private final PingPongMatchMapper pingPongMatchMapper;
     private final UserRepository userRepository;
-    private final PingPongSetRepository pingPongSetRepository;
+    private final StatsRepository statsRepository;
 
 
     public MatchDto createMatch(Long organizationId, Long eventId, MatchDto MatchDTO) {
@@ -57,13 +60,13 @@ public class PingPongMatchService implements MatchService {
 
 
 
-    public boolean setResultApproval(Long eventId, Long matchId) {
+    public boolean setResultApproval(Long eventId, Long matchId, Long organizationId) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
         PingPongEvent pingPongEvent = pingPongEventRepository
                 .findById(eventId)
                 .orElseThrow(EventNotFoundException::new);
 
-        return setResultApproval(requestUser, pingPongEvent, matchId);
+        return setResultApproval(requestUser, pingPongEvent, matchId, organizationId);
     }
 
     public ViewPingPongMatchDTO findMatch(Long eventId, Long matchId) {
@@ -154,7 +157,48 @@ public class PingPongMatchService implements MatchService {
 
     }
 
+    private void addStats(Long organizationId, PingPongMatch pingPongMatch) {
+        List<UserData> matchParticipants = Stream.concat(pingPongMatch.getTeam1().stream(), pingPongMatch.getTeam2()
+                        .stream())
+                .toList();
+        List<Stats> statsList = statsRepository.findByUserAndOrganization(organizationId, matchParticipants);
 
+
+        matchParticipants.forEach(userData -> statsList.forEach(stats -> {
+            if (stats.getUserData().equals(userData)) {
+                stats.setGamesInPingPong(stats.getGamesInPingPong() + 1);
+                if (checkIfUserWon(userData, pingPongMatch)) {
+                    stats.setWinInPingPong(stats.getWinInPingPong() + 1);
+                }
+            }
+        }));
+
+        statsRepository.saveAll(statsList);
+    }
+
+    private boolean checkIfUserWon(UserData user, PingPongMatch pingPongMatch) {
+        int team1WonSets = 0;
+        int team2WonSets = 0;
+
+        List<PingPongSet> sets = pingPongMatch.getSets();
+
+        for (PingPongSet set : sets) {
+            if (set.getTeam1Score() > set.getTeam2Score()) {
+                team1WonSets += 1;
+            } else if (set.getTeam1Score() < set.getTeam2Score()) {
+                team2WonSets += 1;
+            }
+        }
+
+        if (team1WonSets > team2WonSets && pingPongMatch.getTeam1().contains(user)) {
+            return true;
+        }
+        if (team2WonSets > team1WonSets && pingPongMatch.getTeam2().contains(user)) {
+            return true;
+        }
+
+        return false;
+    }
 
     private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
         MatchApprovalService.saveNotification(userData, type, matchId, eventId, userRepository);
@@ -164,7 +208,7 @@ public class PingPongMatchService implements MatchService {
         pingPongEvent.getPingPongMatchList().add(pingPongMatch);
     }
 
-    private boolean setResultApproval(UserData loggedUser, PingPongEvent pingPongEvent, Long matchId) {
+    private boolean setResultApproval(UserData loggedUser, PingPongEvent pingPongEvent, Long matchId, Long organizationId) {
         PingPongMatch pingPongMatch = pingPongEvent.getPingPongMatchList()
                 .stream().filter(match -> match.getId().equals(matchId))
                 .findFirst()
@@ -173,8 +217,14 @@ public class PingPongMatchService implements MatchService {
         List<UserData> team = findUserTeam(pingPongMatch, loggedUser);
         team =  team.stream().filter(userData -> userData.getId() != loggedUser.getId()).toList();
         if(pingPongMatchMapper.isApprovedByDemanded(pingPongMatch)){
-            MatchApprovalService.findNotificationToDisActivate(pingPongMatch.getTeam2(), matchId, EventType.PING_PONG, userRepository);
-            MatchApprovalService.findNotificationToDisActivate(pingPongMatch.getTeam1(), matchId, EventType.PING_PONG, userRepository);
+            addStats(organizationId, pingPongMatch);
+            if(pingPongMatch.getTeam1().stream().anyMatch(userData -> userData.getId() == loggedUser.getId())){
+                MatchApprovalService.findNotificationToDisActivate(team, matchId, EventType.PING_PONG, userRepository);
+                MatchApprovalService.findNotificationToDisActivate(pingPongMatch.getTeam2(), matchId, EventType.PING_PONG, userRepository);
+            } else {
+                MatchApprovalService.findNotificationToDisActivate(team, matchId, EventType.PING_PONG, userRepository);
+                MatchApprovalService.findNotificationToDisActivate(pingPongMatch.getTeam1(), matchId, EventType.PING_PONG, userRepository);
+            }
         } else {
             MatchApprovalService.findNotificationToDisActivate(team, matchId, EventType.PING_PONG, userRepository);
         }

@@ -83,6 +83,7 @@ public class OrganizationService {
     private void setOrganizationSettings(UserData user, Organization organization){
         UserOrganizationService.addAdminUser(user, organization);
         createInvitationForNewOrganization(organization);
+        organization.getStats().add(new Stats(user));
     }
 
     private void createInvitationForNewOrganization(Organization organization){

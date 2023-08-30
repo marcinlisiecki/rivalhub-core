@@ -3,6 +3,7 @@ package com.rivalhub.organization.service;
 
 import com.rivalhub.event.EventType;
 import com.rivalhub.organization.Organization;
+import com.rivalhub.organization.Stats;
 import com.rivalhub.station.Station;
 import com.rivalhub.user.UserData;
 
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 public class UserOrganizationService {
     public static void addUser(UserData userData, Organization organization){
         organization.getUserList().add(userData);
+        organization.getStats().add(new Stats(userData));
     }
 
     public static void addAdminUser(UserData userData, Organization organization){

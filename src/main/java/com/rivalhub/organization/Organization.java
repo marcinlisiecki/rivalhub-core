@@ -80,6 +80,9 @@ public class Organization {
 
     private Boolean onlyAdminCanSeeInvitationLink = true;
 
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Stats> stats = new ArrayList<>();
+
     @OneToMany(fetch = FetchType.LAZY,
             cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH,CascadeType.REMOVE})
     List<PingPongEvent> pingPongEvents = new ArrayList<>();

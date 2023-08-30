@@ -20,6 +20,8 @@ import com.rivalhub.event.pingpong.match.PingPongMatch;
 import com.rivalhub.event.pullups.match.PullUpMatch;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
+import com.rivalhub.organization.Stats;
+import com.rivalhub.organization.StatsRepository;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
@@ -37,32 +39,37 @@ import java.util.List;
 public class DartMatchService implements MatchService {
 
     //WIENCEJ REPOZYTORIÓW SPRING WYCZYMA
-    final OrganizationRepository organizationRepository;
-    final DartEventRepository dartEventRepository;
-    final DartMatchRepository dartMatchRepository;
-    final DartMatchMapper dartMatchMapper;
-    final DartResultMapper dartResultMapper;
-    final LegRepository legRepository;
-    final DartRoundRepository dartRoundRepository;
-    final SinglePlayerInRoundRepository singlePlayerInRoundRepository;
-    final UserRepository userRepository;
+    private final OrganizationRepository organizationRepository;
+    private final DartEventRepository dartEventRepository;
+    private final DartMatchRepository dartMatchRepository;
+    private final DartMatchMapper dartMatchMapper;
+    private final DartResultMapper dartResultMapper;
+    private final LegRepository legRepository;
+    private final DartRoundRepository dartRoundRepository;
+    private final SinglePlayerInRoundRepository singlePlayerInRoundRepository;
+    private final UserRepository userRepository;
+    private final StatsRepository statsRepository;
+    private final DartMatchResultCalculator dartMatchResultCalculator;
+
+
     @Override
-    public boolean setResultApproval(Long eventId, Long matchId) {
+    public boolean setResultApproval(Long eventId, Long matchId, Long organizationId) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
         DartEvent dartEvent = dartEventRepository
                 .findById(eventId)
                 .orElseThrow(EventNotFoundException::new);
 
-        return setResultApproval(requestUser, dartEvent, matchId);
+        return setResultApproval(requestUser, dartEvent, matchId, organizationId);
     }
 
-    private boolean setResultApproval(UserData loggedUser, DartEvent dartEvent, Long matchId) {
+    private boolean setResultApproval(UserData loggedUser, DartEvent dartEvent, Long matchId, Long organizationId) {
         DartMatch dartMatch = dartEvent.getDartsMatch()
                 .stream().filter(match -> match.getId().equals(matchId))
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, dartMatch);
         if(dartMatchMapper.isApprovedByDemanded(dartMatch)) {
+            addStats(organizationId, dartMatch);
             MatchApprovalService.findNotificationToDisActivate(dartMatch.getParticipants(), matchId, EventType.DARTS, userRepository);
         }
         dartMatchRepository.save(dartMatch);
@@ -164,6 +171,30 @@ public class DartMatchService implements MatchService {
                 .stream().filter(match -> match.getId().equals(matchId))
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
+    }
+
+    private void addStats(Long organizationId, DartMatch dartMatch) {
+        List<UserData> matchParticipants = dartMatch.getParticipants();
+        List<Stats> statsList = statsRepository.findByUserAndOrganization(organizationId, matchParticipants);
+
+        matchParticipants.forEach(userData -> statsList.forEach(stats -> {
+            if (stats.getUserData().equals(userData)) {
+                stats.setGamesInDarts(stats.getGamesInDarts() + 1);
+                if (checkIfUserWon(userData, dartMatch)) {
+                    stats.setWinInDarts(stats.getWinInDarts() + 1);
+                }
+            }
+        }));
+
+        statsRepository.saveAll(statsList);
+    }
+
+    private boolean checkIfUserWon(UserData user, DartMatch dartMatch) {
+        ViewDartMatchDto viewMatchDto = new ViewDartMatchDto();
+        dartMatchResultCalculator.calculateResults(viewMatchDto,dartMatch);
+        Integer place = viewMatchDto.getPlacesInLeg().get(0).get(dartMatch.getParticipants().indexOf(user));
+
+        return place == 1;
     }
 
     public ViewMatchDto createLeg(Long eventId, Long matchId) {

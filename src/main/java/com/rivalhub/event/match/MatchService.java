@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public interface MatchService {
-    boolean setResultApproval(Long eventId, Long matchId);
+    boolean setResultApproval(Long eventId, Long matchId, Long organizationId);
 
     MatchDto createMatch(Long organizationId, Long eventId, MatchDto MatchDTO);
 

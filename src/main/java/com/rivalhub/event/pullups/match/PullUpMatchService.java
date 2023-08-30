@@ -14,6 +14,7 @@ import com.rivalhub.event.match.ViewMatchDto;
 
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.event.pingpong.match.PingPongMatch;
+import com.rivalhub.event.pingpong.match.result.PingPongSet;
 import com.rivalhub.event.pullups.PullUpEvent;
 import com.rivalhub.event.pullups.PullUpEventRepository;
 import com.rivalhub.event.pullups.match.result.*;
@@ -21,6 +22,8 @@ import com.rivalhub.event.tablefootball.TableFootballEvent;
 import com.rivalhub.event.tablefootball.match.TableFootballMatch;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
+import com.rivalhub.organization.Stats;
+import com.rivalhub.organization.StatsRepository;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
@@ -31,7 +34,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -44,23 +49,25 @@ public class PullUpMatchService implements MatchService {
     private final PullUpResultMapper pullUpResultMapper;
     private final PullUpSeriesRepository pullUpSeriesRepository;
     private final UserRepository userRepository;
+    private final StatsRepository statsRepository;
     @Override
-    public boolean setResultApproval(Long eventId, Long matchId) {
+    public boolean setResultApproval(Long eventId, Long matchId, Long organizationId) {
             var requestUser = SecurityUtils.getUserFromSecurityContext();
             PullUpEvent pullUpEvent = pullUpEventRepository
                     .findById(eventId)
                     .orElseThrow(EventNotFoundException::new);
 
-            return setResultApproval(requestUser, pullUpEvent, matchId);
+            return setResultApproval(requestUser, pullUpEvent, matchId, organizationId);
     }
 
-    private boolean setResultApproval(UserData loggedUser, PullUpEvent pullUpEvent, Long matchId) {
+    private boolean setResultApproval(UserData loggedUser, PullUpEvent pullUpEvent, Long matchId, Long organizationId) {
         PullUpMatch pullUpMatch = pullUpEvent.getPullUpMatchList()
                 .stream().filter(match -> match.getId().equals(matchId))
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, pullUpMatch);
         if(pullUpMatchMapper.isApprovedByDemanded(pullUpMatch)){
+            addStats(organizationId, pullUpMatch);
             MatchApprovalService.findNotificationToDisActivate(pullUpMatch.getParticipants(), matchId, EventType.PULL_UPS, userRepository);
         }else {
             MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser), matchId, EventType.PULL_UPS, userRepository);
@@ -97,10 +104,32 @@ public class PullUpMatchService implements MatchService {
                 });
     }
 
-
-
     private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
         MatchApprovalService.saveNotification(userData, type, matchId, eventId, userRepository);
+    }
+
+    private void addStats(Long organizationId, PullUpMatch pullUpMatch) {
+        List<UserData> matchParticipants = pullUpMatch.getParticipants();
+        List<Stats> statsList = statsRepository.findByUserAndOrganization(organizationId, matchParticipants);
+
+
+        matchParticipants.forEach(userData -> statsList.forEach(stats -> {
+            if (stats.getUserData().equals(userData)) {
+                stats.setGamesInPullUps(stats.getGamesInPullUps() + 1);
+                if (checkIfUserWon(userData, pullUpMatch)) {
+                    stats.setWinInPullUps(stats.getWinInPullUps() + 1);
+                }
+            }
+        }));
+
+        statsRepository.saveAll(statsList);
+    }
+
+    private boolean checkIfUserWon(UserData user, PullUpMatch pullUpMatch) {
+        Map<Long, Integer> places = pullUpMatchMapper.getPlaces(pullUpMatch);
+        Integer userPlace = places.get(user.getId());
+
+        return userPlace == 1;
     }
 
     @Override

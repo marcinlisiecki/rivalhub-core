@@ -18,9 +18,12 @@ import com.rivalhub.event.match.MatchService;
 import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.event.pingpong.match.PingPongMatch;
+import com.rivalhub.event.pingpong.match.result.PingPongSet;
 import com.rivalhub.event.pullups.match.PullUpMatch;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
+import com.rivalhub.organization.Stats;
+import com.rivalhub.organization.StatsRepository;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
@@ -32,6 +35,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -41,29 +45,65 @@ public class BilliardsMatchService implements MatchService {
     private final BilliardsEventRepository billiardsEventRepository;
     private final BilliardsMatchMapper billiardsMatchMapper;
     private final UserRepository userRepository;
+    private final StatsRepository statsRepository;
     @Override
-    public boolean setResultApproval(Long eventId, Long matchId) {
+    public boolean setResultApproval(Long eventId, Long matchId, Long organizationId) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
         BilliardsEvent billiardsEvent = billiardsEventRepository
                 .findById(eventId)
                 .orElseThrow(EventNotFoundException::new);
 
-        return setResultApproval(requestUser, billiardsEvent, matchId);
+        return setResultApproval(requestUser, billiardsEvent, matchId, organizationId);
     }
 
-    private boolean setResultApproval(UserData loggedUser, BilliardsEvent billiardsEvent, Long matchId) {
+    private boolean setResultApproval(UserData loggedUser, BilliardsEvent billiardsEvent, Long matchId, Long organizationId) {
         BilliardsMatch billiardsMatch = billiardsEvent.getBilliardsMatches()
                 .stream().filter(match -> match.getId().equals(matchId))
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, billiardsMatch);
-        MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser),matchId,EventType.BILLIARDS,userRepository);
+        if (billiardsMatchMapper.isApprovedByDemanded(billiardsMatch)){
+            addStats(organizationId, billiardsMatch);
+
+            MatchApprovalService.findNotificationToDisActivate(billiardsMatch.getTeam2(),matchId,EventType.BILLIARDS,userRepository);
+            MatchApprovalService.findNotificationToDisActivate(billiardsMatch.getTeam1(),matchId,EventType.BILLIARDS,userRepository);
+        }else {
+            MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser), matchId, EventType.BILLIARDS, userRepository);
+        }
         billiardsMatchRepository.save(billiardsMatch);
         return billiardsMatch.getUserApprovalMap().get(loggedUser.getId());
     }
 
     private void setApprove(UserData loggedUser, BilliardsMatch billiardsMatch) {
         billiardsMatch.getUserApprovalMap().replace(loggedUser.getId(), !(billiardsMatch.getUserApprovalMap().get(loggedUser.getId())));
+    }
+
+    private void addStats(Long organizationId, BilliardsMatch billiardsMatch) {
+        List<UserData> matchParticipants = Stream.concat(billiardsMatch.getTeam1().stream(), billiardsMatch.getTeam2()
+                        .stream())
+                .toList();
+        List<Stats> statsList = statsRepository.findByUserAndOrganization(organizationId, matchParticipants);
+
+        matchParticipants.forEach(userData -> statsList.forEach(stats -> {
+            if (stats.getUserData().equals(userData)) {
+                stats.setGamesInBilliards(stats.getGamesInBilliards() + 1);
+                if (checkIfUserWon(userData, billiardsMatch)) {
+                    stats.setWinInBilliards(stats.getWinInBilliards() + 1);
+                }
+            }
+        }));
+
+        statsRepository.saveAll(statsList);
+    }
+
+    private boolean checkIfUserWon(UserData user, BilliardsMatch billiardsMatch) {
+        if (billiardsMatch.isTeam1Won() && billiardsMatch.getTeam1().contains(user)) {
+            return true;
+        }
+        if (billiardsMatch.isTeam2Won() && billiardsMatch.getTeam2().contains(user)) {
+            return true;
+        }
+        return false;
     }
 
     private void setApproveAndNotifications(UserData loggedUser, BilliardsMatch billiardsMatch, Long eventId) {

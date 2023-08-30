@@ -75,7 +75,7 @@ public class BilliardsMatchMapper {
         return viewBilliardMatchDTO;
     }
 
-    private boolean isApprovedByDemanded(BilliardsMatch billiardsMatch){
+    public boolean isApprovedByDemanded(BilliardsMatch billiardsMatch){
         List<Long> userApproved = new ArrayList<>();
         for (Long userId: billiardsMatch.getUserApprovalMap().keySet()) {
             if(billiardsMatch.getUserApprovalMap().get(userId))

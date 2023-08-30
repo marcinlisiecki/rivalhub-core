@@ -13,6 +13,8 @@ import com.rivalhub.event.tablefootball.TableFootballEventRepository;
 import com.rivalhub.event.tablefootball.match.result.TableFootballMatchSet;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
+import com.rivalhub.organization.Stats;
+import com.rivalhub.organization.StatsRepository;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserRepository;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @Service
@@ -32,25 +35,27 @@ public class TableFootballMatchService implements MatchService {
     private final TableFootballMatchRepository tableFootballMatchRepository;
     private final TableFootballMatchMapper tableFootballMatchMapper;
     private final UserRepository userRepository;
+    private final StatsRepository statsRepository;
 
     @Override
-    public boolean setResultApproval(Long eventId, Long matchId) {
+    public boolean setResultApproval(Long eventId, Long matchId, Long organizationId) {
 
         var requestUser = SecurityUtils.getUserFromSecurityContext();
         TableFootballEvent tableFootballEvent = tableFootballEventRepository
                 .findById(eventId)
                 .orElseThrow(EventNotFoundException::new);
 
-        return setResultApproval(requestUser, tableFootballEvent, matchId);
+        return setResultApproval(requestUser, tableFootballEvent, matchId, organizationId);
     }
 
-    private boolean setResultApproval(UserData loggedUser, TableFootballEvent tableFootballEvent, Long matchId) {
+    private boolean setResultApproval(UserData loggedUser, TableFootballEvent tableFootballEvent, Long matchId, Long organizationId) {
         TableFootballMatch tableFootballMatch = tableFootballEvent.getTableFootballMatch()
                 .stream().filter(match -> match.getId().equals(matchId))
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, tableFootballMatch);
         if(tableFootballMatchMapper.isApprovedByDemanded(tableFootballMatch)){
+            addStats(organizationId, tableFootballMatch);
             MatchApprovalService.findNotificationToDisActivate(tableFootballMatch.getTeam2(), matchId, EventType.TABLE_FOOTBALL, userRepository);
             MatchApprovalService.findNotificationToDisActivate(tableFootballMatch.getTeam1(), matchId, EventType.TABLE_FOOTBALL, userRepository);
         } else {
@@ -60,6 +65,48 @@ public class TableFootballMatchService implements MatchService {
         return tableFootballMatch.getUserApprovalMap().get(loggedUser.getId());
     }
 
+    private void addStats(Long organizationId, TableFootballMatch tableFootballMatch) {
+        List<UserData> matchParticipants = Stream.concat(tableFootballMatch.getTeam1().stream(), tableFootballMatch.getTeam2()
+                        .stream())
+                .toList();
+        List<Stats> statsList = statsRepository.findByUserAndOrganization(organizationId, matchParticipants);
+
+
+        matchParticipants.forEach(userData -> statsList.forEach(stats -> {
+            if (stats.getUserData().equals(userData)) {
+                stats.setGamesInTableFootBall(stats.getGamesInTableFootBall() + 1);
+                if (checkIfUserWon(userData, tableFootballMatch)) {
+                    stats.setWinInTableFootBall(stats.getWinInTableFootBall() + 1);
+                }
+            }
+        }));
+
+        statsRepository.saveAll(statsList);
+    }
+
+    private boolean checkIfUserWon(UserData user, TableFootballMatch tableFootballMatch) {
+        int team1WonSets = 0;
+        int team2WonSets = 0;
+
+        List<TableFootballMatchSet> sets = tableFootballMatch.getSets();
+
+        for (TableFootballMatchSet set : sets) {
+            if (set.getTeam1Score() > set.getTeam2Score()) {
+                team1WonSets += 1;
+            } else if (set.getTeam1Score() < set.getTeam2Score()) {
+                team2WonSets += 1;
+            }
+        }
+
+        if (team1WonSets > team2WonSets && tableFootballMatch.getTeam1().contains(user)) {
+            return true;
+        }
+        if (team2WonSets > team1WonSets && tableFootballMatch.getTeam2().contains(user)) {
+            return true;
+        }
+
+        return false;
+    }
 
     private void setApprove(UserData loggedUser, TableFootballMatch tableFootballMatch) {
         tableFootballMatch.getUserApprovalMap().replace(loggedUser.getId(), !(tableFootballMatch.getUserApprovalMap().get(loggedUser.getId())));
