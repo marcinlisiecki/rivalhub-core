@@ -60,7 +60,11 @@ public class PullUpMatchService implements MatchService {
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, pullUpMatch);
-        MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser),matchId,EventType.PULL_UPS,userRepository);
+        if(pullUpMatchMapper.isApprovedByDemanded(pullUpMatch)){
+            MatchApprovalService.findNotificationToDisActivate(pullUpMatch.getParticipants(), matchId, EventType.PULL_UPS, userRepository);
+        }else {
+            MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser), matchId, EventType.PULL_UPS, userRepository);
+        }
         pullUpMatchRepository.save(pullUpMatch);
         return pullUpMatch.getUserApprovalMap().get(loggedUser.getId());
     }

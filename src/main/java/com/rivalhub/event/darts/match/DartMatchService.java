@@ -62,7 +62,11 @@ public class DartMatchService implements MatchService {
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, dartMatch);
-        MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser), matchId,EventType.DARTS,userRepository);
+        if(dartMatchMapper.isApprovedByDemanded(dartMatch)) {
+            MatchApprovalService.findNotificationToDisActivate(dartMatch.getParticipants(), matchId, EventType.TABLE_FOOTBALL, userRepository);
+        }else {
+            MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser), matchId, EventType.DARTS, userRepository);
+        }
         dartMatchRepository.save(dartMatch);
         return dartMatch.getUserApprovalMap().get(loggedUser.getId());
     }

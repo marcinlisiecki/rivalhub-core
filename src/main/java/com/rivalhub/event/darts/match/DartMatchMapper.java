@@ -77,7 +77,7 @@ public class DartMatchMapper {
         viewDartMatch.setId(dartMatch.getId());
         return viewDartMatch;
     }
-    private boolean isApprovedByDemanded(DartMatch dartMatch){
+    public boolean isApprovedByDemanded(DartMatch dartMatch){
         int numberOfUserApproved = 0;
         for (Long userId: dartMatch.getUserApprovalMap().keySet()) {
             if(dartMatch.getUserApprovalMap().get(userId))

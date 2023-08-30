@@ -82,7 +82,7 @@ public class PingPongMatchMapper {
         return pingPongMatchDTO;
     }
 
-    private boolean isApprovedByDemanded(PingPongMatch pingPongMatch){
+    boolean isApprovedByDemanded(PingPongMatch pingPongMatch){
         List<Long> userApproved = new ArrayList<>();
         for (Long userId: pingPongMatch.getUserApprovalMap().keySet()) {
             if(pingPongMatch.getUserApprovalMap().get(userId))

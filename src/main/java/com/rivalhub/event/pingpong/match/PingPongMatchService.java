@@ -168,17 +168,21 @@ public class PingPongMatchService implements MatchService {
                 .findFirst()
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, pingPongMatch);
-        findUserTeam(pingPongMatch,loggedUser);
-        MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser),matchId,EventType.PING_PONG,userRepository);
+        if(pingPongMatchMapper.isApprovedByDemanded(pingPongMatch)){
+            MatchApprovalService.findNotificationToDisActivate(pingPongMatch.getTeam2(), matchId, EventType.PING_PONG, userRepository);
+            MatchApprovalService.findNotificationToDisActivate(pingPongMatch.getTeam1(), matchId, EventType.PING_PONG, userRepository);
+        } else {
+            MatchApprovalService.findNotificationToDisActivate(findUserTeam(pingPongMatch, loggedUser), matchId, EventType.PING_PONG, userRepository);
+        }
         pingPongMatchRepository.save(pingPongMatch);
         return pingPongMatch.getUserApprovalMap().get(loggedUser.getId());
     }
 
     private List<UserData> findUserTeam(PingPongMatch pingPongMatch, UserData loggedUser) {
-        if(pingPongMatch.getTeam1().contains(loggedUser)){
+        if(pingPongMatch.getTeam1().stream().anyMatch(userData -> userData.getId() == loggedUser.getId())){
             return pingPongMatch.getTeam1();
         }
-        if(pingPongMatch.getTeam2().contains((loggedUser))){
+        if(pingPongMatch.getTeam2().stream().anyMatch(userData -> userData.getId() == loggedUser.getId())){
             return pingPongMatch.getTeam2();
         }
         throw new UserNotFoundException();
