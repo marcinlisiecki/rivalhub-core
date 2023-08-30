@@ -96,7 +96,7 @@ public class PingPongMatchService implements MatchService {
         PingPongMatch pingPongMatch = findMatchInEvent(pingPongEvent, matchId);
 
         setApproveAndNotifications(loggedUser, pingPongMatch, eventId);
-        //MatchApprovalService.findNotificationToDisActivate(findUserTeam(pingPongMatch, loggedUser), matchId, EventType.PING_PONG, userRepository);
+        MatchApprovalService.findNotificationToDisActivate(findUserTeam(pingPongMatch, loggedUser), matchId, EventType.PING_PONG, userRepository);
 
         addPingPongSetsIn(pingPongMatch, sets);
         PingPongMatch savedMatch = pingPongMatchRepository.save(pingPongMatch);
