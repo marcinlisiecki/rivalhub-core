@@ -39,10 +39,10 @@ public class MatchApprovalService {
         );
     }
 
-    public static void saveNotification(UserData userData, EventType type, Long matchId, Long eventId, UserRepository userRepository) {
+    public static void saveNotification(UserData userData, EventType type, Long matchId, Long eventId, UserRepository userRepository, Long organizationId) {
         if(userData.getNotifications().stream().noneMatch(notification -> (notification.getMatchId() == matchId && notification.getType() == type))) {
             userData.getNotifications().add(
-                    new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED));
+                    new Notification(eventId, matchId, type, Notification.Status.NOT_CONFIRMED, organizationId));
             userRepository.save(userData);
         }else {
             userData.getNotifications().stream()

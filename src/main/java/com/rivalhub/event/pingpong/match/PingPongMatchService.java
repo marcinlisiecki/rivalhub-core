@@ -1,9 +1,7 @@
 package com.rivalhub.event.pingpong.match;
 
-import com.rivalhub.common.MergePatcher;
 import com.rivalhub.common.exception.*;
 import com.rivalhub.event.EventType;
-import com.rivalhub.event.billiards.match.BilliardsMatchService;
 import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.MatchService;
@@ -11,7 +9,6 @@ import com.rivalhub.event.match.ViewMatchDto;
 import com.rivalhub.event.pingpong.PingPongEvent;
 import com.rivalhub.event.pingpong.PingPongEventRepository;
 import com.rivalhub.event.pingpong.match.result.PingPongSet;
-import com.rivalhub.event.pingpong.match.result.PingPongSetRepository;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.Stats;
@@ -24,12 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -90,7 +82,7 @@ public class PingPongMatchService implements MatchService {
         return new ArrayList<ViewMatchDto>(pingPongMatches.stream().map(pingPongMatchMapper::map).toList());
     }
 
-    public List<PingPongSet> addResult(Long eventId, Long matchId, List<PingPongSet> sets) {
+    public List<PingPongSet> addResult(Long eventId, Long matchId, List<PingPongSet> sets, Long organizationId) {
         var loggedUser = SecurityUtils.getUserFromSecurityContext();
         PingPongEvent pingPongEvent = pingPongEventRepository
                 .findById(eventId)
@@ -98,7 +90,7 @@ public class PingPongMatchService implements MatchService {
 
         PingPongMatch pingPongMatch = findMatchInEvent(pingPongEvent, matchId);
 
-        setApproveAndNotifications(loggedUser, pingPongMatch, eventId);
+        setApproveAndNotifications(loggedUser, pingPongMatch, eventId, organizationId);
         //MatchApprovalService.findNotificationToDisActivate(findUserTeam(pingPongMatch, loggedUser), matchId, EventType.PING_PONG, userRepository);
 
         addPingPongSetsIn(pingPongMatch, sets);
@@ -118,7 +110,7 @@ public class PingPongMatchService implements MatchService {
         return pingPongMatchMapper.mapToMatchDto(savedMatch);
     }
 
-    private void setApproveAndNotifications(UserData loggedUser, PingPongMatch pingPongMatch, Long eventId) {
+    private void setApproveAndNotifications(UserData loggedUser, PingPongMatch pingPongMatch, Long eventId, Long organizationId) {
         pingPongMatch.getUserApprovalMap().keySet().forEach(key -> pingPongMatch.getUserApprovalMap().put(key,false));
         pingPongMatch.getUserApprovalMap().put(loggedUser.getId(),true);
         if(loggedUser.getNotifications().stream().anyMatch(notification -> notification.getType() == EventType.PING_PONG && notification.getMatchId() == pingPongMatch.getId())) {
@@ -128,11 +120,11 @@ public class PingPongMatchService implements MatchService {
         pingPongMatch.getTeam1()
                 .stream()
                 .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.PING_PONG && notification.getMatchId() == pingPongMatch.getId()))
-                .forEach(userData -> saveNotification(userData,EventType.PING_PONG, pingPongMatch.getId(), eventId));
+                .forEach(userData -> saveNotification(userData,EventType.PING_PONG, pingPongMatch.getId(), eventId, organizationId));
         pingPongMatch.getTeam2()
                 .stream()
                 .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.PING_PONG && notification.getMatchId() == pingPongMatch.getId()))
-                .forEach(userData -> saveNotification(userData,EventType.PING_PONG, pingPongMatch.getId(), eventId));
+                .forEach(userData -> saveNotification(userData,EventType.PING_PONG, pingPongMatch.getId(), eventId, organizationId));
         pingPongMatch.getTeam1()
                 .stream()
                 .filter(userData -> (userData.getId() != loggedUser.getId()))
@@ -200,8 +192,8 @@ public class PingPongMatchService implements MatchService {
         return false;
     }
 
-    private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
-        MatchApprovalService.saveNotification(userData, type, matchId, eventId, userRepository);
+    private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId, Long organizationId) {
+        MatchApprovalService.saveNotification(userData, type, matchId, eventId, userRepository, organizationId);
     }
 
     private void addPingPongMatch(PingPongEvent pingPongEvent, PingPongMatch pingPongMatch) {
@@ -217,7 +209,6 @@ public class PingPongMatchService implements MatchService {
         List<UserData> team = findUserTeam(pingPongMatch, loggedUser);
         team =  team.stream().filter(userData -> userData.getId() != loggedUser.getId()).toList();
         if(pingPongMatchMapper.isApprovedByDemanded(pingPongMatch)){
-            addStats(organizationId, pingPongMatch);
             if(pingPongMatch.getTeam1().stream().anyMatch(userData -> userData.getId() == loggedUser.getId())){
                 MatchApprovalService.findNotificationToDisActivate(team, matchId, EventType.PING_PONG, userRepository);
                 MatchApprovalService.findNotificationToDisActivate(pingPongMatch.getTeam2(), matchId, EventType.PING_PONG, userRepository);
@@ -225,6 +216,7 @@ public class PingPongMatchService implements MatchService {
                 MatchApprovalService.findNotificationToDisActivate(team, matchId, EventType.PING_PONG, userRepository);
                 MatchApprovalService.findNotificationToDisActivate(pingPongMatch.getTeam1(), matchId, EventType.PING_PONG, userRepository);
             }
+            addStats(organizationId, pingPongMatch);
         } else {
             MatchApprovalService.findNotificationToDisActivate(team, matchId, EventType.PING_PONG, userRepository);
         }

@@ -6,8 +6,6 @@ import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.event.match.MatchService;
 import com.rivalhub.event.match.ViewMatchDto;
-import com.rivalhub.event.pingpong.PingPongEvent;
-import com.rivalhub.event.pingpong.match.PingPongMatch;
 import com.rivalhub.event.tablefootball.TableFootballEvent;
 import com.rivalhub.event.tablefootball.TableFootballEventRepository;
 import com.rivalhub.event.tablefootball.match.result.TableFootballMatchSet;
@@ -55,9 +53,9 @@ public class TableFootballMatchService implements MatchService {
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, tableFootballMatch);
         if(tableFootballMatchMapper.isApprovedByDemanded(tableFootballMatch)){
-            addStats(organizationId, tableFootballMatch);
             MatchApprovalService.findNotificationToDisActivate(tableFootballMatch.getTeam2(), matchId, EventType.TABLE_FOOTBALL, userRepository);
             MatchApprovalService.findNotificationToDisActivate(tableFootballMatch.getTeam1(), matchId, EventType.TABLE_FOOTBALL, userRepository);
+            addStats(organizationId, tableFootballMatch);
         } else {
             MatchApprovalService.findNotificationToDisActivate(findUserTeam(tableFootballMatch, loggedUser), matchId, EventType.TABLE_FOOTBALL, userRepository);
         }
@@ -153,7 +151,7 @@ public class TableFootballMatchService implements MatchService {
         return eventType.equalsIgnoreCase(EventType.TABLE_FOOTBALL.name());
     }
 
-    public List<TableFootballMatchSet> addResult(Long eventId, Long matchId, List<TableFootballMatchSet> sets) {
+    public List<TableFootballMatchSet> addResult(Long eventId, Long matchId, List<TableFootballMatchSet> sets, Long organizationId) {
         var loggedUser = SecurityUtils.getUserFromSecurityContext();
         TableFootballEvent tableFootballEvent = tableFootballEventRepository
                 .findById(eventId)
@@ -161,7 +159,7 @@ public class TableFootballMatchService implements MatchService {
 
         TableFootballMatch tableFootballMatch = findMatchInEvent(tableFootballEvent, matchId);
 
-        setApproveAndNotifications(loggedUser,tableFootballMatch, eventId);
+        setApproveAndNotifications(loggedUser,tableFootballMatch, eventId, organizationId);
         //MatchApprovalService.findNotificationToDisActivate(findUserTeam(tableFootballMatch, loggedUser), matchId, EventType.TABLE_FOOTBALL, userRepository);
 
         addTableFootballSetsIn(tableFootballMatch, sets);
@@ -183,7 +181,7 @@ public class TableFootballMatchService implements MatchService {
         }
         throw new UserNotFoundException();
     }
-    private void setApproveAndNotifications(UserData loggedUser, TableFootballMatch tableFootballMatch, Long eventId) {
+    private void setApproveAndNotifications(UserData loggedUser, TableFootballMatch tableFootballMatch, Long eventId, Long organizationId) {
         tableFootballMatch.getUserApprovalMap().keySet().forEach(key -> tableFootballMatch.getUserApprovalMap().put(key,false));
         tableFootballMatch.getUserApprovalMap().put(loggedUser.getId(),true);
         if(loggedUser.getNotifications().stream().anyMatch(notification -> notification.getType() == EventType.TABLE_FOOTBALL && notification.getMatchId() == tableFootballMatch.getId())) {
@@ -193,11 +191,11 @@ public class TableFootballMatchService implements MatchService {
         tableFootballMatch.getTeam1()
                 .stream()
                 .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.TABLE_FOOTBALL && notification.getMatchId() == tableFootballMatch.getId()))
-                .forEach(userData -> saveNotification(userData,EventType.TABLE_FOOTBALL, tableFootballMatch.getId(), eventId));
+                .forEach(userData -> saveNotification(userData,EventType.TABLE_FOOTBALL, tableFootballMatch.getId(), eventId, organizationId));
         tableFootballMatch.getTeam2()
                 .stream()
                 .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.TABLE_FOOTBALL && notification.getMatchId() == tableFootballMatch.getId()))
-                .forEach(userData -> saveNotification(userData,EventType.TABLE_FOOTBALL, tableFootballMatch.getId(), eventId));
+                .forEach(userData -> saveNotification(userData,EventType.TABLE_FOOTBALL, tableFootballMatch.getId(), eventId, organizationId));
         tableFootballMatch.getTeam1()
                 .stream()
                 .filter(userData -> (userData.getId() != loggedUser.getId()))
@@ -221,8 +219,8 @@ public class TableFootballMatchService implements MatchService {
                 });
     }
 
-    private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
-        MatchApprovalService.saveNotification( userData,type, matchId, eventId,userRepository);
+    private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId, Long organizationId) {
+        MatchApprovalService.saveNotification( userData,type, matchId, eventId,userRepository, organizationId);
     }
 
     private MatchDto save(TableFootballEvent tableFootballEvent,

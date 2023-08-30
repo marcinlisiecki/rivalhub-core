@@ -63,10 +63,9 @@ public class BilliardsMatchService implements MatchService {
                 .orElseThrow(MatchNotFoundException::new);
         setApprove(loggedUser, billiardsMatch);
         if (billiardsMatchMapper.isApprovedByDemanded(billiardsMatch)){
-            addStats(organizationId, billiardsMatch);
-
             MatchApprovalService.findNotificationToDisActivate(billiardsMatch.getTeam2(),matchId,EventType.BILLIARDS,userRepository);
             MatchApprovalService.findNotificationToDisActivate(billiardsMatch.getTeam1(),matchId,EventType.BILLIARDS,userRepository);
+            addStats(organizationId, billiardsMatch);
         }else {
             MatchApprovalService.findNotificationToDisActivate(List.of(loggedUser), matchId, EventType.BILLIARDS, userRepository);
         }
@@ -106,7 +105,7 @@ public class BilliardsMatchService implements MatchService {
         return false;
     }
 
-    private void setApproveAndNotifications(UserData loggedUser, BilliardsMatch billiardsMatch, Long eventId) {
+    private void setApproveAndNotifications(UserData loggedUser, BilliardsMatch billiardsMatch, Long eventId, Long organizationId) {
         billiardsMatch.getUserApprovalMap().keySet().forEach(key -> billiardsMatch.getUserApprovalMap().put(key,false));
         billiardsMatch.getUserApprovalMap().put(loggedUser.getId(),true);
         if(loggedUser.getNotifications().stream().anyMatch(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() == billiardsMatch.getId())) {
@@ -116,11 +115,11 @@ public class BilliardsMatchService implements MatchService {
         billiardsMatch.getTeam1()
                 .stream()
                 .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() == billiardsMatch.getId()))
-                .forEach(userData -> saveNotification(userData,EventType.BILLIARDS, billiardsMatch.getId(), eventId));
+                .forEach(userData -> saveNotification(userData,EventType.BILLIARDS, billiardsMatch.getId(), eventId, organizationId));
         billiardsMatch.getTeam2()
                 .stream()
                 .filter(userData -> userData.getId() != loggedUser.getId() && userData.getNotifications().stream().noneMatch(notification -> notification.getType() == EventType.BILLIARDS && notification.getMatchId() == billiardsMatch.getId()))
-                .forEach(userData -> saveNotification(userData,EventType.BILLIARDS, billiardsMatch.getId(), eventId));
+                .forEach(userData -> saveNotification(userData,EventType.BILLIARDS, billiardsMatch.getId(), eventId, organizationId));
         billiardsMatch.getTeam1()
                 .stream()
                 .filter(userData -> (userData.getId() != loggedUser.getId()))
@@ -144,8 +143,8 @@ public class BilliardsMatchService implements MatchService {
                 });
 
     }
-    private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId) {
-        MatchApprovalService.saveNotification(userData, type, matchId, eventId, userRepository);
+    private void saveNotification(UserData userData, EventType type, Long matchId, Long eventId, Long organizationId) {
+        MatchApprovalService.saveNotification(userData, type, matchId, eventId, userRepository, organizationId);
     }
 
 
@@ -212,7 +211,7 @@ public class BilliardsMatchService implements MatchService {
         billiardsEvent.getBilliardsMatches().add(billiardsMatch);
     }
 
-    public ViewMatchDto addResult(Long eventId, Long matchId, BilliardsMatchResultAdd billiardsMatchResultAdd) {
+    public ViewMatchDto addResult(Long eventId, Long matchId, BilliardsMatchResultAdd billiardsMatchResultAdd, Long organizationId) {
         var loggedUser = SecurityUtils.getUserFromSecurityContext();
         BilliardsEvent billiardsEvent = billiardsEventRepository
                 .findById(eventId)
@@ -220,7 +219,7 @@ public class BilliardsMatchService implements MatchService {
 
         BilliardsMatch billiardsMatch = findMatchInEvent(billiardsEvent, matchId);
         setResults(billiardsMatch,billiardsMatchResultAdd);
-        setApproveAndNotifications(loggedUser, billiardsMatch, eventId);
+        setApproveAndNotifications(loggedUser, billiardsMatch, eventId, organizationId);
 
         BilliardsMatch savedMatch = billiardsMatchRepository.save(billiardsMatch);
 

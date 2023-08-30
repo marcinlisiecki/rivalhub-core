@@ -18,6 +18,7 @@ import com.rivalhub.event.tablefootball.match.result.TableFootballMatchSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,8 +35,9 @@ public class ResultsController {
     @PostMapping("/{matchId}/pingpong")
     private ResponseEntity<?> addResultsPingPong(@PathVariable Long eventId,
                                          @PathVariable Long matchId,
+                                         @PathVariable Long organizationId,
                                          @RequestBody List<PingPongSet> setList) {
-        return ResponseEntity.ok(pingPongMatchService.addResult(eventId, matchId, setList));
+        return ResponseEntity.ok(pingPongMatchService.addResult(eventId, matchId, setList, organizationId));
     }
 
     @DeleteMapping("/{matchId}/pingpong")
@@ -56,8 +58,9 @@ public class ResultsController {
     @PostMapping("/{matchId}/tablefootball")
     private ResponseEntity<?> addResultsTableFootball(@PathVariable Long eventId,
                                          @PathVariable Long matchId,
+                                         @PathVariable Long organizationId,
                                          @RequestBody List<TableFootballMatchSet> setList) {
-        return ResponseEntity.ok(tableFootballMatchService.addResult(eventId, matchId, setList));
+        return ResponseEntity.ok(tableFootballMatchService.addResult(eventId, matchId, setList, organizationId));
     }
 
     @DeleteMapping("/{matchId}/tablefootball")
@@ -71,8 +74,9 @@ public class ResultsController {
     @PostMapping("/{matchId}/pullups")
     private ResponseEntity<?> addResultsPullUps(@PathVariable Long eventId,
                                                       @PathVariable Long matchId,
+                                                      @PathVariable Long organizationId,
                                                       @RequestBody List<PullUpSeriesAddDto> pullUpSeries) {
-        return ResponseEntity.ok(pullUpMatchService.addResult(eventId, matchId, pullUpSeries));
+        return ResponseEntity.ok(pullUpMatchService.addResult(eventId, matchId, pullUpSeries, organizationId));
     }
 
     @DeleteMapping("/{matchId}/pullups")
@@ -86,8 +90,9 @@ public class ResultsController {
     @PostMapping("/{matchId}/dart")
     private ResponseEntity<?> addResultsDart(@PathVariable Long eventId,
                                          @PathVariable Long matchId,
+                                         @PathVariable Long organizationId,
                                          @RequestBody List<LegAddDto> legListDto) {
-        return ResponseEntity.ok(dartMatchService.addResult(eventId, matchId, legListDto));
+        return ResponseEntity.ok(dartMatchService.addResult(eventId, matchId, legListDto, organizationId));
     }
 
     @PostMapping("/{matchId}/dart/legs")
@@ -99,9 +104,10 @@ public class ResultsController {
     private ResponseEntity<?> addRound(@PathVariable Long eventId,
                                         @PathVariable Long matchId,
                                        @PathVariable int legNumber,
+                                       @PathVariable Long organizationId,
                                        @RequestBody DartRoundDto dartRoundDto
     ) {
-        return ResponseEntity.ok(dartMatchService.addRound(eventId, matchId,dartRoundDto,legNumber));
+        return ResponseEntity.ok(dartMatchService.addRound(eventId, matchId,dartRoundDto,legNumber, organizationId));
     }
 
     @DeleteMapping("/{matchId}/dart/legs/rounds/{legNumber}")
@@ -118,8 +124,9 @@ public class ResultsController {
     @PostMapping("/{matchId}/billiards")
     private ResponseEntity<?> addResultsBilliards(@PathVariable Long eventId,
                                              @PathVariable Long matchId,
+                                             @PathVariable Long organizationId,
                                              @RequestBody BilliardsMatchResultAdd billiardsMatchResultAdd) {
-        return ResponseEntity.ok(billiardsMatchService.addResult(eventId, matchId, billiardsMatchResultAdd));
+        return ResponseEntity.ok(billiardsMatchService.addResult(eventId, matchId, billiardsMatchResultAdd, organizationId));
     }
 
     @DeleteMapping("/{matchId}/billiards")

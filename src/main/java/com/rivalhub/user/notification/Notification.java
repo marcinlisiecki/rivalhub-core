@@ -18,12 +18,14 @@ public class Notification {
     private EventType type;
     private Status status;
     private Long eventId;
+    private Long organizationId;
 
-    public Notification(Long eventId, Long matchId, EventType type, Status status) {
+    public Notification(Long eventId, Long matchId, EventType type, Status status, Long organizationId) {
         this.eventId= eventId;
         this.matchId = matchId;
         this.type = type;
         this.status = status;
+        this.organizationId = organizationId;
     }
 
     public Notification() {}
