@@ -72,7 +72,7 @@ public class DartMatchMapper {
         viewDartMatch.setEventId(dartMatch.getEventId());
         viewDartMatch.setEventType(dartMatch.getEventType());
         dartMatchResultCalculator.calculateResults(viewDartMatch,dartMatch);
-        viewDartMatch.setUserApprovalMap(viewDartMatch.getUserApprovalMap());
+        viewDartMatch.setUserApprovalMap(dartMatch.getUserApprovalMap());
         viewDartMatch.setApproved(isApprovedByDemanded(dartMatch));
         viewDartMatch.setId(dartMatch.getId());
         return viewDartMatch;

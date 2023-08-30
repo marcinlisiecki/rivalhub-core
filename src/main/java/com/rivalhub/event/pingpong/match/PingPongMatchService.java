@@ -83,6 +83,7 @@ public class PingPongMatchService implements MatchService {
 
         List<PingPongMatch> pingPongMatches = pingPongEvent.getPingPongMatchList();
 
+
         return new ArrayList<ViewMatchDto>(pingPongMatches.stream().map(pingPongMatchMapper::map).toList());
     }
 
@@ -95,6 +96,7 @@ public class PingPongMatchService implements MatchService {
         PingPongMatch pingPongMatch = findMatchInEvent(pingPongEvent, matchId);
 
         setApproveAndNotifications(loggedUser, pingPongMatch, eventId);
+        MatchApprovalService.findNotificationToDisActivate(findUserTeam(pingPongMatch, loggedUser), matchId, EventType.PING_PONG, userRepository);
 
         addPingPongSetsIn(pingPongMatch, sets);
         PingPongMatch savedMatch = pingPongMatchRepository.save(pingPongMatch);
