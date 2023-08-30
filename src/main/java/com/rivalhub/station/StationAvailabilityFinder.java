@@ -63,21 +63,17 @@ public class StationAvailabilityFinder {
                         currentReservation.getEndTime().plusMinutes(1),
                         nextReservation.getStartTime().minusMinutes(1)) >= timeWindow.getSeconds()) {
 
+                    if (currentReservation.getEndTime().isBefore(LocalDateTime.now())) {
+                        continue;
+                    }
+
                     foundAny = true;
                     currentStationFirstAvailable = currentReservation.getEndTime().plusMinutes(1);
                     break;
                 }
             }
 
-            if (firstAvailable == null) {
-                if (!foundAny) {
-                    firstAvailable = currentStationFirstAvailable;
-                }
-
-                continue;
-            }
-
-            if (currentStationFirstAvailable.isBefore(firstAvailable)) {
+            if (firstAvailable == null || currentStationFirstAvailable.isBefore(firstAvailable)) {
                 firstAvailable = currentStationFirstAvailable;
             }
         }
