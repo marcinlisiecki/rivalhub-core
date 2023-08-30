@@ -1,26 +1,138 @@
 package com.rivalhub.event.match;
 
+import com.rivalhub.event.billiards.BilliardsService;
+import com.rivalhub.event.billiards.match.BilliardsMatch;
+import com.rivalhub.event.billiards.match.BilliardsMatchResultAdd;
+import com.rivalhub.event.billiards.match.BilliardsMatchService;
+import com.rivalhub.event.darts.match.DartMatchService;
+import com.rivalhub.event.darts.match.result.DartRoundDto;
+import com.rivalhub.event.darts.match.result.LegAddDto;
 import com.rivalhub.event.pingpong.match.PingPongMatchService;
 import com.rivalhub.event.pingpong.match.result.PingPongSet;
+import com.rivalhub.event.pullups.match.PullUpMatchService;
+import com.rivalhub.event.pullups.match.result.PullUpSeries;
+import com.rivalhub.event.pullups.match.result.PullUpSeriesAddDto;
+import com.rivalhub.event.pullups.match.result.PullUpSeriesDto;
+import com.rivalhub.event.tablefootball.match.TableFootballMatchService;
+import com.rivalhub.event.tablefootball.match.result.TableFootballMatchSet;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-//TODO Wydaje mi się że można wbić tą klase do
-// matchcontrolera za pomocą zewnętrznego interfejsu na każdy
-// z wyników i customowego deserializatora gdy nie bedzie co robic
-// refactor
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/organizations/{organizationId}/events/{eventId}/match")
 public class ResultsController {
     private final PingPongMatchService pingPongMatchService;
+    private final DartMatchService dartMatchService;
+    private final TableFootballMatchService tableFootballMatchService;
+    private final BilliardsMatchService billiardsMatchService;
+    private final PullUpMatchService pullUpMatchService;
     @PostMapping("/{matchId}/pingpong")
-    private ResponseEntity<?> addResults(@PathVariable Long eventId,
+    private ResponseEntity<?> addResultsPingPong(@PathVariable Long eventId,
                                          @PathVariable Long matchId,
-                                         @RequestParam String type,
+                                         @PathVariable Long organizationId,
                                          @RequestBody List<PingPongSet> setList) {
-        return ResponseEntity.ok(pingPongMatchService.addResult(eventId, matchId, setList));
+        return ResponseEntity.ok(pingPongMatchService.addResult(eventId, matchId, setList, organizationId));
+    }
+
+    @DeleteMapping("/{matchId}/pingpong")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void deletePingPongSet(@PathVariable Long eventId,
+                                                @PathVariable Long matchId,
+                                                @RequestBody PingPongSet pingPongSet){
+        pingPongMatchService.deletePingPongSet(eventId, matchId, pingPongSet);
+    }
+
+    @PatchMapping("/{matchId}/pingpong")
+    private ResponseEntity<?> editPingPongSet(@PathVariable Long eventId,
+                                              @PathVariable Long matchId,
+                                              @RequestBody PingPongSet pingPongSet){
+        return ResponseEntity.ok(pingPongMatchService.editPingPongSet(eventId, matchId, pingPongSet));
+    }
+
+    @PostMapping("/{matchId}/tablefootball")
+    private ResponseEntity<?> addResultsTableFootball(@PathVariable Long eventId,
+                                         @PathVariable Long matchId,
+                                         @PathVariable Long organizationId,
+                                         @RequestBody List<TableFootballMatchSet> setList) {
+        return ResponseEntity.ok(tableFootballMatchService.addResult(eventId, matchId, setList, organizationId));
+    }
+
+    @DeleteMapping("/{matchId}/tablefootball")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void deleteTableFootballSet(@PathVariable Long eventId,
+                                                      @PathVariable Long matchId,
+                                                      @RequestBody TableFootballMatchSet tableFootballSet) {
+        tableFootballMatchService.deleteTableFootballSet(eventId, matchId, tableFootballSet);
+    }
+
+    @PostMapping("/{matchId}/pullups")
+    private ResponseEntity<?> addResultsPullUps(@PathVariable Long eventId,
+                                                      @PathVariable Long matchId,
+                                                      @PathVariable Long organizationId,
+                                                      @RequestBody List<PullUpSeriesAddDto> pullUpSeries) {
+        return ResponseEntity.ok(pullUpMatchService.addResult(eventId, matchId, pullUpSeries, organizationId));
+    }
+
+    @DeleteMapping("/{matchId}/pullups")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void deletePullUpSeries(@PathVariable Long eventId,
+                                                @PathVariable Long matchId,
+                                                @RequestBody Long seriesId) {
+        pullUpMatchService.deletePullUpSeries(eventId, matchId, seriesId);
+    }
+
+    @PostMapping("/{matchId}/dart")
+    private ResponseEntity<?> addResultsDart(@PathVariable Long eventId,
+                                         @PathVariable Long matchId,
+                                         @PathVariable Long organizationId,
+                                         @RequestBody List<LegAddDto> legListDto) {
+        return ResponseEntity.ok(dartMatchService.addResult(eventId, matchId, legListDto, organizationId));
+    }
+
+    @PostMapping("/{matchId}/dart/legs")
+    private ResponseEntity<?> createLeg(@PathVariable Long eventId,
+                                             @PathVariable Long matchId) {
+        return ResponseEntity.ok(dartMatchService.createLeg(eventId, matchId));
+    }
+    @PostMapping("/{matchId}/dart/legs/rounds/{legNumber}")
+    private ResponseEntity<?> addRound(@PathVariable Long eventId,
+                                        @PathVariable Long matchId,
+                                       @PathVariable int legNumber,
+                                       @PathVariable Long organizationId,
+                                       @RequestBody DartRoundDto dartRoundDto
+    ) {
+        return ResponseEntity.ok(dartMatchService.addRound(eventId, matchId,dartRoundDto,legNumber, organizationId));
+    }
+
+    @DeleteMapping("/{matchId}/dart/legs/rounds/{legNumber}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void deleteLeg(@PathVariable Long eventId,
+                                    @PathVariable Long matchId,
+                                    @PathVariable Long legNumber,
+                                    @RequestBody int numberOfRound
+    ) {
+        dartMatchService.deleteRound(matchId, legNumber,numberOfRound);
+    }
+
+
+    @PostMapping("/{matchId}/billiards")
+    private ResponseEntity<?> addResultsBilliards(@PathVariable Long eventId,
+                                             @PathVariable Long matchId,
+                                             @PathVariable Long organizationId,
+                                             @RequestBody BilliardsMatchResultAdd billiardsMatchResultAdd) {
+        return ResponseEntity.ok(billiardsMatchService.addResult(eventId, matchId, billiardsMatchResultAdd, organizationId));
+    }
+
+    @DeleteMapping("/{matchId}/billiards")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void deleteBilliardsMatch(@PathVariable Long eventId,
+                                    @PathVariable Long matchId) {
+        billiardsMatchService.deleteBilliardsMatch(eventId, matchId);
     }
 }

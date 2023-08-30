@@ -7,16 +7,17 @@ import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.OrganizationSettingsDTO;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.user.UserData;
 import com.rivalhub.user.UserDetailsDto;
-import com.rivalhub.user.UserNotFoundException;
+import com.rivalhub.common.exception.UserNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,13 +53,13 @@ public class OrganizationSettingsService {
     }
 
 
-    public void removeEventType(Long organizationId, EventType eventType) {
+    public void removeEventType(Long organizationId, List<EventType> eventTypes) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
         final var organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
-        UserOrganizationService.removeEventType(organization, eventType);
+        UserOrganizationService.removeEventType(organization, eventTypes);
 
         organizationRepository.save(organization);
     }
@@ -69,20 +70,22 @@ public class OrganizationSettingsService {
         return organization.getEventTypeInOrganization();
     }
 
-    public EventType addEventType(Long organizationId, EventType eventType) {
+    public List<EventType> addEventType(Long organizationId, List<EventType> eventTypes) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
         final var organization = organizationRepository.findById(organizationId)
                 .orElseThrow(OrganizationNotFoundException::new);
 
         OrganizationSettingsValidator.checkIfUserIsAdmin(requestUser, organization);
-        UserOrganizationService.addEventType(organization, eventType);
+        UserOrganizationService.addEventType(organization, eventTypes);
 
         organizationRepository.save(organization);
-        return eventType;
+        return eventTypes;
     }
 
     public Set<EventType> allEventTypeInApp() {
-        return Arrays.stream(EventType.values()).collect(Collectors.toSet());
+        Set<EventType> collect = Arrays.stream(EventType.values()).collect(Collectors.toSet());
+        collect.remove(EventType.RUNNING);
+        return collect;
     }
 
     public boolean setOnlyAdminCanSeeInvitationLink(Long organizationId, boolean onlyAdminCanSeeInvitationLink) {

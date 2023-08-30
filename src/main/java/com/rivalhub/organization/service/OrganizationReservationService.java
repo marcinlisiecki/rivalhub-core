@@ -2,14 +2,12 @@ package com.rivalhub.organization.service;
 
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.FormatterHelper;
+import com.rivalhub.common.exception.ReservationNotFoundException;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepoManager;
-import com.rivalhub.organization.OrganizationRepository;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
 import com.rivalhub.reservation.*;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.station.Station;
-import com.rivalhub.station.StationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -62,5 +60,16 @@ public class OrganizationReservationService {
                 .stationList(reservationStations)
                 .build();
         return reservationRepository.save(newReservation);
+    }
+
+    public ReservationDTO getReservation(Long id) {
+        return reservationRepository
+                .findById(id)
+                .map(autoMapper::mapToReservationDto)
+                .orElseThrow(ReservationNotFoundException::new);
+    }
+
+    public void deleteReservation(Long id) {
+        reservationRepository.deleteById(id);
     }
 }

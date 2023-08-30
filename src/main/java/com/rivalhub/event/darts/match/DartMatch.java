@@ -1,11 +1,17 @@
 package com.rivalhub.event.darts.match;
 
+import com.rivalhub.event.EventType;
+import com.rivalhub.event.darts.match.result.Leg;
+import com.rivalhub.event.darts.match.result.variables.DartFormat;
+import com.rivalhub.event.darts.match.result.variables.DartMode;
 import com.rivalhub.user.UserData;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Data
@@ -14,16 +20,25 @@ public class DartMatch {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //Lista list teamów
-    //Lista wyników
-    //Lista zatwierdzeń
+
+
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
+    private List<Leg> legList = new ArrayList<>();
+
+    private DartFormat dartFormat;
+    private DartMode dartMode;
+
     @ManyToMany
-    private List<UserData> team1 = new ArrayList<>();
-    @ManyToMany
-    private List<UserData> team2 = new ArrayList<>();
-    //      TODO jakie dane z meczu chcemy??????
-//    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
-//    private List<PingPongSet> sets = new ArrayList<>();
-    private boolean team1Approval;
-    private boolean team2Approval;
+    private List<UserData> participants = new ArrayList<>();
+    @ElementCollection
+    private Map<Long, Boolean> userApprovalMap = new HashMap<>();
+
+    private boolean approvalFirstPlace;
+    private boolean approvalSecondPlace;
+    private boolean approvalThirdPlace;
+    @Transient
+    private EventType eventType;
+    @Transient
+    private Long eventId;
+
 }

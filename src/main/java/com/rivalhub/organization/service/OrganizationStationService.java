@@ -6,12 +6,13 @@ import com.github.fge.jsonpatch.mergepatch.JsonMergePatch;
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.common.FormatterHelper;
 import com.rivalhub.common.MergePatcher;
+import com.rivalhub.common.exception.StationNotFoundException;
 import com.rivalhub.event.EventType;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.organization.OrganizationRepoManager;
 import com.rivalhub.organization.OrganizationRepository;
 import com.rivalhub.organization.validator.OrganizationSettingsValidator;
-import com.rivalhub.organization.exception.OrganizationNotFoundException;
+import com.rivalhub.common.exception.OrganizationNotFoundException;
 import com.rivalhub.security.SecurityUtils;
 import com.rivalhub.station.*;
 import com.rivalhub.user.UserData;
@@ -52,7 +53,7 @@ public class OrganizationStationService {
     }
 
     public List<Station> viewStations(Long organizationId, String start, String end, EventType type,
-                               boolean onlyAvailable, boolean showInactive) {
+                                      boolean onlyAvailable, boolean showInactive) {
         var requestUser = SecurityUtils.getUserFromSecurityContext();
 
         var organization = organizationRepository.findById(organizationId)
@@ -60,7 +61,7 @@ public class OrganizationStationService {
 
         if (onlyAvailable && start != null && end != null)
             return StationAvailabilityFinder
-                    .getAvailableStations(organizationRepoManager.fetchReservationsFor(organization), start, end, type, requestUser);
+                    .getAvailableStations(organization, start, end, type);
 
         if (showInactive) return StationAvailabilityFinder.filterForTypeIn(organization.getStationList(), type);
         return StationAvailabilityFinder.filterForActiveStationsAndTypeIn(organization, type);
@@ -94,20 +95,20 @@ public class OrganizationStationService {
         deleteStationIn(organization, stationId);
     }
 
-    private void deleteStationIn(Organization organization, Long id){
+    private void deleteStationIn(Organization organization, Long id) {
         Station station = findStationIn(organization, id);
         organization.getStationList().remove(station);
         organizationRepository.save(organization);
     }
 
-    private Station findStationIn(Organization organization, Long id){
+    private Station findStationIn(Organization organization, Long id) {
         return organization.getStationList().stream()
                 .filter(station -> station.getId().equals(id))
                 .findFirst()
                 .orElseThrow(StationNotFoundException::new);
     }
 
-    private Long findRequestOrganizationIn(List<Long> organizationIdsList, Long id){
+    private Long findRequestOrganizationIn(List<Long> organizationIdsList, Long id) {
         return organizationIdsList.stream()
                 .filter(orgId -> orgId.equals(id)).findFirst()
                 .orElseThrow(OrganizationNotFoundException::new);
@@ -127,7 +128,6 @@ public class OrganizationStationService {
         return eventStation;
     }
 
-
     private List<EventTypeStationsDto> getEventTypeStationsByTime(String start, String end, EventType type, UserData requestUser, Organization organization) {
         LocalDateTime startTime = LocalDateTime.parse(start, FormatterHelper.formatter());
         LocalDateTime endTime = LocalDateTime.parse(end, FormatterHelper.formatter());
@@ -137,14 +137,14 @@ public class OrganizationStationService {
 
         if (type != null) {
             List<Station> availableStations = StationAvailabilityFinder
-                    .getAvailableStations(organization, start, end, type, requestUser);
+                    .getAvailableStations(organization, start, end, type);
             eventStations.add(getEventTypeStation(type, availableStations, organization, timeNeeded));
             return eventStations;
         }
 
         for (EventType eventType : EventType.values()) {
             List<Station> availableStations = StationAvailabilityFinder
-                    .getAvailableStations(organization, start, end, eventType, requestUser);
+                    .getAvailableStations(organization, start, end, eventType);
             eventStations.add(getEventTypeStation(eventType, availableStations, organization, timeNeeded));
         }
 

@@ -17,10 +17,10 @@ public class RunningEventSaver {
     private final OrganizationRepository organizationRepository;
     private final OrganizationReservationService reservationService;
     RunningEvent saveEvent(RunningEvent runningEvent, Organization organization, EventDto eventDto) {
-        //TODO Narazie można dodać tylko użytkowników z danej organizacji!
         AddReservationDTO addReservationDTO = EventUtils.createAddReservationDTO(eventDto, organization);
         Reservation reservation = reservationService.addReservationForEvent(addReservationDTO, organization);
         EventUtils.setBasicInfo(runningEvent,organization,eventDto,reservation);
+        runningEvent.setDistance(eventDto.getDistance());
         addRunningEventTo(organization, runningEvent);
         organizationRepository.save(organization);
         return runningEvent;

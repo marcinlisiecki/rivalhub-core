@@ -1,6 +1,7 @@
 package com.rivalhub.email;
 
 import com.rivalhub.common.InvitationHelper;
+import com.rivalhub.common.exception.EmailNotSentException;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.user.UserDto;
 import jakarta.mail.MessagingException;
@@ -47,7 +48,7 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(mailMessage, true);
             helper.setTo(email);
             helper.setFrom(sender);
-            helper.setSubject("Invitation to " + organization.getName());
+            helper.setSubject("Zaproszenie do " + organization.getName());
             helper.setText(message,true);
 
             Resource resource = resourceLoader.getResource("classpath:/templates/logo.png");

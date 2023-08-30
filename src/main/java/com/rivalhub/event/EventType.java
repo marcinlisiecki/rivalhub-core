@@ -8,6 +8,6 @@ public enum EventType {
     DARTS,
     PULL_UPS,
     RUNNING,
-    DEFAULT
+
 
 }

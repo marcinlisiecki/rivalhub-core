@@ -1,6 +1,6 @@
 package com.rivalhub.auth;
 
-import com.rivalhub.user.UserNotFoundException;
+import com.rivalhub.common.exception.UserNotFoundException;
 import com.rivalhub.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

@@ -1,7 +1,6 @@
 package com.rivalhub.event.match;
 
 import com.rivalhub.common.exception.InvalidPathParamException;
-import com.rivalhub.event.EventServiceInterface;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -14,10 +13,10 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class MatchOperator {
-    private final List<MatchServiceInterface> listOfImplementations;
+    private final List<MatchService> listOfImplementations;
 
 
-    public MatchServiceInterface useStrategy(String strategy) {
+    public MatchService useStrategy(String strategy) {
         return listOfImplementations.stream()
                 .filter(implementation -> implementation.matchStrategy(strategy))
                 .findFirst()

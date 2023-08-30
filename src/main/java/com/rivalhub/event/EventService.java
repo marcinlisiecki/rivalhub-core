@@ -1,29 +1,25 @@
 package com.rivalhub.event;
 
-import com.rivalhub.common.exception.InvalidPathParamException;
-import com.rivalhub.event.pingpong.PingPongService;
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.internal.bytebuddy.dynamic.loading.InjectionClassLoader;
-import org.springframework.stereotype.Service;
+import com.rivalhub.user.UserDetailsDto;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@RequiredArgsConstructor
-@Service
-public class EventService {
+public interface EventService {
+    EventDto addEvent(Long organizationId, EventDto eventDto);
 
-    private final EventOperator eventOperator;
+    List<EventDto> findAllEvents(long id);
 
-    EventDto findEvent(Long eventId, String type) {
-        return eventOperator.useStrategy(type).findEvent(eventId);
-    }
+    EventDto findEvent(long eventId);
 
-    EventDto addEvent(Long id, EventDto eventDto, String type) {
-        return eventOperator.useStrategy(type).addEvent(id,eventDto);
-    }
+    List<UserDetailsDto> findAllParticipants(long id);
 
-    List<EventDto> findAllEvents(Long id, String type) {
-        return eventOperator.useStrategy(type).findAllEvents(id);
-    }
+    boolean matchStrategy(String eventType);
+
+    List<UserDetailsDto> deleteUserFromEvent(Long eventId, Long userId);
+
+    List<UserDetailsDto> addUserToEvent(Long eventId, Long userId);
+
+    void joinPublicEvent(Long id);
+
+    void deleteEvent(Long organizationId, Long eventId);
 }

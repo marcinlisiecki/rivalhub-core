@@ -25,27 +25,16 @@ import java.util.List;
 public class PingPongEvent extends Event {
 
 
-    @OneToMany
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.REMOVE)
     private List<PingPongMatch> pingPongMatchList = new ArrayList<>();
 
     private EventType eventType = EventType.PING_PONG;
 
-    //TODO wywalić te metody do innej klasy jeżeli to możliwe
-    public List<Long> getParticipantsId(){
+    public List<Long> getParticipantsId() {
         List<Long> participantsId = new ArrayList<>();
-        for (UserData userData:this.getParticipants()) {
+        for (UserData userData : this.getParticipants()) {
             participantsId.add(userData.getId());
         }
         return participantsId;
     }
-
-    public List<Long> getStationId(){
-        List<Long> stationId = new ArrayList<>();
-        for (Station station:this.getReservation().getStationList()) {
-            stationId.add(station.getId());
-        }
-        return stationId;
-    }
-
-
 }

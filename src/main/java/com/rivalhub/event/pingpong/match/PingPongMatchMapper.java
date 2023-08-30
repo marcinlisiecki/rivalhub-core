@@ -3,6 +3,7 @@ package com.rivalhub.event.pingpong.match;
 
 import com.rivalhub.common.AutoMapper;
 import com.rivalhub.event.EventUtils;
+import com.rivalhub.event.match.MatchApprovalService;
 import com.rivalhub.event.match.MatchDto;
 import com.rivalhub.organization.Organization;
 import com.rivalhub.user.UserData;
@@ -10,6 +11,7 @@ import com.rivalhub.user.UserDetailsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,7 +33,9 @@ public class PingPongMatchMapper {
 
         pingPongMatch.setTeam1(team1);
         pingPongMatch.setTeam2(team2);
-
+        pingPongMatch.setUserApprovalMap(MatchApprovalService.prepareApprovalMap(matchDto));
+        pingPongMatch.setEventId(matchDto.getEventId());
+        pingPongMatch.setEventType(matchDto.getEventType());
         return pingPongMatch;
     }
 
@@ -48,15 +52,16 @@ public class PingPongMatchMapper {
         pingPongMatchDTO.setId(pingPongMatch.getId());
         pingPongMatchDTO.setTeam1Ids(team1.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
         pingPongMatchDTO.setTeam2Ids(team2.stream().map(UserDetailsDto::getId).collect(Collectors.toList()));
-        pingPongMatchDTO.setTeam1Approval(pingPongMatch.isTeam1Approval());
-        pingPongMatchDTO.setTeam2Approval(pingPongMatch.isTeam2Approval());
+        pingPongMatchDTO.setUserApprovalMap(pingPongMatch.getUserApprovalMap());
+        pingPongMatchDTO.setEventId(pingPongMatch.getEventId());
+        pingPongMatchDTO.setEventType(pingPongMatch.getEventType());
 
         return pingPongMatchDTO;
     }
 
 
 
-    ViewPingPongMatchDTO map(PingPongMatch pingPongMatch){
+    public ViewPingPongMatchDTO map(PingPongMatch pingPongMatch){
         ViewPingPongMatchDTO pingPongMatchDTO = new ViewPingPongMatchDTO();
 
         List<UserDetailsDto> team1 = pingPongMatch.getTeam1()
@@ -70,10 +75,36 @@ public class PingPongMatchMapper {
         pingPongMatchDTO.setTeam1(team1);
         pingPongMatchDTO.setTeam2(team2);
         pingPongMatchDTO.setSets(pingPongMatch.getSets());
-        pingPongMatchDTO.setTeam1Approval(pingPongMatch.isTeam1Approval());
-        pingPongMatchDTO.setTeam2Approval(pingPongMatch.isTeam2Approval());
-
+        pingPongMatchDTO.setUserApprovalMap(pingPongMatch.getUserApprovalMap());
+        pingPongMatchDTO.setApproved(isApprovedByDemanded(pingPongMatch));
+        pingPongMatchDTO.setEventId(pingPongMatch.getEventId());
+        pingPongMatchDTO.setEventType(pingPongMatch.getEventType());
         return pingPongMatchDTO;
+    }
+
+    boolean isApprovedByDemanded(PingPongMatch pingPongMatch){
+        List<Long> userApproved = new ArrayList<>();
+        for (Long userId: pingPongMatch.getUserApprovalMap().keySet()) {
+            if(pingPongMatch.getUserApprovalMap().get(userId))
+                userApproved.add(userId);
+        }
+        boolean teamOneApproved = false;
+        for (UserData userData : pingPongMatch.getTeam1()) {
+            for(Long userApprove : userApproved){
+                if(userData.getId() == userApprove){
+                    teamOneApproved = true;
+                }
+            }
+        };
+        boolean teamTwoApproved = false;
+        for (UserData userData : pingPongMatch.getTeam2()) {
+            for(Long userApprove : userApproved){
+                if(userData.getId() == userApprove){
+                    teamTwoApproved = true;
+                }
+            }
+        };
+        return teamTwoApproved&&teamOneApproved;
     }
 
 }

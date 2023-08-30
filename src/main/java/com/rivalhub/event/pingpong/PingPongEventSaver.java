@@ -18,19 +18,15 @@ public class PingPongEventSaver {
     private final OrganizationRepository organizationRepository;
 
     PingPongEvent saveEvent(PingPongEvent pingPongEvent, Organization organization, EventDto eventDto) {
-        //TODO Narazie można dodać tylko użytkowników z danej organizacji!
         AddReservationDTO addReservationDTO = EventUtils.createAddReservationDTO(eventDto, organization);
         Reservation reservation = reservationService.addReservationForEvent(addReservationDTO, organization);
+
         EventUtils.setBasicInfo(pingPongEvent,organization,eventDto,reservation);
         addPingPongEventTo(organization, pingPongEvent);
         organizationRepository.save(organization);
         return pingPongEvent;
     }
-
-
-
     private void addPingPongEventTo(Organization organization, PingPongEvent pingPongEvent) {
         organization.getPingPongEvents().add(pingPongEvent);
     }
-
 }

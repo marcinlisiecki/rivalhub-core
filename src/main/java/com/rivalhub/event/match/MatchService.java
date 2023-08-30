@@ -1,31 +1,16 @@
 package com.rivalhub.event.match;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
+import java.util.HashMap;
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class MatchService {
+public interface MatchService {
+    boolean setResultApproval(Long eventId, Long matchId, Long organizationId);
 
-    private final MatchOperator matchOperator;
-    public boolean setResultApproval(Long eventId, Long matchId, boolean approve , String type){
-        return matchOperator.useStrategy(type).setResultApproval(eventId,matchId,approve);
-    }
+    MatchDto createMatch(Long organizationId, Long eventId, MatchDto MatchDTO);
 
-    public MatchDto createMatch(Long organizationId, Long eventId, MatchDto matchDTO,String type){
-        return matchOperator.useStrategy(type).createMatch(organizationId,eventId,matchDTO);
-    };
+    ViewMatchDto findMatch(Long eventId, Long matchId);
 
-    public ViewMatchDto findMatch(Long organizationId, Long eventId,String type){
-        return matchOperator.useStrategy(type).findMatch(organizationId,eventId);
-    };
-
-    public List<ViewMatchDto> findMatches(Long EventId, String type){
-      return matchOperator.useStrategy(type).findMatches(EventId);
-    };
-
-
+    List<ViewMatchDto> findMatches(Long eventId);
+    boolean matchStrategy(String strategy);
 
 }

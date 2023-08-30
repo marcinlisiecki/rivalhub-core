@@ -2,7 +2,7 @@ FROM maven:3.6.3-openjdk-17-slim AS MAVEN_BUILD
 COPY ./pom.xml ./pom.xml
 RUN mvn dependency:go-offline -B
 COPY ./src ./src
-RUN mvn package
+RUN mvn -f ./pom.xml clean package -DskipTests
 
 FROM openjdk:17.0.2-slim-buster
 EXPOSE 8080
