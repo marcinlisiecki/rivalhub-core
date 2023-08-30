@@ -161,7 +161,7 @@ public class TableFootballMatchService implements MatchService {
 
         TableFootballMatch tableFootballMatch = findMatchInEvent(tableFootballEvent, matchId);
 
-        setApproveAndNotifications(loggedUser,tableFootballMatch, eventId);
+        setApproveAndNotifications(loggedUser,tableFootballMatch, eventId, organizationId);
         MatchApprovalService.findNotificationToDisActivate(findUserTeam(tableFootballMatch, loggedUser), matchId, EventType.TABLE_FOOTBALL, userRepository);
 
         addTableFootballSetsIn(tableFootballMatch, sets);
